@@ -1,0 +1,870 @@
+<title>AVA IPECC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root {
+  --bg: #f6f8f5; --surface: #ffffff; --ink: #19352e;
+  --green: #17634d; --green-light: #eaf4ed; --muted: #74827d;
+  --line: #e4eae6; --accent: #73a987; --hero-bg: #154d3c;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#111c18;--surface:#1a2b24;--ink:#d8e8e0;--green:#5cb88a;
+    --green-light:#1a2e24;--muted:#7a9484;--line:#263d32;--accent:#5cb88a;--hero-bg:#0d2e22;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#111c18;--surface:#1a2b24;--ink:#d8e8e0;--green:#5cb88a;
+  --green-light:#1a2e24;--muted:#7a9484;--line:#263d32;--accent:#5cb88a;--hero-bg:#0d2e22;
+  color-scheme:dark;
+}
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;border:0;background:transparent}
+h1,h2,h3{text-wrap:balance}
+
+aside{position:fixed;top:0;left:0;width:250px;height:100vh;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:32px 20px 24px;overflow-y:auto;z-index:20}
+.brand{display:flex;align-items:center;gap:12px;font-family:'DM Serif Display',Georgia,serif;font-size:22px;color:var(--green);margin-bottom:32px}
+.brand-mark{width:42px;height:42px;background:var(--green);border-radius:10px 10px 10px 2px;display:grid;place-items:center;color:#fff;font-family:'DM Serif Display',Georgia,serif;font-size:24px;font-style:italic;flex-shrink:0}
+.brand-text small{display:block;font-family:'Inter',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;padding:20px 12px 8px}
+nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;color:var(--muted);font-size:14px;font-weight:500;margin-bottom:2px;transition:background .15s,color .15s}
+nav a:hover{background:var(--green-light);color:var(--ink)}
+nav a.active{background:var(--green-light);color:var(--green);font-weight:600}
+nav a svg{flex-shrink:0}
+.aside-footer{margin-top:auto;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.8}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:5px}
+
+.shell{margin-left:250px;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:10;height:68px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+.breadcrumb{font-size:13px;color:var(--muted)}
+.breadcrumb strong{color:var(--ink)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--green-light);color:var(--green);font-weight:700;font-size:13px;display:grid;place-items:center;cursor:pointer;title:'Sair'}
+.notice{padding:10px 40px;background:#fffbeb;color:#7c6b39;border-bottom:1px solid #ede7cf;font-size:12px}
+.notice strong{font-size:10px;letter-spacing:.5px;margin-right:10px}
+main{flex:1;max-width:1200px;padding:36px 40px 60px}
+footer{padding:20px 40px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-left:250px}
+
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+.topline{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:28px}
+.page-title{font-family:'DM Serif Display',Georgia,serif;font-size:30px;font-weight:400;margin:8px 0 4px}
+.sub{color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.5px;padding:4px 9px;border-radius:4px;background:var(--green-light);color:var(--green)}
+.tag.warn{background:#fff8e1;color:#8a6f00}
+.muted{color:var(--muted);font-size:13px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;background:var(--green);color:#fff;font-size:13px;font-weight:600;transition:opacity .15s}
+.btn-primary:hover{opacity:.88}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;background:var(--green-light);color:var(--green);font-size:13px;font-weight:600;border:1px solid var(--line)}
+
+.hero{background:var(--hero-bg);color:#fff;border-radius:16px;padding:40px;display:grid;grid-template-columns:1fr 160px;gap:24px;overflow:hidden;margin-bottom:32px}
+.hero .eyebrow{color:#a8c6b8}
+.hero h2{font-family:'DM Serif Display',Georgia,serif;font-size:30px;font-weight:400;line-height:1.25;margin:12px 0 14px;max-width:480px}
+.hero p{color:#c0d4ca;font-size:14px;max-width:420px;margin-bottom:20px}
+.hero .btn-primary{background:#d4eadb;color:#1a3d2b}
+.hero-art{display:grid;place-items:center;font-family:'DM Serif Display',Georgia,serif;font-size:80px;color:#d6e4b2;border:1px solid #3d6e58;border-radius:72px 72px 8px 8px;background:#ffffff08;transform:rotate(6deg)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.stat-num{font-family:'DM Serif Display',Georgia,serif;font-size:34px;display:block;margin:8px 0 4px;color:var(--ink)}
+
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.section-header h2{font-size:18px;font-weight:600}
+.section-header a{font-size:13px;color:var(--green)}
+.courses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card-cover{height:118px;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-end;background:#dce8d2;color:#3c6346}
+.card-cover.blue{background:#dde6ec;color:#2e5066}
+.card-cover-label{font-size:10px;letter-spacing:2px;font-weight:700;line-height:1.9}
+.card-cover-icon{font-family:'DM Serif Display',Georgia,serif;font-size:46px;line-height:1}
+.card-body{padding:22px}
+.card-body h3{font-size:16px;font-weight:600;margin:10px 0 6px}
+.card-meta{display:flex;gap:16px;color:var(--muted);font-size:12px;margin:14px 0}
+.progress-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.progress-bar{height:5px;background:var(--green-light);border-radius:9px;overflow:hidden}
+.progress-bar i{display:block;background:var(--accent);height:100%;border-radius:9px}
+.card-foot{margin-top:18px;display:flex;justify-content:space-between;align-items:center}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;margin-bottom:20px}
+.panel h2{font-size:18px;font-weight:600;margin-bottom:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+
+.lesson-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px}
+.lesson-title{font-family:'DM Serif Display',Georgia,serif;font-size:26px;font-weight:400;margin:16px 0 12px}
+textarea.answer{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--bg);color:var(--ink);margin-top:8px}
+.lesson-nav-btn{display:block;width:100%;text-align:left;padding:13px;border-radius:7px;color:var(--ink);font-size:13px;margin-bottom:4px;transition:background .12s}
+.lesson-nav-btn:hover{background:var(--green-light)}
+.lesson-nav-btn.sel{background:var(--green-light);color:var(--green);font-weight:600}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:13px;margin-bottom:22px}
+
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:14px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+
+dialog{border:0;border-radius:14px;padding:30px;width:min(520px,96vw);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px #0004}
+dialog::backdrop{background:#12392a99}
+.dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.dialog-head h2{font-size:18px;font-weight:600}
+.close-btn{font-size:26px;color:var(--muted);padding:0 4px}
+label.field{display:block;font-size:13px;font-weight:500;margin-bottom:14px}
+label.field span{display:block;margin-bottom:5px}
+input.fi,textarea.fi,select.fi{width:100%;padding:11px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea.fi{min-height:85px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+#toast{position:fixed;bottom:24px;right:24px;background:#193e30;color:#fff;padding:13px 22px;border-radius:9px;font-size:13px;font-weight:500;z-index:99;display:none;box-shadow:0 4px 20px #0004}
+
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-center{display:flex;justify-content:center;padding:48px;color:var(--muted)}
+
+@media(max-width:900px){
+  aside{width:200px;padding:24px 14px}
+  .shell{margin-left:200px}
+  footer{margin-left:200px}
+  .hero{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .lesson-layout{grid-template-columns:1fr}
+  header,main,.notice{padding-left:26px;padding-right:26px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  aside{position:relative;width:100%;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:14px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line)}
+  .brand{margin-bottom:0}
+  .nav-label,.aside-footer{display:none}
+  nav{display:flex;flex-direction:row;gap:4px;overflow-x:auto;padding:8px 0 0;width:100%}
+  nav a span{display:none}
+  nav a{padding:10px}
+  .shell{margin-left:0}
+  footer{margin-left:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  header{padding:0 max(16px,env(safe-area-inset-left,0px))}
+  .notice{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  main{padding:24px max(16px,env(safe-area-inset-left,0px)) 48px}
+  .courses,.stats{grid-template-columns:1fr}
+  .hero{padding:26px}
+  .hero h2{font-size:24px}
+}
+</style>
+
+<aside>
+  <a class="brand" href="#inicio">
+    <div class="brand-mark">i</div>
+    <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
+  </a>
+  <div class="nav-label">Aluno</div>
+  <nav>
+    <a href="#inicio" class="active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Visão geral</span>
+    </a>
+    <a href="#cursos">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Meus cursos</span>
+    </a>
+    <a href="#atividades">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Atividades</span>
+    </a>
+    <a href="#certificados">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <span>Certificados</span>
+    </a>
+    <div class="nav-label">Gestão</div>
+    <a href="#gestao">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Cursos e turmas</span>
+    </a>
+    <a href="#relatorios">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Relatórios</span>
+    </a>
+  </nav>
+  <div class="aside-footer"><span class="dot"></span>AVA IPECC · Fase 1<br><small>Conhecimento que transforma.</small></div>
+</aside>
+
+<div class="shell">
+  <header>
+    <div class="breadcrumb">Portal de formação &nbsp;/&nbsp; <strong id="crumb">Visão geral</strong></div>
+    <div class="avatar" id="avatar-btn" title="Sair">IP</div>
+  </header>
+  <main id="main"><div class="loading-center"><span class="spinner"></span></div></main>
+</div>
+<footer>IPECC · Educação para construir novos caminhos <span>AVA v1.0</span></footer>
+
+<dialog id="dlg">
+  <form id="course-form">
+    <div class="dialog-head">
+      <h2>Novo curso</h2>
+      <button type="button" class="close-btn" aria-label="Fechar">×</button>
+    </div>
+    <label class="field"><span>Nome do curso</span><input class="fi" name="title" required maxlength="100"></label>
+    <label class="field"><span>Descrição</span><textarea class="fi" name="description" required maxlength="500"></textarea></label>
+    <div class="form-grid">
+      <label class="field"><span>Carga horária (h)</span><input class="fi" name="hours" type="number" min="1" max="9999" required></label>
+      <label class="field"><span>Turma inicial</span><input class="fi" name="cohort" required maxlength="80"></label>
+    </div>
+    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:6px">Criar curso</button>
+  </form>
+</dialog>
+
+<dialog id="dlg-matricula">
+  <form id="matricula-form">
+    <div class="dialog-head">
+      <h2>Nova matrícula</h2>
+      <button type="button" class="close-btn" aria-label="Fechar">×</button>
+    </div>
+    <label class="field"><span>E-mail do aluno</span><input class="fi" name="email" type="email" required></label>
+    <label class="field"><span>Turma</span><select class="fi" name="turma_id" id="turma-select" required></select></label>
+    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:6px">Matricular</button>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Supabase REST client (sem SDK — compatível com CSP do artifact) ──
+const SUPA_URL = 'https://eohshxaxbsdpxundsley.supabase.co';
+const SUPA_KEY = 'sb_publishable_AUZF9dm0hQ4KYKdcY78pdQ_4pJ7QAUw';
+let _session = null;
+
+const supa = {
+  _headers(extra={}) {
+    const h = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+(_session?.access_token||SUPA_KEY),...extra};
+    return h;
+  },
+  // Auth
+  auth: {
+    _cbs: [],
+    async getSession() {
+      try {
+        const raw = localStorage.getItem('ava_session');
+        if (raw) { _session = JSON.parse(raw); return {data:{session:_session}}; }
+      } catch{}
+      return {data:{session:null}};
+    },
+    async signInWithPassword({email,password}) {
+      const r = await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+        body:JSON.stringify({email,password})
+      });
+      const d = await r.json();
+      if (!r.ok) return {error:{message:d.error_description||d.msg||'Erro de autenticação'}};
+      _session = d;
+      try { localStorage.setItem('ava_session', JSON.stringify(d)); } catch{}
+      this._cbs.forEach(cb => cb('SIGNED_IN', d));
+      return {data:d, error:null};
+    },
+    async signOut() {
+      try {
+        await fetch(SUPA_URL+'/auth/v1/logout',{method:'POST',headers:supa._headers()});
+      } catch{}
+      _session = null;
+      try { localStorage.removeItem('ava_session'); } catch{}
+      this._cbs.forEach(cb => cb('SIGNED_OUT', null));
+    },
+    onAuthStateChange(cb) { this._cbs.push(cb); return {data:{subscription:{unsubscribe:()=>{}}}}; }
+  },
+  // REST helpers
+  from(table) {
+    return new SupaQuery(table);
+  }
+};
+
+class SupaQuery {
+  constructor(table) {
+    this._table = table; this._params = new URLSearchParams();
+    this._method = 'GET'; this._body = null; this._single = false;
+    this._upsertConflict = null; this._select = '*';
+  }
+  select(cols) { this._select = cols||'*'; return this; }
+  eq(col,val) { this._params.append(col,'eq.'+val); return this; }
+  in(col,vals) { this._params.append(col,'in.('+vals.join(',')+')'); return this; }
+  order(col,{ascending=true}={}) { this._params.append('order',col+(ascending?'.asc':'.desc')); return this; }
+  limit(n) { this._params.append('limit',n); return this; }
+  single() { this._single=true; this._params.append('limit',1); return this; }
+  insert(body) { this._method='POST'; this._body=Array.isArray(body)?body:[body]; return this; }
+  upsert(body,{onConflict}={}) {
+    this._method='POST'; this._body=Array.isArray(body)?body:[body];
+    this._upsertConflict=onConflict||true; return this;
+  }
+  async _run() {
+    this._params.set('select',this._select);
+    const url = SUPA_URL+'/rest/v1/'+this._table+'?'+this._params.toString();
+    const headers = supa._headers(
+      this._method==='GET' ? {'Prefer':'return=representation'}
+      : this._upsertConflict
+        ? {'Prefer':'resolution=merge-duplicates,return=representation'}
+        : {'Prefer':'return=representation'}
+    );
+    const r = await fetch(url,{method:this._method,headers,
+      body:this._body?JSON.stringify(this._body.length===1?this._body[0]:this._body):undefined});
+    const text = await r.text();
+    let d; try{d=JSON.parse(text);}catch{d=text;}
+    if (!r.ok) return {data:null,error:{message:(d?.message||d?.hint||text||r.statusText)}};
+    const arr = Array.isArray(d)?d:(d?[d]:[]);
+    if(this._single) return {data:arr[0]||null,error:null};
+    return {data:arr,error:null};
+  }
+  then(res,rej){return this._run().then(res,rej);}
+  catch(fn){return this._run().catch(fn);}
+}
+
+// ── Utils ─────────────────────────────────────────────────────────
+const esc = v => String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+let toastTimer;
+function toast(t,ok=true){const el=$('#toast');el.textContent=t;el.style.background=ok?'#193e30':'#7c1f1f';el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',4000);}
+function loading(){return`<div class="loading-center"><span class="spinner"></span></div>`;}
+
+// ── State ─────────────────────────────────────────────────────────
+let currentUser = null;
+let userPerfil  = null; // {id, nome, email, papel}
+
+// ── Auth ──────────────────────────────────────────────────────────
+function renderLogin(msg) {
+  $('aside').style.display = 'none';
+  $('.shell').style.marginLeft = '0';
+  $('footer').style.marginLeft = '0';
+  $('#main').innerHTML = `
+    <div style="max-width:380px;margin:60px auto">
+      <div class="brand" style="margin-bottom:28px;justify-content:center">
+        <div class="brand-mark">i</div>
+        <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
+      </div>
+      <div class="panel">
+        <h2 style="margin-bottom:4px">Entrar</h2>
+        <p class="muted" style="margin-bottom:20px">Use o e-mail cadastrado pelo IPECC.</p>
+        ${msg?`<p style="color:#b13232;font-size:13px;margin-bottom:12px">${esc(msg)}</p>`:''}
+        <form id="login-form">
+          <label class="field"><span>E-mail</span><input class="fi" type="email" name="email" required autocomplete="username"></label>
+          <label class="field"><span>Senha</span><input class="fi" type="password" name="password" required autocomplete="current-password"></label>
+          <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="login-btn">Entrar →</button>
+        </form>
+        <p class="muted" style="margin-top:16px;font-size:12px;text-align:center">Esqueceu a senha? Fale com o IPECC.</p>
+      </div>
+    </div>`;
+  $('#login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('#login-btn');
+    btn.innerHTML = '<span class="spinner"></span> Entrando…'; btn.disabled = true;
+    const {error} = await supa.auth.signInWithPassword({
+      email: e.target.email.value.trim(),
+      password: e.target.password.value,
+    });
+    if (error) renderLogin(error.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos.' : error.message);
+  });
+}
+
+async function loadPerfil(uid) {
+  const {data} = await supa.from('ava_perfis').select('*').eq('id', uid).single();
+  userPerfil = data;
+}
+
+supa.auth.onAuthStateChange(async (_event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    await loadPerfil(session.user.id);
+    $('aside').style.display = '';
+    $('.shell').style.marginLeft = '';
+    $('footer').style.marginLeft = '';
+    // show avatar initials
+    const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    $('#avatar-btn').textContent = initials;
+    render();
+  } else {
+    currentUser = null; userPerfil = null;
+    renderLogin();
+  }
+});
+
+$('#avatar-btn').addEventListener('click', async () => {
+  await supa.auth.signOut();
+});
+
+const isAdmin = () => userPerfil?.papel === 'admin';
+const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel);
+
+// ── Routing ───────────────────────────────────────────────────────
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',certificados:'Certificados',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem'};
+
+async function render() {
+  if (!currentUser) return;
+  const parts = location.hash.slice(1).split('/').map(p=>{try{return decodeURIComponent(p);}catch{return '';}});
+  const view = parts[0] || 'inicio';
+  $('#crumb').textContent = LABELS[view] || 'Visão geral';
+  document.querySelectorAll('nav a').forEach(a => {
+    const h = a.getAttribute('href').slice(1);
+    a.classList.toggle('active', h === (view === 'curso' ? 'cursos' : view));
+  });
+  $('#main').innerHTML = loading();
+  try {
+    if (view === 'curso')       await renderCurso(parts[1], parts[2]);
+    else if (view === 'cursos') await renderCursos();
+    else if (view === 'atividades') await renderAtividades();
+    else if (view === 'certificados') await renderCertificados();
+    else if (view === 'gestao') await renderGestao();
+    else if (view === 'relatorios') await renderRelatorios();
+    else await renderDashboard();
+  } catch(err) {
+    $('#main').innerHTML = `<div class="panel"><p class="muted">Erro ao carregar: ${esc(err.message)}</p></div>`;
+  }
+}
+
+window.addEventListener('hashchange', () => { render(); scrollTo(0,0); });
+
+// ── Dashboard ─────────────────────────────────────────────────────
+async function renderDashboard() {
+  const [{data: cursos}, {data: matriculas}] = await Promise.all([
+    supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('ativo', true),
+    currentUser ? supa.from('ava_matriculas').select('id,turma_id,status,ava_turmas(nome,ava_cursos(id,titulo,descricao,carga_horas))').eq('aluno_id', currentUser.id).eq('status','ativa') : {data:[]}
+  ]);
+  const totalCursos = cursos?.length || 0;
+
+  // progresso geral
+  let totalConcluidas = 0;
+  if (matriculas?.length) {
+    const mids = matriculas.map(m=>m.id);
+    const {data: prog} = await supa.from('ava_progresso').select('id').in('matricula_id', mids).eq('concluida', true);
+    totalConcluidas = prog?.length || 0;
+  }
+
+  const cursosCards = (matriculas?.length ? matriculas.map((m,i) => {
+    const c = m.ava_turmas?.ava_cursos;
+    if (!c) return '';
+    return courseCardHTML({id:c.id,titulo:c.titulo,descricao:c.descricao,carga_horas:c.carga_horas,cohort:m.ava_turmas?.nome}, i, 0, 1);
+  }) : (cursos||[]).map((c,i) => courseCardHTML(c, i, 0, 0))).join('');
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · APRENDIZAGEM</div>
+      <h1 class="page-title">Olá, ${esc(userPerfil?.nome?.split(' ')[0] || 'bem-vindo')}.</h1>
+      <p class="sub">Seu painel de aprendizagem — ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p>
+    </div></div>
+    <div class="hero">
+      <div>
+        <div class="eyebrow">PROJETO NOVO RUMO</div>
+        <h2>Novas habilidades.<br>Novas possibilidades.</h2>
+        <p>Uma jornada de formação digital para transformar conhecimento em oportunidades reais.</p>
+        <a class="btn-primary" href="#cursos">Ver meus cursos →</a>
+      </div>
+      <div class="hero-art">↗</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="eyebrow">Cursos disponíveis</div><span class="stat-num">${String(totalCursos).padStart(2,'0')}</span><div class="muted">Percursos de formação</div></div>
+      <div class="stat"><div class="eyebrow">Matrículas ativas</div><span class="stat-num">${String(matriculas?.length||0).padStart(2,'0')}</span><div class="muted">Sua jornada atual</div></div>
+      <div class="stat"><div class="eyebrow">Atividades concluídas</div><span class="stat-num">${String(totalConcluidas).padStart(2,'0')}</span><div class="muted">Registros no banco</div></div>
+    </div>
+    <div class="section-header"><h2>${matriculas?.length ? 'Minha jornada' : 'Cursos disponíveis'}</h2><a href="#cursos">Ver todos →</a></div>
+    <div class="courses">${cursosCards || '<p class="muted">Nenhum curso disponível ainda.</p>'}</div>`;
+}
+
+// ── Cursos ────────────────────────────────────────────────────────
+async function renderCursos() {
+  const {data: cursos, error} = await supa.from('ava_cursos').select(`id,titulo,descricao,carga_horas,ava_modulos(id)`).eq('ativo',true);
+  if (error) throw error;
+
+  let matriculaMap = {};
+  if (currentUser && cursos?.length) {
+    const {data: mats} = await supa.from('ava_matriculas').select('id,turma_id,ava_turmas(nome,curso_id)').eq('aluno_id',currentUser.id).eq('status','ativa');
+    (mats||[]).forEach(m => { if(m.ava_turmas) matriculaMap[m.ava_turmas.curso_id] = m; });
+  }
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · APRENDIZAGEM</div>
+      <h1 class="page-title">Cursos</h1>
+    </div></div>
+    <div class="courses">${(cursos||[]).map((c,i) => {
+      const m = matriculaMap[c.id];
+      return courseCardHTML({...c, cohort: m?.ava_turmas?.nome || ''}, i, 0, m?1:0);
+    }).join('') || '<p class="muted">Nenhum curso disponível.</p>'}</div>`;
+}
+
+function courseCardHTML(c, i, pct=0, matriculado=0) {
+  return `<article class="card">
+    <div class="card-cover${i%2?' blue':''}">
+      <div class="card-cover-label">PROJETO<br>NOVO RUMO</div>
+      <div class="card-cover-icon">↗</div>
+    </div>
+    <div class="card-body">
+      <span class="tag">${matriculado ? 'MATRICULADO' : 'DISPONÍVEL'}</span>
+      <h3>${esc(c.titulo)}</h3>
+      <p class="muted">${esc(c.descricao||'')}</p>
+      <div class="card-meta"><span>◷ ${c.carga_horas}h</span>${c.cohort?`<span>▦ ${esc(c.cohort)}</span>`:''}</div>
+      <div class="progress-row"><span class="muted">Atividades</span><b>${pct}%</b></div>
+      <div class="progress-bar"><i style="width:${pct}%"></i></div>
+      <div class="card-foot"><small class="muted">${matriculado?'Em andamento':'Sem matrícula'}</small>
+        <a class="btn-primary" href="#curso/${encodeURIComponent(c.id)}">${matriculado?'Acessar →':'Ver →'}</a>
+      </div>
+    </div>
+  </article>`;
+}
+
+// ── Sala de aula ──────────────────────────────────────────────────
+async function renderCurso(cursoId, aulaId) {
+  if (!cursoId) { location.hash='#cursos'; return; }
+
+  const [{data:curso},{data:modulos}] = await Promise.all([
+    supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('id',cursoId).single(),
+    supa.from('ava_modulos').select('id,titulo,ordem,ava_aulas(id,titulo,conteudo,prompt,ordem,publicada)').eq('curso_id',cursoId).order('ordem')
+  ]);
+  if (!curso) { $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel">Curso não encontrado.</div>`; return; }
+
+  // aplainar aulas
+  const todasAulas = (modulos||[]).flatMap(m => (m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).map(a=>({...a,modulo:m})));
+  const aula = todasAulas.find(a=>a.id===aulaId) || todasAulas[0];
+
+  // progresso
+  let progSet = new Set();
+  let matriculaId = null;
+  if (currentUser) {
+    const {data:mat} = await supa.from('ava_matriculas').select('id').eq('aluno_id',currentUser.id).eq('status','ativa').limit(1).single();
+    matriculaId = mat?.id;
+    if (matriculaId) {
+      const {data:prog} = await supa.from('ava_progresso').select('aula_id').eq('matricula_id',matriculaId).eq('concluida',true);
+      progSet = new Set((prog||[]).map(p=>p.aula_id));
+    }
+  }
+
+  // resposta salva
+  let respostaSalva = '';
+  if (aula && matriculaId) {
+    const {data:ent} = await supa.from('ava_entregas').select('resposta,status').eq('matricula_id',matriculaId).eq('aula_id',aula.id).single();
+    respostaSalva = ent?.resposta || '';
+  }
+
+  const pct = todasAulas.length ? Math.round(progSet.size/todasAulas.length*100) : 0;
+
+  $('#main').innerHTML = `
+    <a class="back-link" href="#cursos">← Voltar</a>
+    <div class="topline"><div>
+      <div class="eyebrow">SALA DE APRENDIZAGEM</div>
+      <h1 class="page-title">${esc(curso.titulo)}</h1>
+      <p class="sub">${esc(curso.descricao||'')}</p>
+    </div></div>
+    ${todasAulas.length === 0 ? `<div class="panel" style="text-align:center;padding:48px"><p class="muted">Nenhuma atividade publicada ainda.</p>${isAdmin()?`<a class="btn-secondary" style="margin-top:16px" href="#gestao">Gerenciar conteúdo</a>`:''}</div>` : `
+    <div class="lesson-layout">
+      <section class="panel" id="lesson-body">
+        <span class="tag warn">ATIVIDADE COMPLEMENTAR</span>
+        <h2 class="lesson-title">${esc(aula?.titulo||'')}</h2>
+        <p style="font-size:14px;line-height:1.7;color:var(--muted)">${esc(aula?.conteudo||'')}</p>
+        ${aula?.prompt ? `<div class="panel" style="background:var(--bg);border:0;margin-top:16px">
+          <strong style="font-size:14px">Pratique e registre</strong>
+          <p class="muted" style="margin:6px 0 10px">${esc(aula.prompt)}</p>
+          <label style="font-size:13px;font-weight:500">Seu registro</label>
+          <textarea class="answer" id="answer" maxlength="5000">${esc(respostaSalva)}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn-secondary" id="btn-salvar" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">Salvar rascunho</button>
+          <button class="btn-primary" id="btn-concluir" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">${progSet.has(aula.id)?'Atualizar ✓':'Concluir ✓'}</button>
+        </div>` : ''}
+        ${!matriculaId ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
+      </section>
+      <section class="panel">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Conteúdo do curso</h3>
+        <div class="progress-bar" style="margin-bottom:8px"><i style="width:${pct}%"></i></div>
+        <p class="muted" style="margin-bottom:16px">${progSet.size}/${todasAulas.length} atividades</p>
+        ${(modulos||[]).map((m,i)=>`
+          <p style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 6px">${i+1}. ${esc(m.titulo)}</p>
+          ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>`
+            <button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${esc(a.id)}" data-curso="${esc(cursoId)}">${progSet.has(a.id)?'✓ ':'○ '}${esc(a.titulo)}</button>`).join('')}`).join('')}
+      </section>
+    </div>`}`;
+
+  // events
+  $('#main').addEventListener('click', async e => {
+    const lb = e.target.closest('[data-lesson]');
+    if (lb) { location.hash=`curso/${encodeURIComponent(lb.dataset.curso)}/${encodeURIComponent(lb.dataset.lesson)}`; return; }
+
+    const bs = e.target.closest('#btn-salvar');
+    const bc = e.target.closest('#btn-concluir');
+    if ((bs||bc) && matriculaId) {
+      const aulaIdBtn = (bs||bc).dataset.aula;
+      const resposta = $('#answer')?.value?.trim()||'';
+      if (bc && resposta.length < 20) { toast('Escreva pelo menos 20 caracteres.',false); return; }
+      const btn = bs||bc; btn.disabled=true;
+      // upsert entrega
+      await supa.from('ava_entregas').upsert({
+        matricula_id: matriculaId, aula_id: aulaIdBtn,
+        resposta, status: bc?'enviada':'pendente', enviada_em: bc?new Date().toISOString():null,
+        updated_at: new Date().toISOString()
+      }, {onConflict:'matricula_id,aula_id'});
+      if (bc) {
+        await supa.from('ava_progresso').upsert({
+          matricula_id: matriculaId, aula_id: aulaIdBtn,
+          concluida: true, concluida_em: new Date().toISOString()
+        }, {onConflict:'matricula_id,aula_id'});
+        toast('Atividade concluída ✓');
+        await renderCurso(cursoId, aulaIdBtn);
+      } else {
+        toast('Rascunho salvo.'); btn.disabled=false;
+      }
+    }
+  }, {once:true});
+}
+
+// ── Atividades ────────────────────────────────────────────────────
+async function renderAtividades() {
+  if (!currentUser) return;
+  const {data: mats} = await supa.from('ava_matriculas').select('id,ava_turmas(nome,ava_cursos(id,titulo))').eq('aluno_id',currentUser.id).eq('status','ativa');
+  if (!mats?.length) { $('#main').innerHTML=`<div class="panel"><p class="muted">Você não tem matrículas ativas.</p></div>`; return; }
+
+  const mids = mats.map(m=>m.id);
+  const {data: entregas} = await supa.from('ava_entregas').select('aula_id,status,matricula_id').in('matricula_id',mids);
+  const entregaMap = Object.fromEntries((entregas||[]).map(e=>[`${e.matricula_id}:${e.aula_id}`,e.status]));
+
+  // aulas por curso
+  const cursoIds = [...new Set(mats.map(m=>m.ava_turmas?.ava_cursos?.id).filter(Boolean))];
+  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,modulo_id,ava_modulos(curso_id)').eq('publicada',true);
+  const aulasPorCurso = {};
+  (aulas||[]).forEach(a => {
+    const cid = a.ava_modulos?.curso_id;
+    if (cid) (aulasPorCurso[cid]||=(aulasPorCurso[cid]=[])).push(a);
+  });
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · APRENDIZAGEM</div>
+      <h1 class="page-title">Atividades</h1>
+    </div></div>
+    ${mats.map(m => {
+      const c = m.ava_turmas?.ava_cursos;
+      if (!c) return '';
+      const aulasC = aulasPorCurso[c.id]||[];
+      return `<section class="panel"><h2>${esc(c.titulo)}</h2>
+        ${aulasC.length ? aulasC.map(a => {
+          const st = entregaMap[`${m.id}:${a.id}`];
+          return `<div class="row">
+            <div><strong style="font-size:14px">${esc(a.titulo)}</strong>
+            <p class="muted">${st==='enviada'?'Enviada ✓':st==='avaliada'?'Avaliada ✓':'Pendente'}</p></div>
+            <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}/${encodeURIComponent(a.id)}">Abrir →</a>
+          </div>`;
+        }).join('') : '<p class="muted">Nenhuma atividade publicada.</p>'}
+      </section>`;
+    }).join('')}`;
+}
+
+// ── Certificados ──────────────────────────────────────────────────
+async function renderCertificados() {
+  const {data: certs} = currentUser ? await supa.from('ava_certificados').select('*,ava_matriculas(ava_turmas(nome,ava_cursos(titulo)))').eq('ava_matriculas.aluno_id', currentUser.id) : {data:[]};
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · FORMAÇÃO</div>
+      <h1 class="page-title">Certificados</h1>
+    </div></div>
+    <div class="panel">
+      <span class="tag warn">EMISSÃO AINDA NÃO DISPONÍVEL</span>
+      <h2 style="margin-top:16px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:22px">Certificado de 200 horas presenciais</h2>
+      <p style="margin-top:10px;font-size:14px;line-height:1.7">O TRP exige frequência presencial mínima de 70% e aproveitamento satisfatório. A emissão depende dos registros presenciais e da validação pedagógica.</p>
+      <div style="margin-top:20px">
+        <div class="row"><strong>Frequência presencial</strong><span class="tag warn">Aguardando registro</span></div>
+        <div class="row"><strong>Aproveitamento</strong><span class="tag warn">Aguardando avaliação</span></div>
+        <div class="row"><strong>Certificados emitidos</strong><span class="tag ${(certs?.length||0)>0?'':'warn'}">${certs?.length||0}</span></div>
+      </div>
+    </div>`;
+}
+
+// ── Gestão ────────────────────────────────────────────────────────
+async function renderGestao() {
+  const [{data:cursos},{data:turmas}] = await Promise.all([
+    supa.from('ava_cursos').select('id,titulo,carga_horas').order('created_at'),
+    supa.from('ava_turmas').select('id,nome,dia_semana,hora_inicio,hora_fim,vagas,curso_id').order('dia_semana')
+  ]);
+
+  // contagem de matrículas por turma
+  const {data: mats} = await supa.from('ava_matriculas').select('turma_id').eq('status','ativa');
+  const matCount = {};
+  (mats||[]).forEach(m => matCount[m.turma_id]=(matCount[m.turma_id]||0)+1);
+
+  const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · GESTÃO</div>
+      <h1 class="page-title">Cursos e turmas</h1>
+    </div>
+    <div style="display:flex;gap:10px">
+      ${isAdmin()?`<button class="btn-primary" id="btn-novo-curso">+ Curso</button>
+      <button class="btn-secondary" id="btn-nova-matricula">+ Matrícula</button>`:''}
+    </div></div>
+
+    <div class="panel">
+      <h2>Turmas — Projeto Novo Rumo</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Turma</th><th>Dia</th><th>Horário</th><th>Vagas</th><th>Matrículas</th></tr></thead>
+        <tbody>${(turmas||[]).map(t=>`<tr>
+          <td>${esc(t.nome)}</td>
+          <td>${dias[t.dia_semana]||'-'}</td>
+          <td>${t.hora_inicio?t.hora_inicio.slice(0,5)+' – '+t.hora_fim.slice(0,5):'-'}</td>
+          <td>${t.vagas}</td>
+          <td>${matCount[t.id]||0}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+
+    ${(cursos||[]).map(c=>`
+    <div class="panel">
+      <div class="section-header"><h2>${esc(c.titulo)}</h2><a href="#curso/${encodeURIComponent(c.id)}" class="btn-secondary">Abrir →</a></div>
+      <p class="muted">${c.carga_horas}h presenciais</p>
+      ${isAdmin()?`<details style="margin-top:16px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Adicionar aula/atividade</summary>
+      <form class="aula-form" data-curso="${esc(c.id)}" style="margin-top:14px">
+        <label class="field"><span>Módulo</span>
+          <select class="fi" name="modulo_id" data-curso="${esc(c.id)}">
+            <option value="">Carregando…</option>
+          </select></label>
+        <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="100"></label>
+        <label class="field"><span>Conteúdo</span><textarea class="fi" name="conteudo" required maxlength="10000"></textarea></label>
+        <label class="field"><span>Instrução de prática</span><input class="fi" name="prompt" maxlength="500"></label>
+        <button type="submit" class="btn-secondary">Adicionar</button>
+      </form></details>`:''}
+    </div>`).join('')}`;
+
+  // carregar módulos para cada select
+  if (isAdmin()) {
+    const {data: mods} = await supa.from('ava_modulos').select('id,titulo,curso_id').order('ordem');
+    document.querySelectorAll('select[data-curso]').forEach(sel => {
+      const cid = sel.dataset.curso;
+      const opts = (mods||[]).filter(m=>m.curso_id===cid);
+      sel.innerHTML = opts.map(m=>`<option value="${esc(m.id)}">${esc(m.titulo)}</option>`).join('') || '<option value="">Sem módulos</option>';
+    });
+
+    $('#btn-novo-curso')?.addEventListener('click', () => $('#dlg').showModal());
+    $('#btn-nova-matricula')?.addEventListener('click', async () => {
+      const sel = $('#turma-select');
+      sel.innerHTML = (turmas||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.nome)}</option>`).join('');
+      $('#dlg-matricula').showModal();
+    });
+  }
+}
+
+// ── Relatórios ────────────────────────────────────────────────────
+async function renderRelatorios() {
+  const [{data:cursos},{data:mats},{data:freq}] = await Promise.all([
+    supa.from('ava_cursos').select('id,titulo,carga_horas'),
+    supa.from('ava_matriculas').select('id,status,turma_id,ava_turmas(nome,curso_id)'),
+    supa.from('ava_frequencia').select('matricula_id,presente')
+  ]);
+
+  const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
+  const progMap = {};
+  (prog||[]).forEach(p => {
+    if (!progMap[p.matricula_id]) progMap[p.matricula_id]={total:0,ok:0};
+    progMap[p.matricula_id].total++;
+    if(p.concluida) progMap[p.matricula_id].ok++;
+  });
+
+  const freqMap = {};
+  (freq||[]).forEach(f => {
+    if (!freqMap[f.matricula_id]) freqMap[f.matricula_id]={total:0,ok:0};
+    freqMap[f.matricula_id].total++;
+    if(f.presente) freqMap[f.matricula_id].ok++;
+  });
+
+  const totalMats = mats?.length||0;
+  const totalAtivas = (mats||[]).filter(m=>m.status==='ativa').length;
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · GESTÃO</div>
+      <h1 class="page-title">Relatórios</h1>
+    </div><button class="btn-secondary" id="export-csv">↓ Exportar CSV</button></div>
+
+    <div class="stats" style="margin-bottom:24px">
+      <div class="stat"><div class="eyebrow">Total matrículas</div><span class="stat-num">${totalMats}</span></div>
+      <div class="stat"><div class="eyebrow">Ativas</div><span class="stat-num">${totalAtivas}</span></div>
+      <div class="stat"><div class="eyebrow">Turmas</div><span class="stat-num">${[...new Set((mats||[]).map(m=>m.turma_id))].length}</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Progresso por turma</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Turma</th><th>Matrículas</th><th>Ativ. concluídas</th><th>Freq. registrada</th></tr></thead>
+        <tbody>${Object.entries(
+          (mats||[]).reduce((acc,m) => {
+            const nome = m.ava_turmas?.nome||m.turma_id;
+            if(!acc[nome]) acc[nome]={count:0,ativOk:0,freqOk:0,freqTotal:0};
+            acc[nome].count++;
+            acc[nome].ativOk += progMap[m.id]?.ok||0;
+            acc[nome].freqOk += freqMap[m.id]?.ok||0;
+            acc[nome].freqTotal += freqMap[m.id]?.total||0;
+            return acc;
+          },{})
+        ).map(([nome,v])=>`<tr><td>${esc(nome)}</td><td>${v.count}</td><td>${v.ativOk}</td><td>${v.freqTotal?Math.round(v.freqOk/v.freqTotal*100)+'%':'—'}</td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted)">Sem dados</td></tr>'}
+        </tbody>
+      </table></div>
+    </div>`;
+
+  $('#export-csv')?.addEventListener('click', () => {
+    const cell = v => '"'+String(v).replace(/^[=+@\-]/,"'$&").replace(/"/,'""')+'"';
+    const rows = [['Turma','Matrículas','Ativ.Concluídas'],
+      ...(mats||[]).map(m=>[m.ava_turmas?.nome||m.turma_id, m.status, progMap[m.id]?.ok||0])];
+    const blob = new Blob(['﻿'+rows.map(r=>r.map(cell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+    const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'ipecc-relatorio.csv'});
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  });
+}
+
+// ── Dialog events ─────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  if (e.target.closest('.close-btn')) { e.target.closest('dialog').close(); }
+});
+
+$('#course-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const {error} = await supa.from('ava_cursos').insert({
+    titulo: f.get('title').trim(),
+    descricao: f.get('description').trim(),
+    carga_horas: Number(f.get('hours')),
+  });
+  if (error) { toast(error.message,false); return; }
+  $('#dlg').close(); e.target.reset();
+  toast('Curso criado.');
+  render();
+});
+
+$('#matricula-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const email = f.get('email').trim();
+  // buscar aluno
+  const {data: perfil, error: pe} = await supa.from('ava_perfis').select('id').eq('email',email).single();
+  if (pe || !perfil) { toast('Aluno não encontrado. Verifique o e-mail.',false); return; }
+  const {error} = await supa.from('ava_matriculas').insert({aluno_id:perfil.id, turma_id:f.get('turma_id')});
+  if (error) { toast(error.message,false); return; }
+  $('#dlg-matricula').close(); e.target.reset();
+  toast('Matrícula criada.');
+  render();
+});
+
+document.addEventListener('submit', async e => {
+  if (!e.target.matches('.aula-form')) return;
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const {error} = await supa.from('ava_aulas').insert({
+    modulo_id: f.get('modulo_id'),
+    titulo: f.get('titulo').trim(),
+    conteudo: f.get('conteudo').trim(),
+    prompt: f.get('prompt').trim()||null,
+    publicada: true, ordem: 99
+  });
+  if (error) { toast(error.message,false); return; }
+  toast('Aula adicionada.');
+  render();
+});
+
+// inicial
+(async () => {
+  const {data:{session}} = await supa.auth.getSession();
+  if (!session) renderLogin();
+})();
+</script>
