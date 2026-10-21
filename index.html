@@ -701,17 +701,23 @@ function courseCardHTML(c, i, pct=0, matriculado=0) {
 // ── Inscrição autosservida ────────────────────────────────────────
 async function inscreverSe(cursoId) {
   if (!currentUser) { toast('Faça login para se inscrever.',false); return; }
-  // buscar primeira turma ativa do curso com vagas
+  // buscar turmas ativas do curso
   const {data: turmas} = await supa.from('ava_turmas').select('id,vagas').eq('curso_id', cursoId);
   if (!turmas?.length) { toast('Nenhuma turma disponível para este curso.',false); return; }
+  const turmaIds = turmas.map(t=>t.id);
   // verificar se já matriculado
   const {data: jaMatriculado} = await supa.from('ava_matriculas').select('id')
-    .eq('aluno_id', currentUser.id).eq('status','ativa').in('turma_id', turmas.map(t=>t.id)).single();
+    .eq('aluno_id', currentUser.id).eq('status','ativa').in('turma_id', turmaIds).single();
   if (jaMatriculado) { toast('Você já está matriculado neste curso.',false); return; }
-  const turma = turmas[0];
+  // conta matrículas ativas por turma, para respeitar o limite de vagas
+  const {data: matsAtivas} = await supa.from('ava_matriculas').select('turma_id').eq('status','ativa').in('turma_id', turmaIds);
+  const ocupadas = {};
+  (matsAtivas||[]).forEach(m => ocupadas[m.turma_id] = (ocupadas[m.turma_id]||0)+1);
+  const turma = turmas.find(t => (ocupadas[t.id]||0) < (t.vagas||0));
+  if (!turma) { toast('Todas as turmas deste curso estão com vagas esgotadas.',false); return; }
   const {error} = await supa.from('ava_matriculas').insert({aluno_id: currentUser.id, turma_id: turma.id});
   if (error) { toast('Erro ao se inscrever: '+error.message, false); return; }
-  toast('Inscrição realizada com sucesso! ✓');
+  toast('Inscrição realizada com sucesso!');
   renderCursos();
 }
 
