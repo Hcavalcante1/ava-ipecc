@@ -945,7 +945,7 @@ async function renderCertificados() {
   for (const m of (matriculas||[])) {
     const cid = m.ava_turmas?.ava_cursos?.id;
     if (cid && aulasTotais[cid]===undefined) {
-      const {count} = await supa.from('ava_aulas').select('id',{count:'exact',head:true})
+      const {count} = await supa.from('ava_aulas').select('id,ava_modulos!inner(curso_id)',{count:'exact',head:true})
         .eq('publicada',true).eq('ava_modulos.curso_id', cid);
       aulasTotais[cid] = count||0;
     }
