@@ -1291,6 +1291,17 @@ document.addEventListener('submit', async e => {
 // inicial
 (async () => {
   const {data:{session}} = await supa.auth.getSession();
-  if (!session) renderLogin();
+  if (!session?.user) {
+    renderLogin();
+    return;
+  }
+  currentUser = session.user;
+  await loadPerfil(session.user.id);
+  $('aside').style.display = '';
+  $('.shell').style.marginLeft = '';
+  $('footer').style.marginLeft = '';
+  const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  $('#avatar-btn').textContent = initials;
+  await render();
 })();
 </script>
