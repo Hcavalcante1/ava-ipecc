@@ -480,7 +480,7 @@ supa.auth.onAuthStateChange(async (_event, session) => {
     render();
   } else {
     currentUser = null; userPerfil = null;
-    renderLogin();
+    if (isRotaPublica()) { render(); } else { renderLogin(); }
   }
 });
 
@@ -491,8 +491,38 @@ $('#avatar-btn').addEventListener('click', async () => {
 const isAdmin = () => userPerfil?.papel === 'admin';
 const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel);
 
+// rotas que não exigem login (validação pública de certificado, estatísticas e troca de senha via e-mail)
+function isRotaPublica() {
+  if (location.hash.includes('access_token=') && location.hash.includes('type=recovery')) return true;
+  const view = location.hash.slice(1).split('/')[0];
+  return view === 'stats' || view === 'validar' || view === 'nova-senha';
+}
+
 // ── Routing ───────────────────────────────────────────────────────
 const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha'};
+
+// para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
+function prepararChromePublico() {
+  if (currentUser) return;
+  $('aside').style.display = '';
+  $('header').style.display = '';
+  $('.shell').style.marginLeft = '';
+  $('footer').style.display = '';
+  const nav = document.querySelector('aside nav');
+  if (nav && !nav.dataset.publicoAplicado) {
+    nav.dataset.publicoAplicado = '1';
+    nav.style.display = 'none';
+    const asideFooter = document.querySelector('.aside-footer');
+    if (asideFooter) asideFooter.innerHTML = `<a href="${location.pathname}" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--green);font-size:13px;font-weight:600">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Acessar plataforma</a><span class="dot"></span>AVA IPECC · Fase 4<br><small>Conhecimento que transforma.</small>`;
+  }
+  const avatarArea = document.querySelector('header > div:last-child');
+  if (avatarArea && !avatarArea.dataset.publicoAplicado) {
+    avatarArea.dataset.publicoAplicado = '1';
+    avatarArea.innerHTML = `<a class="btn-secondary" href="${location.pathname}" style="font-size:13px">Entrar →</a>`;
+  }
+}
 
 async function render() {
   const parts = location.hash.slice(1).split('/').map(p=>{try{return decodeURIComponent(p);}catch{return '';}});
@@ -501,6 +531,7 @@ async function render() {
   if (location.hash.includes('access_token=') && location.hash.includes('type=recovery')) view = 'nova-senha';
   // rotas públicas — não exigem login
   if (view === 'stats') {
+    prepararChromePublico();
     $('#crumb').textContent = 'Estatísticas';
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     $('#main').innerHTML = loading();
@@ -508,6 +539,7 @@ async function render() {
     return;
   }
   if (view === 'nova-senha') {
+    prepararChromePublico();
     $('#crumb').textContent = 'Nova senha';
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     $('#main').innerHTML = loading();
@@ -515,6 +547,7 @@ async function render() {
     return;
   }
   if (view === 'validar') {
+    prepararChromePublico();
     $('#crumb').textContent = 'Validar Certificado';
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     $('#main').innerHTML = loading();
@@ -1610,6 +1643,7 @@ function renderNovaSenha() {
 (async () => {
   const {data:{session}} = await supa.auth.getSession();
   if (!session?.user) {
+    if (isRotaPublica()) { await render(); return; }
     renderLogin();
     return;
   }
