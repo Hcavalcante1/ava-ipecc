@@ -1180,7 +1180,7 @@ async function renderGestao() {
     </div></div>
 
     <div class="panel">
-      <h2>Turmas — Projeto Novo Rumo</h2>
+      <div class="section-header"><h2 style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Turmas — Projeto Novo Rumo</h2></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Turma</th><th>Dia</th><th>Horário</th><th>Vagas</th><th>Matrículas</th></tr></thead>
         <tbody>${(turmas||[]).map(t=>`<tr>
@@ -1195,7 +1195,7 @@ async function renderGestao() {
 
     ${(cursos||[]).map(c=>`
     <div class="panel">
-      <div class="section-header"><h2>${esc(c.titulo)}</h2><a href="#curso/${encodeURIComponent(c.id)}" class="btn-secondary">Abrir →</a></div>
+      <div class="section-header"><h2 style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>${esc(c.titulo)}</h2><a href="#curso/${encodeURIComponent(c.id)}" class="btn-secondary">Abrir →</a></div>
       <p class="muted">${c.carga_horas}h presenciais</p>
       ${isAdmin()?`<details style="margin-top:16px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Adicionar aula/atividade</summary>
       <form class="aula-form" data-curso="${esc(c.id)}" style="margin-top:14px">
@@ -1233,7 +1233,7 @@ async function renderGestao() {
     trilhaSection.innerHTML = `
       <div class="topline" style="margin-top:32px"><div>
         <div class="eyebrow">TRILHAS</div>
-        <h2 style="font-size:20px;font-family:'DM Serif Display',Georgia,serif;font-weight:400">Trilhas de Aprendizagem</h2>
+        <h2 style="font-size:20px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--green);flex-shrink:0"><path d="M4 19V5a2 2 0 0 1 2-2h8.5L20 7.5V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg>Trilhas de Aprendizagem</h2>
       </div></div>
       <div class="panel" style="margin-bottom:16px">
         ${(trilhas||[]).length ? (trilhas||[]).map(t=>`<div class="row">
@@ -1309,9 +1309,9 @@ async function renderRelatorios() {
     </div><button class="btn-secondary" id="export-csv">↓ Exportar CSV</button></div>
 
     <div class="stats" style="margin-bottom:24px">
-      <div class="stat"><div class="eyebrow">Total matrículas</div><span class="stat-num">${totalMats}</span></div>
-      <div class="stat"><div class="eyebrow">Ativas</div><span class="stat-num">${totalAtivas}</span></div>
-      <div class="stat"><div class="eyebrow">Turmas</div><span class="stat-num">${[...new Set((mats||[]).map(m=>m.turma_id))].length}</span></div>
+      <div class="stat"><div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="eyebrow">Total matrículas</div><span class="stat-num">${totalMats}</span></div>
+      <div class="stat"><div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="eyebrow">Ativas</div><span class="stat-num">${totalAtivas}</span></div>
+      <div class="stat"><div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="eyebrow">Turmas</div><span class="stat-num">${[...new Set((mats||[]).map(m=>m.turma_id))].length}</span></div>
     </div>
 
     <div class="panel">
