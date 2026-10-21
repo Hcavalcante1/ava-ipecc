@@ -414,10 +414,11 @@ let userPerfil  = null; // {id, nome, email, papel}
 // ── Auth ──────────────────────────────────────────────────────────
 function renderLogin(msg) {
   $('aside').style.display = 'none';
+  $('header').style.display = 'none';
   $('.shell').style.marginLeft = '0';
-  $('footer').style.marginLeft = '0';
+  $('footer').style.display = 'none';
   $('#main').innerHTML = `
-    <div style="min-height:calc(100vh - 88px);display:flex;align-items:center;justify-content:center;padding:40px 20px">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
       <div style="max-width:380px;width:100%">
         <div class="brand" style="margin-bottom:28px;justify-content:center">
           <div class="brand-mark">i</div>
@@ -470,8 +471,9 @@ supa.auth.onAuthStateChange(async (_event, session) => {
     currentUser = session.user;
     await loadPerfil(session.user.id);
     $('aside').style.display = '';
+    $('header').style.display = '';
     $('.shell').style.marginLeft = '';
-    $('footer').style.marginLeft = '';
+    $('footer').style.display = '';
     // show avatar initials
     const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     $('#avatar-btn-display').textContent = initials;
@@ -1598,8 +1600,9 @@ function renderNovaSenha() {
   currentUser = session.user;
   await loadPerfil(session.user.id);
   $('aside').style.display = '';
+  $('header').style.display = '';
   $('.shell').style.marginLeft = '';
-  $('footer').style.marginLeft = '';
+  $('footer').style.display = '';
   const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   $('#avatar-btn-display').textContent = initials;
   await render();
