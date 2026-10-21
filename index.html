@@ -1442,14 +1442,16 @@ document.addEventListener('submit', async e => {
 // ── Perfil do aluno ───────────────────────────────────────────────
 async function renderPerfil() {
   if (!currentUser) return;
-  const [{data: perfil}, {data: mats}, {data: certs}] = await Promise.all([
+  const [{data: perfil}, {data: mats}] = await Promise.all([
     supa.from('ava_perfis').select('*').eq('id', currentUser.id).single(),
-    supa.from('ava_matriculas').select('id,status,created_at,ava_turmas(nome,ava_cursos(id,titulo,carga_horas))').eq('aluno_id', currentUser.id).order('created_at',{ascending:false}),
-    supa.from('ava_certificados').select('id,codigo,emitido_em,carga_horas,matricula_id').in('matricula_id', (await supa.from('ava_matriculas').select('id').eq('aluno_id', currentUser.id)).data?.map(m=>m.id)||[])
+    supa.from('ava_matriculas').select('id,status,created_at,ava_turmas(nome,ava_cursos(id,titulo,carga_horas))').eq('aluno_id', currentUser.id).order('created_at',{ascending:false})
   ]);
 
   const mids = (mats||[]).map(m=>m.id);
-  const {data: prog} = mids.length ? await supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id', mids) : {data:[]};
+  const [{data: certs}, {data: prog}] = await Promise.all([
+    mids.length ? supa.from('ava_certificados').select('id,codigo,emitido_em,carga_horas,matricula_id').in('matricula_id', mids) : {data:[]},
+    mids.length ? supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id', mids) : {data:[]}
+  ]);
   const progByMat = {};
   (prog||[]).forEach(p => { if (p.concluida) progByMat[p.matricula_id]=(progByMat[p.matricula_id]||0)+1; });
   const certIds = new Set((certs||[]).map(c=>c.matricula_id));
