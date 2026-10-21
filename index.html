@@ -209,6 +209,7 @@ textarea.fi{min-height:85px;resize:vertical}
       <label class="field"><span>Carga horária (h)</span><input class="fi" name="hours" type="number" min="1" max="9999" required></label>
       <label class="field"><span>Turma inicial</span><input class="fi" name="cohort" required maxlength="80"></label>
     </div>
+    <label class="field"><span>Tema / área temática</span><input class="fi" name="tema" maxlength="80" placeholder="Ex: Gestão Pública, Cultura, Cidadania"></label>
     <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:6px">Criar curso</button>
   </form>
 </dialog>
@@ -467,8 +468,8 @@ async function renderDashboard() {
 }
 
 // ── Cursos ────────────────────────────────────────────────────────
-async function renderCursos() {
-  const {data: cursos, error} = await supa.from('ava_cursos').select(`id,titulo,descricao,carga_horas,ava_modulos(id)`).eq('ativo',true);
+async function renderCursos(filtroTema='') {
+  const {data: cursos, error} = await supa.from('ava_cursos').select(`id,titulo,descricao,carga_horas,tema,ava_modulos(id)`).eq('ativo',true);
   if (error) throw error;
 
   let matriculaMap = {};
@@ -477,21 +478,40 @@ async function renderCursos() {
     (mats||[]).forEach(m => { if(m.ava_turmas) matriculaMap[m.ava_turmas.curso_id] = m; });
   }
 
+  // temas únicos para o filtro
+  const temas = [...new Set((cursos||[]).map(c=>c.tema).filter(Boolean))].sort();
+  const cursosVisiveis = filtroTema ? (cursos||[]).filter(c=>c.tema===filtroTema) : (cursos||[]);
+
   $('#main').innerHTML = `
     <div class="topline"><div>
       <div class="eyebrow">IPECC · APRENDIZAGEM</div>
       <h1 class="page-title">Cursos</h1>
     </div></div>
-    <div class="courses">${(cursos||[]).map((c,i) => {
+    ${temas.length ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <span class="muted" style="font-size:12px">Filtrar por tema:</span>
+      <button class="btn-secondary" style="${!filtroTema?'background:var(--green);color:#fff;border-color:var(--green)':''}" data-tema="">Todos</button>
+      ${temas.map(t=>`<button class="btn-secondary" style="${filtroTema===t?'background:var(--green);color:#fff;border-color:var(--green)':''}" data-tema="${esc(t)}">${esc(t)}</button>`).join('')}
+    </div>` : ''}
+    <div class="courses">${cursosVisiveis.map((c,i) => {
       const m = matriculaMap[c.id];
       return courseCardHTML({...c, cohort: m?.ava_turmas?.nome || ''}, i, 0, m?1:0);
-    }).join('') || '<p class="muted">Nenhum curso disponível.</p>'}</div>`;
+    }).join('') || '<p class="muted">Nenhum curso neste tema.</p>'}</div>`;
+
+  // eventos dos filtros de tema
+  $('#main').querySelectorAll('[data-tema]').forEach(btn => {
+    btn.addEventListener('click', () => renderCursos(btn.dataset.tema));
+  });
+
+  // eventos de inscrição nos cards
+  $('#main').querySelectorAll('[data-inscrever]').forEach(btn => {
+    btn.addEventListener('click', () => inscreverSe(btn.dataset.inscrever));
+  });
 }
 
 function courseCardHTML(c, i, pct=0, matriculado=0) {
   return `<article class="card">
     <div class="card-cover${i%2?' blue':''}">
-      <div class="card-cover-label">PROJETO<br>NOVO RUMO</div>
+      <div class="card-cover-label">${c.tema ? esc(c.tema).toUpperCase() : 'PROJETO NOVO RUMO'}</div>
       <div class="card-cover-icon">↗</div>
     </div>
     <div class="card-body">
@@ -502,10 +522,30 @@ function courseCardHTML(c, i, pct=0, matriculado=0) {
       <div class="progress-row"><span class="muted">Atividades</span><b>${pct}%</b></div>
       <div class="progress-bar"><i style="width:${pct}%"></i></div>
       <div class="card-foot"><small class="muted">${matriculado?'Em andamento':'Sem matrícula'}</small>
-        <a class="btn-primary" href="#curso/${encodeURIComponent(c.id)}">${matriculado?'Acessar →':'Ver →'}</a>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${!matriculado && !isStaff() ? `<button class="btn-secondary" data-inscrever="${esc(c.id)}" style="font-size:12px;padding:8px 13px">Inscrever-se</button>` : ''}
+          <a class="btn-primary" href="#curso/${encodeURIComponent(c.id)}">${matriculado?'Acessar →':'Ver →'}</a>
+        </div>
       </div>
     </div>
   </article>`;
+}
+
+// ── Inscrição autosservida ────────────────────────────────────────
+async function inscreverSe(cursoId) {
+  if (!currentUser) { toast('Faça login para se inscrever.',false); return; }
+  // buscar primeira turma ativa do curso com vagas
+  const {data: turmas} = await supa.from('ava_turmas').select('id,vagas').eq('curso_id', cursoId);
+  if (!turmas?.length) { toast('Nenhuma turma disponível para este curso.',false); return; }
+  // verificar se já matriculado
+  const {data: jaMatriculado} = await supa.from('ava_matriculas').select('id')
+    .eq('aluno_id', currentUser.id).eq('status','ativa').in('turma_id', turmas.map(t=>t.id)).single();
+  if (jaMatriculado) { toast('Você já está matriculado neste curso.',false); return; }
+  const turma = turmas[0];
+  const {error} = await supa.from('ava_matriculas').insert({aluno_id: currentUser.id, turma_id: turma.id});
+  if (error) { toast('Erro ao se inscrever: '+error.message, false); return; }
+  toast('Inscrição realizada com sucesso! ✓');
+  renderCursos();
 }
 
 // ── Sala de aula ──────────────────────────────────────────────────
@@ -514,7 +554,7 @@ async function renderCurso(cursoId, aulaId) {
 
   const [{data:curso},{data:modulos}] = await Promise.all([
     supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('id',cursoId).single(),
-    supa.from('ava_modulos').select('id,titulo,ordem,ava_aulas(id,titulo,conteudo,prompt,ordem,publicada)').eq('curso_id',cursoId).order('ordem')
+    supa.from('ava_modulos').select('id,titulo,ordem,ava_aulas(id,titulo,conteudo,video_url,prompt,ordem,publicada)').eq('curso_id',cursoId).order('ordem')
   ]);
   if (!curso) { $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel">Curso não encontrado.</div>`; return; }
 
@@ -541,6 +581,13 @@ async function renderCurso(cursoId, aulaId) {
     respostaSalva = ent?.resposta || '';
   }
 
+  // materiais de apoio
+  let materiais = [];
+  if (aula) {
+    const {data:mats} = await supa.from('ava_materiais').select('id,nome,url,tipo').eq('aula_id', aula.id);
+    materiais = mats || [];
+  }
+
   const pct = todasAulas.length ? Math.round(progSet.size/todasAulas.length*100) : 0;
 
   $('#main').innerHTML = `
@@ -554,8 +601,18 @@ async function renderCurso(cursoId, aulaId) {
     <div class="lesson-layout">
       <section class="panel" id="lesson-body">
         <span class="tag warn">ATIVIDADE COMPLEMENTAR</span>
-        <h2 class="lesson-title">${esc(aula?.titulo||'')}</h2>
-        <p style="font-size:14px;line-height:1.7;color:var(--muted)">${esc(aula?.conteudo||'')}</p>
+        <h2 class="lesson-title" id="aula-titulo"></h2>
+        ${aula?.video_url ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:16px 0">
+          <iframe src="${esc(aula.video_url.replace('watch?v=','embed/').replace('youtu.be/','youtube.com/embed/'))}"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe>
+        </div>` : ''}
+        <div id="lesson-content" style="font-size:14px;line-height:1.8;color:var(--muted);margin-top:8px"></div>
+        ${materiais.length ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+          <p style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Materiais de apoio</p>
+          ${materiais.map(mat=>`<a href="${esc(mat.url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px;font-size:13px;color:var(--green)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            ${esc(mat.nome)}</a>`).join('')}
+        </div>` : ''}
         ${aula?.prompt ? `<div class="panel" style="background:var(--bg);border:0;margin-top:16px">
           <strong style="font-size:14px">Pratique e registre</strong>
           <p class="muted" style="margin:6px 0 10px">${esc(aula.prompt)}</p>
@@ -579,8 +636,20 @@ async function renderCurso(cursoId, aulaId) {
       </section>
     </div>`}`;
 
+  // injetar conteúdo como innerHTML (permite HTML rico)
+  if (aula) {
+    const titleEl = $('#aula-titulo');
+    if (titleEl) titleEl.textContent = aula.titulo || '';
+    const contentEl = $('#lesson-content');
+    if (contentEl) contentEl.innerHTML = aula.conteudo || '';
+  }
+
   // events
   $('#main').addEventListener('click', async e => {
+    // inscrição autosservida (a partir da sala de aula)
+    const bi = e.target.closest('[data-inscrever-curso]');
+    if (bi) { await inscreverSe(bi.dataset.inscreverCurso); return; }
+
     const lb = e.target.closest('[data-lesson]');
     if (lb) { location.hash=`curso/${encodeURIComponent(lb.dataset.curso)}/${encodeURIComponent(lb.dataset.lesson)}`; return; }
 
@@ -721,7 +790,8 @@ async function renderGestao() {
             <option value="">Carregando…</option>
           </select></label>
         <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="100"></label>
-        <label class="field"><span>Conteúdo</span><textarea class="fi" name="conteudo" required maxlength="10000"></textarea></label>
+        <label class="field"><span>Conteúdo (HTML aceito)</span><textarea class="fi" name="conteudo" required maxlength="30000" style="min-height:120px"></textarea></label>
+        <label class="field"><span>URL do vídeo YouTube (opcional)</span><input class="fi" name="video_url" type="url" placeholder="https://www.youtube.com/watch?v=..."></label>
         <label class="field"><span>Instrução de prática</span><input class="fi" name="prompt" maxlength="500"></label>
         <button type="submit" class="btn-secondary">Adicionar</button>
       </form></details>`:''}
@@ -825,6 +895,7 @@ $('#course-form').addEventListener('submit', async e => {
     titulo: f.get('title').trim(),
     descricao: f.get('description').trim(),
     carga_horas: Number(f.get('hours')),
+    tema: f.get('tema')?.trim()||null,
   });
   if (error) { toast(error.message,false); return; }
   $('#dlg').close(); e.target.reset();
@@ -854,6 +925,7 @@ document.addEventListener('submit', async e => {
     modulo_id: f.get('modulo_id'),
     titulo: f.get('titulo').trim(),
     conteudo: f.get('conteudo').trim(),
+    video_url: f.get('video_url')?.trim()||null,
     prompt: f.get('prompt').trim()||null,
     publicada: true, ordem: 99
   });
