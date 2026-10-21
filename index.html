@@ -644,7 +644,7 @@ function courseCardHTML(c, i, pct=0, matriculado=0) {
       <span class="tag">${matriculado ? 'MATRICULADO' : 'DISPONÍVEL'}</span>
       <h3>${esc(c.titulo)}</h3>
       <p class="muted">${esc(c.descricao||'')}</p>
-      <div class="card-meta"><span>◷ ${c.carga_horas}h</span>${c.cohort?`<span>▦ ${esc(c.cohort)}</span>`:''}</div>
+      <div class="card-meta"><span style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${c.carga_horas}h</span>${c.cohort?`<span style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>${esc(c.cohort)}</span>`:''}</div>
       <div class="progress-row"><span class="muted">Atividades</span><b>${pct}%</b></div>
       <div class="progress-bar"><i style="width:${pct}%"></i></div>
       <div class="card-foot"><small class="muted">${matriculado?'Em andamento':'Sem matrícula'}</small>
