@@ -351,8 +351,9 @@ class SupaQuery {
     this._table = table; this._params = new URLSearchParams();
     this._method = 'GET'; this._body = null; this._single = false;
     this._upsertConflict = null; this._select = '*';
+    this._count = null; this._head = false;
   }
-  select(cols) { this._select = cols||'*'; return this; }
+  select(cols, {count=null, head=false}={}) { this._select = cols||'*'; this._count = count; this._head = !!head; return this; }
   eq(col,val) { this._params.append(col,'eq.'+val); return this; }
   in(col,vals) { this._params.append(col,'in.('+vals.join(',')+')'); return this; }
   order(col,{ascending=true}={}) { this._params.append('order',col+(ascending?'.asc':'.desc')); return this; }
@@ -369,20 +370,24 @@ class SupaQuery {
   async _run() {
     this._params.set('select',this._select);
     const url = SUPA_URL+'/rest/v1/'+this._table+'?'+this._params.toString();
-    const headers = supa._headers(
-      this._method==='GET' ? {'Prefer':'return=representation'}
-      : this._upsertConflict
-        ? {'Prefer':'resolution=merge-duplicates,return=representation'}
-        : {'Prefer':'return=representation'}
-    );
-    const r = await fetch(url,{method:this._method,headers,
+    let preferVal = this._method==='GET' ? 'return=representation'
+      : this._upsertConflict ? 'resolution=merge-duplicates,return=representation'
+      : 'return=representation';
+    if (this._count) preferVal += ',count='+this._count;
+    const headers = supa._headers({'Prefer':preferVal});
+    const method = this._head ? 'HEAD' : this._method;
+    const r = await fetch(url,{method,headers,
       body:this._body?JSON.stringify(this._body.length===1?this._body[0]:this._body):undefined});
-    const text = await r.text();
-    let d; try{d=JSON.parse(text);}catch{d=text;}
-    if (!r.ok) return {data:null,error:{message:(d?.message||d?.hint||text||r.statusText)}};
+    // extrai contagem total do cabeçalho Content-Range (ex.: "0-24/117" ou "*/117")
+    let count = null;
+    const cr = r.headers.get('content-range');
+    if (cr) { const total = cr.split('/')[1]; if (total && total!=='*') count = parseInt(total,10); }
+    const text = this._head ? '' : await r.text();
+    let d; try{d = text ? JSON.parse(text) : [];}catch{d=text;}
+    if (!r.ok) return {data:null,error:{message:(d?.message||d?.hint||text||r.statusText)},count};
     const arr = Array.isArray(d)?d:(d?[d]:[]);
-    if(this._single) return {data:arr[0]||null,error:null};
-    return {data:arr,error:null};
+    if(this._single) return {data:arr[0]||null,error:null,count};
+    return {data:arr,error:null,count};
   }
   then(res,rej){return this._run().then(res,rej);}
   catch(fn){return this._run().catch(fn);}
