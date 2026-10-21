@@ -733,7 +733,13 @@ async function renderCurso(cursoId, aulaId) {
   let progSet = new Set();
   let matriculaId = null;
   if (currentUser) {
-    const {data:mat} = await supa.from('ava_matriculas').select('id').eq('aluno_id',currentUser.id).eq('status','ativa').limit(1).single();
+    // restringe a matrícula às turmas deste curso — evita pegar a matrícula
+    // de outro curso quando o aluno tem mais de uma matrícula ativa
+    const {data:turmasDoCurso} = await supa.from('ava_turmas').select('id').eq('curso_id',cursoId);
+    const turmaIds = (turmasDoCurso||[]).map(t=>t.id);
+    const {data:mat} = turmaIds.length
+      ? await supa.from('ava_matriculas').select('id').eq('aluno_id',currentUser.id).eq('status','ativa').in('turma_id',turmaIds).limit(1).single()
+      : {data:null};
     matriculaId = mat?.id;
     if (matriculaId) {
       const {data:prog} = await supa.from('ava_progresso').select('aula_id').eq('matricula_id',matriculaId).eq('concluida',true);
@@ -850,13 +856,14 @@ async function renderCurso(cursoId, aulaId) {
           ]);
           const cursoInfo = turmaInfo?.ava_turmas?.ava_cursos;
           if (cursoInfo) {
-            const {count: totalAulas} = await supa.from('ava_aulas').select('id',{count:'exact',head:true}).eq('publicada',true);
+            // total de aulas DESTE curso (antes contava aulas publicadas de todos os cursos)
+            const totalAulas = todasAulas.length;
             const pct = totalAulas ? Math.round((progresso?.length||0)/totalAulas*100) : 0;
             if (pct >= (cursoInfo.pct_minimo||70)) {
               const {data: certExiste} = await supa.from('ava_certificados').select('id').eq('matricula_id',matriculaId).maybeSingle();
               if (!certExiste) {
                 await supa.from('ava_certificados').insert({matricula_id:matriculaId,tipo:'conclusao',carga_horas:cursoInfo.carga_horas||0});
-                toast('🎓 Parabéns! Certificado emitido automaticamente!');
+                toast('Parabéns! Certificado emitido automaticamente.');
               }
             }
           }
@@ -1008,7 +1015,7 @@ async function emitirCertificado(matriculaId, cursoId, cargaHoras) {
     carga_horas: cargaHoras
   });
   if (error) { toast('Erro ao emitir: '+error.message, false); return; }
-  toast('Certificado emitido! 🎓');
+  toast('Certificado emitido com sucesso.');
   await renderCertificados();
 }
 
