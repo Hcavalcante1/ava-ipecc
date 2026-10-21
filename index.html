@@ -358,6 +358,7 @@ class SupaQuery {
   order(col,{ascending=true}={}) { this._params.append('order',col+(ascending?'.asc':'.desc')); return this; }
   limit(n) { this._params.append('limit',n); return this; }
   single() { this._single=true; this._params.append('limit',1); return this; }
+  maybeSingle() { return this.single(); }
   insert(body) { this._method='POST'; this._body=Array.isArray(body)?body:[body]; return this; }
   upsert(body,{onConflict}={}) {
     this._method='POST'; this._body=Array.isArray(body)?body:[body];
