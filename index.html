@@ -752,13 +752,16 @@ async function renderCurso(cursoId, aulaId) {
         ${!matriculaId ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
       </section>
       <section class="panel">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Conteúdo do curso</h3>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Conteúdo do curso</h3>
         <div class="progress-bar" style="margin-bottom:8px"><i style="width:${pct}%"></i></div>
         <p class="muted" style="margin-bottom:16px">${progSet.size}/${todasAulas.length} atividades</p>
         ${(modulos||[]).map((m,i)=>`
           <p style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 6px">${i+1}. ${esc(m.titulo)}</p>
-          ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>`
-            <button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${esc(a.id)}" data-curso="${esc(cursoId)}">${progSet.has(a.id)?'✓ ':'○ '}${esc(a.titulo)}</button>`).join('')}`).join('')}
+          ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>{
+            const okIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+            const pendIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
+            return `<button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${esc(a.id)}" data-curso="${esc(cursoId)}" style="display:flex;align-items:center;gap:8px">${progSet.has(a.id)?okIcon:pendIcon}<span>${esc(a.titulo)}</span></button>`;
+          }).join('')}`).join('')}
       </section>
     </div>`}`;
 
