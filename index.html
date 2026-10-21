@@ -193,6 +193,10 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Atividades</span>
     </a>
+    <a href="#trilhas">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+      <span>Trilhas</span>
+    </a>
     <a href="#certificados">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
       <span>Certificados</span>
@@ -416,7 +420,7 @@ const isAdmin = () => userPerfil?.papel === 'admin';
 const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel);
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',certificados:'Certificados',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem',validar:'Validar Certificado'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem',validar:'Validar Certificado'};
 
 async function render() {
   const parts = location.hash.slice(1).split('/').map(p=>{try{return decodeURIComponent(p);}catch{return '';}});
@@ -433,7 +437,7 @@ async function render() {
   $('#crumb').textContent = LABELS[view] || 'Visão geral';
   document.querySelectorAll('nav a').forEach(a => {
     const h = a.getAttribute('href').slice(1);
-    a.classList.toggle('active', h === (view === 'curso' ? 'cursos' : view));
+    a.classList.toggle('active', h === (view === 'curso' ? 'cursos' : view === 'trilha' ? 'trilhas' : view));
   });
   $('#main').innerHTML = loading();
   try {
@@ -441,6 +445,8 @@ async function render() {
     else if (view === 'cursos') await renderCursos();
     else if (view === 'atividades') await renderAtividades();
     else if (view === 'certificados') await renderCertificados();
+    else if (view === 'trilhas') await renderTrilhas();
+    else if (view === 'trilha')  await renderTrilha(parts[1]);
     else if (view === 'validar') await renderValidar(parts[1]);
     else if (view === 'gestao') await renderGestao();
     else if (view === 'relatorios') await renderRelatorios();
@@ -952,6 +958,96 @@ async function renderValidar(codigo) {
     </div>`;
 }
 
+// ── Trilhas ───────────────────────────────────────────────────────
+async function renderTrilhas() {
+  const {data: trilhas} = await supa.from('ava_trilhas').select('id,titulo,descricao,publicada,ordem').order('ordem');
+  if (!trilhas?.length) {
+    $('#main').innerHTML = `
+      <div class="topline"><div>
+        <div class="eyebrow">IPECC · FORMAÇÃO</div>
+        <h1 class="page-title">Trilhas de Aprendizagem</h1>
+      </div></div>
+      <div class="panel"><p class="muted">Nenhuma trilha publicada ainda.</p></div>`;
+    return;
+  }
+  // para cada trilha busca quantos cursos
+  const trilhaIds = trilhas.map(t=>t.id);
+  const {data: tc} = await supa.from('ava_trilha_cursos').select('trilha_id,curso_id').in('trilha_id', trilhaIds);
+  const contagem = {};
+  (tc||[]).forEach(r => { contagem[r.trilha_id] = (contagem[r.trilha_id]||0)+1; });
+
+  // para cada trilha, verifica progresso do aluno
+  let matriculasCursos = {};
+  if (currentUser) {
+    const {data: mats} = await supa.from('ava_matriculas')
+      .select('ava_turmas(curso_id)').eq('aluno_id', currentUser.id).eq('status','ativa');
+    (mats||[]).forEach(m => { if (m.ava_turmas?.curso_id) matriculasCursos[m.ava_turmas.curso_id] = true; });
+  }
+
+  const cards = trilhas.filter(t=>t.publicada).map(t => {
+    const total = contagem[t.id]||0;
+    return `<div class="panel" style="cursor:pointer" onclick="location.hash='trilha/${t.id}'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div class="eyebrow" style="margin-bottom:4px">TRILHA · ${total} CURSO${total===1?'':'S'}</div>
+          <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:22px">${esc(t.titulo)}</h2>
+          ${t.descricao?`<p class="muted" style="margin-top:6px;font-size:14px">${esc(t.descricao)}</p>`:''}
+        </div>
+        <span class="btn-secondary" style="flex-shrink:0">Ver trilha →</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · FORMAÇÃO</div>
+      <h1 class="page-title">Trilhas de Aprendizagem</h1>
+    </div></div>
+    ${cards||'<div class="panel"><p class="muted">Nenhuma trilha publicada ainda.</p></div>'}`;
+}
+
+async function renderTrilha(trilhaId) {
+  if (!trilhaId) { location.hash='trilhas'; return; }
+  const [{data: trilha}, {data: tc}] = await Promise.all([
+    supa.from('ava_trilhas').select('id,titulo,descricao').eq('id', trilhaId).single(),
+    supa.from('ava_trilha_cursos').select('ordem,ava_cursos(id,titulo,carga_horas,tema)').eq('trilha_id', trilhaId).order('ordem')
+  ]);
+  if (!trilha) { location.hash='trilhas'; return; }
+
+  let matriculasCursos = {};
+  if (currentUser) {
+    const {data: mats} = await supa.from('ava_matriculas')
+      .select('ava_turmas(curso_id)').eq('aluno_id', currentUser.id).eq('status','ativa');
+    (mats||[]).forEach(m => { if (m.ava_turmas?.curso_id) matriculasCursos[m.ava_turmas.curso_id] = true; });
+  }
+
+  const cursos = (tc||[]).map(r=>r.ava_cursos).filter(Boolean);
+  const rows = cursos.map((c,i) => {
+    const mat = matriculasCursos[c.id];
+    return `<div class="row" style="align-items:center">
+      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);color:var(--green);font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0">${i+1}</div>
+        <div>
+          <strong style="font-size:14px">${esc(c.titulo)}</strong>
+          <p class="muted" style="font-size:12px">${c.carga_horas||0}h${c.tema?` · ${esc(c.tema)}`:''}</p>
+        </div>
+      </div>
+      <a class="btn-secondary" href="#cursos" style="flex-shrink:0">${mat?'Acessar →':'Ver curso →'}</a>
+    </div>`;
+  }).join('');
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <a class="muted" href="#trilhas" style="font-size:13px;display:block;margin-bottom:6px">← Trilhas</a>
+      <div class="eyebrow">TRILHA · ${cursos.length} CURSO${cursos.length===1?'':'S'}</div>
+      <h1 class="page-title">${esc(trilha.titulo)}</h1>
+      ${trilha.descricao?`<p class="muted" style="margin-top:8px;max-width:600px">${esc(trilha.descricao)}</p>`:''}
+    </div></div>
+    <div class="panel">
+      ${rows||'<p class="muted">Nenhum curso nesta trilha ainda.</p>'}
+    </div>`;
+}
+
 // ── Gestão ────────────────────────────────────────────────────────
 async function renderGestao() {
   const [{data:cursos},{data:turmas}] = await Promise.all([
@@ -1022,6 +1118,53 @@ async function renderGestao() {
       const sel = $('#turma-select');
       sel.innerHTML = (turmas||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.nome)}</option>`).join('');
       $('#dlg-matricula').showModal();
+    });
+
+    // ── gestão de trilhas ──
+    const {data: trilhas} = await supa.from('ava_trilhas').select('id,titulo,publicada,ordem').order('ordem');
+    const trilhaSection = document.createElement('div');
+    trilhaSection.innerHTML = `
+      <div class="topline" style="margin-top:32px"><div>
+        <div class="eyebrow">TRILHAS</div>
+        <h2 style="font-size:20px;font-family:'DM Serif Display',Georgia,serif;font-weight:400">Trilhas de Aprendizagem</h2>
+      </div></div>
+      <div class="panel" style="margin-bottom:16px">
+        ${(trilhas||[]).length ? (trilhas||[]).map(t=>`<div class="row">
+          <span>${esc(t.titulo)}</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="tag ${t.publicada?'':'warn'}">${t.publicada?'Publicada':'Rascunho'}</span>
+            <a class="btn-secondary" href="#trilha/${t.id}">Ver</a>
+          </div>
+        </div>`).join('') : '<p class="muted">Nenhuma trilha criada.</p>'}
+      </div>
+      <details class="panel">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">+ Nova trilha</summary>
+        <form id="trilha-form" style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+          <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="200"></label>
+          <label class="field"><span>Descrição</span><textarea class="fi" name="descricao" style="min-height:80px" maxlength="1000"></textarea></label>
+          <label class="field"><span>Cursos (IDs separados por vírgula, na ordem desejada)</span><textarea class="fi" name="curso_ids" placeholder="uuid1, uuid2, uuid3" style="min-height:60px;font-size:12px;font-family:monospace"></textarea></label>
+          <label class="field" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="publicada"> <span>Publicar imediatamente</span></label>
+          <button type="submit" class="btn-primary">Criar trilha</button>
+        </form>
+      </details>`;
+    $('#main').appendChild(trilhaSection);
+
+    document.getElementById('trilha-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const titulo = f.get('titulo')?.trim();
+      const descricao = f.get('descricao')?.trim()||null;
+      const publicada = f.get('publicada')==='on';
+      const cursoIdsRaw = f.get('curso_ids')?.trim()||'';
+      const cursoIds = cursoIdsRaw ? cursoIdsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+      const {data: novaTrilha, error} = await supa.from('ava_trilhas').insert({titulo,descricao,publicada}).select('id').single();
+      if (error) { toast('Erro: '+error.message, false); return; }
+      if (cursoIds.length) {
+        await supa.from('ava_trilha_cursos').insert(cursoIds.map((cid,i)=>({trilha_id:novaTrilha.id,curso_id:cid,ordem:i})));
+      }
+      toast('Trilha criada ✓');
+      e.target.reset();
+      await renderGestao();
     });
   }
 }
