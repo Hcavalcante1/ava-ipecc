@@ -217,7 +217,12 @@ textarea.fi{min-height:85px;resize:vertical}
 <div class="shell">
   <header>
     <div class="breadcrumb">Portal de formação &nbsp;/&nbsp; <strong id="crumb">Visão geral</strong></div>
-    <div class="avatar" id="avatar-btn" title="Sair">IP</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="avatar" id="avatar-btn-display">IP</div>
+      <button id="avatar-btn" type="button" style="background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:6px 10px;border-radius:6px;display:flex;align-items:center;gap:5px" title="Sair da conta">
+        Sair <span style="font-size:15px;line-height:1">↪</span>
+      </button>
+    </div>
   </header>
   <main id="main"><div class="loading-center"><span class="spinner"></span></div></main>
 </div>
@@ -361,21 +366,23 @@ function renderLogin(msg) {
   $('.shell').style.marginLeft = '0';
   $('footer').style.marginLeft = '0';
   $('#main').innerHTML = `
-    <div style="max-width:380px;margin:60px auto">
-      <div class="brand" style="margin-bottom:28px;justify-content:center">
-        <div class="brand-mark">i</div>
-        <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
-      </div>
-      <div class="panel">
-        <h2 style="margin-bottom:4px">Entrar</h2>
-        <p class="muted" style="margin-bottom:20px">Use o e-mail cadastrado pelo IPECC.</p>
-        ${msg?`<p style="color:#b13232;font-size:13px;margin-bottom:12px">${esc(msg)}</p>`:''}
-        <form id="login-form">
-          <label class="field"><span>E-mail</span><input class="fi" type="email" name="email" required autocomplete="username"></label>
-          <label class="field"><span>Senha</span><input class="fi" type="password" name="password" required autocomplete="current-password"></label>
-          <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="login-btn">Entrar →</button>
-        </form>
-        <p class="muted" style="margin-top:16px;font-size:12px;text-align:center">Esqueceu a senha? Fale com o IPECC.</p>
+    <div style="min-height:calc(100vh - 88px);display:flex;align-items:center;justify-content:center;padding:40px 20px">
+      <div style="max-width:380px;width:100%">
+        <div class="brand" style="margin-bottom:28px;justify-content:center">
+          <div class="brand-mark">i</div>
+          <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
+        </div>
+        <div class="panel">
+          <h2 style="margin-bottom:4px">Entrar</h2>
+          <p class="muted" style="margin-bottom:20px">Use o e-mail cadastrado pelo IPECC.</p>
+          ${msg?`<p style="color:#b13232;font-size:13px;margin-bottom:12px">${esc(msg)}</p>`:''}
+          <form id="login-form">
+            <label class="field"><span>E-mail</span><input class="fi" type="email" name="email" required autocomplete="username"></label>
+            <label class="field"><span>Senha</span><input class="fi" type="password" name="password" required autocomplete="current-password"></label>
+            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="login-btn">Entrar →</button>
+          </form>
+          <p class="muted" style="margin-top:16px;font-size:12px;text-align:center">Esqueceu a senha? Fale com o IPECC.</p>
+        </div>
       </div>
     </div>`;
   $('#login-form').addEventListener('submit', async e => {
@@ -404,7 +411,7 @@ supa.auth.onAuthStateChange(async (_event, session) => {
     $('footer').style.marginLeft = '';
     // show avatar initials
     const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    $('#avatar-btn').textContent = initials;
+    $('#avatar-btn-display').textContent = initials;
     render();
   } else {
     currentUser = null; userPerfil = null;
@@ -1291,6 +1298,17 @@ document.addEventListener('submit', async e => {
 // inicial
 (async () => {
   const {data:{session}} = await supa.auth.getSession();
-  if (!session) renderLogin();
+  if (!session?.user) {
+    renderLogin();
+    return;
+  }
+  currentUser = session.user;
+  await loadPerfil(session.user.id);
+  $('aside').style.display = '';
+  $('.shell').style.marginLeft = '';
+  $('footer').style.marginLeft = '';
+  const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  $('#avatar-btn-display').textContent = initials;
+  await render();
 })();
 </script>
