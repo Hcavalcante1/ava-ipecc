@@ -1,0 +1,426 @@
+{
+  "aulas": [
+    {
+      "id": "addcb7e8-ba7d-46c9-8ff5-c43a36e8516c",
+      "titulo": "Editor de texto e formatação profissional",
+      "conteudo": "Word, Google Docs ou LibreOffice Writer: aprenda a formatar um documento profissional — margens, fontes, títulos, parágrafos, listas e numeração de páginas.",
+      "prompt": "Crie um documento de uma página sobre um tema de seu interesse, usando pelo menos: título, subtítulo, dois parágrafos e uma lista numerada. Descreva as escolhas de formatação que você fez.",
+      "ordem": 1,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "620b53d8-a08b-47bf-984c-1acf7104237f",
+      "titulo": "Currículo e carta de apresentação",
+      "conteudo": "O currículo é seu cartão de visitas. Aprenda os elementos essenciais de um currículo moderno e como escrever uma carta de apresentação para uma vaga real ou fictícia.",
+      "prompt": "Descreva as três seções mais importantes do seu currículo e explique por que cada uma delas é relevante para o emprego que você deseja.",
+      "ordem": 2,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "a4831849-6d23-42df-8c49-2ecef026c1cc",
+      "titulo": "Planilhas: células, dados e formatação",
+      "conteudo": "Excel, Google Sheets ou LibreOffice Calc: entenda a lógica das células, como inserir e formatar dados, ajustar colunas e aplicar bordas e cores para facilitar a leitura.",
+      "prompt": "Monte uma planilha simples de controle de despesas mensais com pelo menos cinco categorias. Descreva como você organizou as informações.",
+      "ordem": 3,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "39ad49e0-565e-400f-9f35-233e354c2930",
+      "titulo": "Fórmulas, soma, média e controles",
+      "conteudo": "Planilhas calculam por você. Aprenda as fórmulas básicas: SOMA, MÉDIA, MÁXIMO, MÍNIMO e SE. Pratique aplicá-las em situações reais do dia a dia.",
+      "prompt": "Usando a planilha de despesas da atividade anterior, adicione fórmulas de SOMA e MÉDIA. Explique o que cada fórmula faz e qual resultado ela retornou.",
+      "ordem": 4,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "589f5ff6-cefb-40fa-807d-22e833bbc137",
+      "titulo": "Cadastro de clientes e controle de estoque",
+      "conteudo": "Planilhas podem ser bancos de dados simples. Crie uma planilha de cadastro de clientes e outra de controle de estoque com entradas, saídas e saldo automático.",
+      "prompt": "Descreva como você montou o controle de estoque: quais colunas usou, como calculou o saldo e como essa ferramenta pode ajudar num negócio real.",
+      "ordem": 5,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "48796532-89db-4a91-bc80-4ea0c48051d9",
+      "titulo": "Apresentações profissionais",
+      "conteudo": "PowerPoint, Google Slides ou Canva Apresentações: aprenda a criar slides com hierarquia visual, imagens e textos concisos. Menos é mais em uma boa apresentação.",
+      "prompt": "Crie uma apresentação de três slides sobre um produto ou serviço que você oferece ou gostaria de oferecer. Descreva as escolhas de design e conteúdo que você fez.",
+      "ordem": 6,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "4267848d-0f6c-4252-98e0-9753375870fc",
+      "titulo": "Conversão, impressão e compartilhamento em PDF",
+      "conteudo": "PDF é o formato universal de documentos profissionais. Aprenda a converter qualquer arquivo para PDF, imprimir com qualidade e compartilhar por e-mail ou WhatsApp.",
+      "prompt": "Descreva o processo que você usou para converter um documento em PDF e compartilhá-lo. Qual a diferença entre enviar o arquivo original e enviar o PDF?",
+      "ordem": 7,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "c135079b-0b39-4598-b94f-fd9866271070",
+      "titulo": "Produto: documento, planilha e apresentação",
+      "conteudo": "Atividade final do Módulo 2: integre o que aprendeu produzindo um documento de apresentação pessoal, uma planilha de controle financeiro simples e dois slides de apresentação.",
+      "prompt": "Descreva os três produtos que você criou nesta atividade. O que foi mais desafiador? Como você vai usar essas habilidades no trabalho ou nos estudos?",
+      "ordem": 8,
+      "modulo_id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "duracao_min": 10
+    },
+    {
+      "id": "7f1b4a0b-0c03-431c-a2b3-1fe41f1c8bd6",
+      "titulo": "Comunicação visual: cores, fontes e legibilidade",
+      "conteudo": "Design não é só beleza — é comunicação. Entenda os princípios básicos de contraste, hierarquia tipográfica e combinação de cores para criar peças que se destacam.",
+      "prompt": "Escolha duas cores complementares e duas fontes (uma para título e uma para texto). Justifique suas escolhas: que sensação você quer transmitir?",
+      "ordem": 1,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "a224dddf-c735-4d36-bd90-798cb4feac39",
+      "titulo": "Canva: interface, modelos e organização",
+      "conteudo": "O Canva democratizou o design. Explore a interface, aprenda a usar e adaptar modelos prontos, organizar elementos e exportar nos formatos certos.",
+      "prompt": "Descreva as três funcionalidades do Canva que você mais usou hoje. Qual foi a maior dificuldade e como você a resolveu?",
+      "ordem": 2,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "b7d11945-2d77-4e03-a9da-a0ab95aee70e",
+      "titulo": "Criação de posts para redes sociais",
+      "conteudo": "Post para Instagram, Facebook ou WhatsApp: tamanhos certos, imagens de qualidade, texto objetivo e chamada para ação. Crie um post real para um negócio fictício ou seu próprio.",
+      "prompt": "Crie um post e descreva: para qual rede social é, qual o objetivo da publicação e quais escolhas de design você fez para atrair atenção.",
+      "ordem": 3,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "0b0e3e5e-e7a4-4db1-8152-a3ffed7930bd",
+      "titulo": "Cartazes, convites e panfletos digitais",
+      "conteudo": "Material impresso e digital para divulgação de eventos, serviços e promoções. Aprenda a criar um cartaz A4, um convite e um panfleto respeitando a identidade visual.",
+      "prompt": "Crie um cartaz de divulgação para um evento fictício (festa, curso, reunião). Descreva as informações que você incluiu e por quê cada elemento está onde está.",
+      "ordem": 4,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "f75120b7-72a8-4ad5-862d-ab72f44eeaf7",
+      "titulo": "Cardápios e catálogos digitais",
+      "conteudo": "Restaurantes, ambulantes e prestadores de serviço precisam de catálogos. Aprenda a montar um cardápio ou catálogo digital para WhatsApp ou PDF, com fotos e preços.",
+      "prompt": "Monte um mini-catálogo com três produtos ou serviços. Descreva como você organizou os itens, escolheu as fotos e definiu o layout.",
+      "ordem": 5,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "80e680ce-f4f3-45f4-b431-569f412903a6",
+      "titulo": "Fotografia e tratamento básico de produtos",
+      "conteudo": "Foto boa vende. Com o celular que você já tem, aprenda enquadramento, iluminação natural, fundo limpo e edição básica para valorizar produtos e serviços.",
+      "prompt": "Tire três fotos de um objeto qualquer aplicando as técnicas de iluminação e enquadramento. Descreva o que você fez diferente em cada tentativa.",
+      "ordem": 6,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "b3675738-5cd3-45f9-9251-7a2f52acdb6a",
+      "titulo": "Identidade visual simplificada",
+      "conteudo": "Logo, paleta de cores e fonte padrão formam a identidade visual. Crie uma identidade visual simples para um negócio fictício usando o Canva.",
+      "prompt": "Descreva a identidade visual que você criou: nome do negócio, cores escolhidas, fonte e o que cada elemento representa para a marca.",
+      "ordem": 7,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "3e6294f2-af99-4505-9cab-f5c9c262d741",
+      "titulo": "Produto: pacote comercial com cinco peças",
+      "conteudo": "Atividade final do Módulo 3: crie um pacote com post, cartaz, panfleto, capa de catálogo e cartão de visita digital para um negócio real ou fictício.",
+      "prompt": "Descreva cada uma das cinco peças que você produziu. Como elas formam um conjunto coeso? O que você faria diferente se tivesse mais tempo?",
+      "ordem": 8,
+      "modulo_id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "duracao_min": 10
+    },
+    {
+      "id": "8adfd3d1-61ae-4903-a980-ed41b8b5a588",
+      "titulo": "Perfil empreendedor e oportunidades locais",
+      "conteudo": "Empreender começa pelo autoconhecimento. Reflita sobre suas habilidades, identifique oportunidades no seu bairro e entenda a diferença entre emprego formal, autônomo e empreendedor.",
+      "prompt": "Descreva três habilidades suas que poderiam se tornar um serviço ou produto. Qual oportunidade local você enxerga que ainda não foi explorada?",
+      "ordem": 1,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "3011e51c-5445-4169-b2d3-3a0bd6f0380d",
+      "titulo": "Público-alvo, proposta de valor e serviço",
+      "conteudo": "Para quem você vende? O que você oferece de diferente? Defina seu público-alvo, construa sua proposta de valor e descreva seu serviço de forma clara e atraente.",
+      "prompt": "Descreva o público-alvo do seu negócio ou ideia: quem são, onde estão, o que precisam. Em uma frase, qual é a sua proposta de valor?",
+      "ordem": 2,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "1e3335b9-feee-4709-a8bd-f655d7cc7340",
+      "titulo": "Custos, precificação e fluxo de caixa",
+      "conteudo": "Preço errado quebra negócio. Aprenda a calcular o custo real de um produto ou serviço, definir o preço de venda com margem e montar um fluxo de caixa simples.",
+      "prompt": "Calcule o preço de venda de um produto ou serviço considerando custo, despesas e lucro desejado. Apresente os números e justifique a margem escolhida.",
+      "ordem": 3,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "0846a9fc-ee7c-4343-bfa9-e72f3ea0389f",
+      "titulo": "MEI, formalização e direitos do consumidor",
+      "conteudo": "Formalizar o negócio abre portas. Entenda o que é o MEI, como abrir, quais impostos pagar, quais direitos e obrigações você tem — e como o Código de Defesa do Consumidor te protege.",
+      "prompt": "Quais são os principais benefícios de se formalizar como MEI para o seu tipo de negócio? Quais obrigações você teria que assumir?",
+      "ordem": 4,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "0520fb60-f37a-4d38-880c-bac4af86e9fb",
+      "titulo": "Proposta comercial e negociação",
+      "conteudo": "Uma boa proposta fecha contratos. Aprenda a estruturar uma proposta comercial escrita, a conduzir uma negociação e a lidar com objeções de forma profissional.",
+      "prompt": "Escreva uma proposta comercial de uma página para um serviço que você oferece. Inclua apresentação, escopo, prazo, valor e forma de pagamento.",
+      "ordem": 5,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "6d922e88-aacd-4445-ae12-4a064a50f7be",
+      "titulo": "Busca de vagas, currículo e entrevista",
+      "conteudo": "O mercado de trabalho formal também é um caminho. Aprenda a usar LinkedIn, Indeed e portais de vagas, a adequar o currículo para cada vaga e a se preparar para entrevistas.",
+      "prompt": "Encontre uma vaga de emprego real compatível com seu perfil. Descreva como você adaptaria seu currículo para essa vaga e quais perguntas você se prepararia para responder.",
+      "ordem": 6,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "cabdba0f-93e8-43cb-9f98-98d11607edc7",
+      "titulo": "Portfólio digital e prospecção de clientes",
+      "conteudo": "Portfólio mostra quem você é profissionalmente. Aprenda a criar um portfólio digital simples (no Canva, Linktree ou Notion) e a usá-lo ativamente para prospectar clientes.",
+      "prompt": "Descreva o que você incluiria no seu portfólio digital: quais trabalhos, habilidades e formas de contato. Como você o usaria para conseguir novos clientes?",
+      "ordem": 7,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "8dc53c09-7648-47c8-9f5e-73c528edf049",
+      "titulo": "Produto final: portfólio e plano de 30 dias",
+      "conteudo": "Atividade de conclusão do curso: monte seu portfólio digital completo e escreva um plano de ação para os próximos 30 dias — seja para buscar emprego, formalizar um negócio ou expandir o que já tem.",
+      "prompt": "Descreva seu portfólio e seu plano de 30 dias. Quais são as três ações mais importantes que você vai realizar? Como o curso mudou sua visão sobre suas possibilidades?",
+      "ordem": 8,
+      "modulo_id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "duracao_min": 10
+    },
+    {
+      "id": "1ea20fbf-12fe-4f9f-aff8-86d47572c0f4",
+      "titulo": "Redes sociais e presença digital de negócios",
+      "conteudo": "Instagram, Facebook, TikTok: entenda como cada rede funciona, qual serve melhor para seu tipo de negócio e como criar ou otimizar um perfil profissional.",
+      "prompt": "Escolha a rede social mais adequada para um negócio que você conhece ou quer criar. Justifique sua escolha e descreva como seria o perfil ideal.",
+      "ordem": 1,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "31dd5843-0fa6-458a-9c48-8daf9ee64310",
+      "titulo": "WhatsApp Business: perfil, catálogo e respostas automáticas",
+      "conteudo": "O WhatsApp Business é a ferramenta de vendas mais usada no Brasil. Configure o perfil completo, crie um catálogo de produtos e defina mensagens automáticas de boas-vindas e ausência.",
+      "prompt": "Descreva o catálogo e as mensagens automáticas que você configuraria no WhatsApp Business para um negócio. Por que cada elemento é importante para o cliente?",
+      "ordem": 2,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "2ff64821-3ef5-44c2-8272-b76ef0ba739d",
+      "titulo": "Atendimento digital e roteiro de respostas",
+      "conteudo": "Atendimento rápido e profissional faz diferença. Crie um roteiro de respostas para as perguntas mais frequentes dos seus clientes, mantendo o tom adequado ao negócio.",
+      "prompt": "Liste cinco perguntas frequentes de um cliente fictício e escreva a resposta ideal para cada uma. Como você equilibra agilidade e cordialidade?",
+      "ordem": 3,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "bf8ae9bf-8b83-41c8-9d01-39c4fa14b2f2",
+      "titulo": "Planejamento de conteúdo e calendário de publicações",
+      "conteudo": "Consistência nas redes sociais exige planejamento. Aprenda a criar um calendário editorial: que conteúdo publicar, com que frequência e em qual horário.",
+      "prompt": "Monte um calendário editorial de duas semanas para um negócio fictício. Inclua pelo menos seis publicações com tema, formato (post, story, reels) e objetivo de cada uma.",
+      "ordem": 4,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "65b9cf6d-2d6b-4bc9-b732-5576c0eb05d8",
+      "titulo": "Marketplaces e cadastro de produtos",
+      "conteudo": "Shopee, Mercado Livre, iFood, Elo7 — marketplaces ampliam o alcance. Aprenda a cadastrar produtos ou serviços: título, descrição, foto e preço que convertem.",
+      "prompt": "Escreva o título e a descrição de um produto para cadastro em marketplace. Use as técnicas de título com palavras-chave e descrição com benefícios reais.",
+      "ordem": 5,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "4ff03e1b-4b82-460a-afe6-616ef2413db3",
+      "titulo": "Meios e links de pagamento",
+      "conteudo": "PIX, link de pagamento, maquininha: entenda as opções disponíveis, taxas, prazos de recebimento e como oferecer mais de uma forma de pagamento ao cliente.",
+      "prompt": "Compare dois meios de pagamento digitais que você usaria no seu negócio. Quais são as vantagens e desvantagens de cada um para quem vende e para quem compra?",
+      "ordem": 6,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "9c319a7a-c161-44e5-95bf-ba0c2f598e2d",
+      "titulo": "Segurança nas vendas e marketing de afiliados",
+      "conteudo": "Golpes no digital existem dos dois lados. Aprenda a identificar clientes mal-intencionados, golpe do falso comprovante e como o marketing de afiliados pode ser uma renda complementar.",
+      "prompt": "Descreva dois sinais de alerta que indicam que uma venda pode ser golpe. O que você faria ao identificá-los?",
+      "ordem": 7,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "9e7d5f83-379c-4afb-b89f-8dda1e583df0",
+      "titulo": "Produto: catálogo, campanha e simulação de venda",
+      "conteudo": "Atividade final do Módulo 4: crie um catálogo digital completo, planeje uma campanha de uma semana e simule do primeiro contato até o fechamento de uma venda no WhatsApp.",
+      "prompt": "Descreva a simulação de venda que você fez: como foi o primeiro contato, como você apresentou o produto, como negociou e como finalizou. O que funcionou bem?",
+      "ordem": 8,
+      "modulo_id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "duracao_min": 10
+    },
+    {
+      "id": "94624342-b9d5-4e76-9345-cd1433fe3699",
+      "titulo": "Cidadania digital, ética, segurança e proteção de dados",
+      "conteudo": "<div class=\"aula-conteudo\"><h2>Cidadania digital</h2><p>Cidadania digital é usar a internet com ética. A LGPD protege seus dados. Nunca compartilhe senhas ou códigos SMS.</p><h3>Golpes</h3><ul><li>Phishing: mensagem falsa pedindo dados</li><li>Perfil falso: alguém pedindo dinheiro</li><li>Falso prêmio: exige pagamento prévio</li></ul><h3>Proteção</h3><ol><li>Senhas fortes com letras, números e símbolos</li><li>Senhas diferentes por conta</li><li>Verificação em duas etapas</li><li>Apps atualizados</li></ol></div>",
+      "prompt": "Descreva uma situação do cotidiano em que a segurança digital é importante para você ou para alguém que você conhece. O que pode ser feito para se proteger?",
+      "ordem": 1,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "e4f6389f-fe7a-48d8-915e-e1da83ce339c",
+      "titulo": "Computador, periféricos, teclado e sistema operacional",
+      "conteudo": "<div class=\"aula-conteudo\"><h2>Computador, periféricos e sistema operacional</h2><p>O computador tem <strong>hardware</strong> (partes físicas: monitor, teclado, mouse, CPU) e <strong>software</strong> (programas). O <strong>sistema operacional</strong> (Windows, macOS, Linux) controla tudo.</p><h3>Atalhos essenciais</h3><ul><li>Ctrl+C / Ctrl+V — copiar / colar</li><li>Ctrl+Z — desfazer</li><li>Ctrl+S — salvar</li><li>Ctrl+A — selecionar tudo</li><li>Ctrl+P — imprimir</li><li>Alt+F4 — fechar programa</li></ul><h3>Cuidados</h3><ol><li>Desligue pelo menu Iniciar (nunca puxe o cabo)</li><li>Antivírus ativo e atualizado</li><li>Não instale programas desconhecidos</li></ol></div>",
+      "prompt": "Liste três atalhos de teclado que você aprendeu hoje e descreva para que serve cada um deles.",
+      "ordem": 2,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "5758190b-e07b-4684-b85c-439394d31b52",
+      "titulo": "Pastas, arquivos, nuvem e dispositivos removíveis",
+      "conteudo": "<div class=\"aula-conteudo\"><h2>Pastas, arquivos, nuvem e dispositivos removíveis</h2><p>Arquivos têm extensões que indicam seu tipo: <strong>.docx</strong> (texto), <strong>.xlsx</strong> (planilha), <strong>.pdf</strong> (portátil), <strong>.jpg/.png</strong> (imagem).</p><h3>Organização</h3><p>Use nomes descritivos (<em>Curriculo_Maria_2024.docx</em>, não <em>doc1.docx</em>). Crie pastas: Documentos → Pessoal / Trabalho / Cursos.</p><h3>Nuvem</h3><ul><li><strong>Google Drive:</strong> 15 GB gratuitos</li><li><strong>OneDrive:</strong> 5 GB, integrado ao Windows</li></ul><h3>Pen drive</h3><ol><li>Sempre ejete antes de retirar (botão direito → Ejetar)</li><li>Faça backup — pen drives podem falhar</li><li>Desconfie de pen drives desconhecidos (vírus)</li></ol></div>",
+      "prompt": "Como você vai organizar os seus arquivos pessoais e profissionais a partir de hoje? Descreva sua estratégia de pastas.",
+      "ordem": 3,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "e9aadd39-1fe8-4c30-b1aa-a8f080bb5226",
+      "titulo": "Internet, pesquisa e avaliação de fontes",
+      "conteudo": "<div class=\"aula-conteudo\"><h2>Internet, pesquisa e avaliação de fontes</h2><p>Sites seguros têm <strong>https://</strong> e cadeado 🔒 na barra de endereços. Sem cadeado, evite inserir dados pessoais.</p><h3>Pesquisa eficiente</h3><ul><li>Use aspas para frase exata: \"emprego Suzano 2024\"</li><li>Use − para excluir: bolo −chocolate</li><li>Use site: para buscar dentro de um site: MEI site:gov.br</li></ul><h3>Avalie fontes</h3><ol><li>Quem publicou? (governo, universidade ou anônimo?)</li><li>Quando? (ainda é atual?)</li><li>Outras fontes confirmam?</li><li>Tem autor e referências citadas?</li></ol><p>Antes de compartilhar, verifique em: <em>Agência Lupa</em>, <em>Aos Fatos</em> ou <em>G1 Fato ou Fake</em>.</p></div>",
+      "prompt": "Pesquise um tema relacionado ao seu trabalho ou área de interesse. Explique quais fontes você consultou e como avaliou a confiabilidade delas.",
+      "ordem": 4,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "06a1766c-a5b7-4aef-93d9-b9a09477a522",
+      "titulo": "E-mail profissional e envio de documentos",
+      "conteudo": "<div class=\"aula-conteudo\"><h2>E-mail profissional e envio de documentos</h2><p>Use endereço profissional: <em>nome.sobrenome@gmail.com</em>. Evite apelidos ou datas de nascimento no e-mail.</p><h3>Estrutura do e-mail formal</h3><ul><li><strong>Assunto:</strong> claro e específico (ex: Candidatura – Auxiliar Administrativo)</li><li><strong>Saudação:</strong> \"Prezado(a) senhor(a),\"</li><li><strong>Corpo:</strong> objetivo e sem erros</li><li><strong>Encerramento:</strong> \"Atenciosamente,\" + nome + telefone</li></ul><h3>Anexos</h3><ol><li>Envie documentos em PDF (não se desformatam)</li><li>Nomeie claramente: <em>Curriculo_NomeSobrenome.pdf</em></li><li>Gmail aceita até 25 MB por e-mail</li></ol><h3>Organização</h3><p>Use pastas/etiquetas para separar Trabalho, Cursos e Pessoal. Verifique a pasta Spam regularmente.</p></div>",
+      "prompt": "Escreva um e-mail fictício para uma empresa solicitando informações sobre uma vaga de emprego. Use linguagem profissional e inclua todos os elementos de uma mensagem formal.",
+      "ordem": 5,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "03dfdf4b-9e2b-4cab-980b-42fa8e2e1758",
+      "titulo": "Digitalização, PDF e organização documental",
+      "conteudo": "Documentos físicos precisam existir no mundo digital. Aprenda a fotografar ou digitalizar documentos com qualidade, converter para PDF e nomeá-los corretamente para envio.",
+      "prompt": "Descreva passo a passo como você digitalizaria um documento importante (ex: RG, comprovante de residência) e o enviaria por e-mail de forma segura.",
+      "ordem": 6,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "0a5c91af-d011-470c-8a7b-9d69fa060bb1",
+      "titulo": "Serviços públicos digitais e cadastros",
+      "conteudo": "Gov.br, INSS, CTPS digital, Bolsa Família, MEI — quase tudo já tem acesso digital. Explore os principais portais, faça simulações de cadastro e entenda como acessar benefícios on-line.",
+      "prompt": "Escolha um serviço público digital que seja relevante para você. Descreva como acessá-lo e quais documentos são necessários para se cadastrar.",
+      "ordem": 7,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    },
+    {
+      "id": "6f1f070e-ac20-495a-a615-8789104f112a",
+      "titulo": "Produto: e-mail profissional, documento em PDF e atendimento simulado",
+      "conteudo": "É hora de integrar tudo o que você aprendeu no Módulo 1. Nesta atividade final você vai criar seu e-mail profissional, digitalizar um documento e simular um atendimento em um portal de serviço digital.",
+      "prompt": "Descreva o que você produziu nesta atividade: seu novo e-mail, o documento que digitalizou e como foi a experiência do atendimento simulado. O que você faria diferente?",
+      "ordem": 8,
+      "modulo_id": "dee7c884-9336-4234-acce-a46089221f13",
+      "duracao_min": 10
+    }
+  ],
+  "modulos": [
+    {
+      "id": "94bf98c9-328d-4e62-ab34-c754562bac30",
+      "titulo": "Inclusão Digital e Serviços Básicos",
+      "ordem": 1,
+      "curso_id": "a1b2c3d4-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "a402d093-74e9-4087-ba63-bbe1feead704",
+      "titulo": "Produtividade e Apoio Administrativo",
+      "ordem": 2,
+      "curso_id": "a1b2c3d4-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "f5c5a354-241d-4ee4-9034-a2b989a00056",
+      "titulo": "Design e Conteúdo Digital",
+      "ordem": 3,
+      "curso_id": "a1b2c3d4-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "14232ddc-9486-4f45-9fc3-3dfaacb26f2f",
+      "titulo": "Vendas, Divulgação e Atendimento Digital",
+      "ordem": 4,
+      "curso_id": "a1b2c3d4-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "71a9de33-d731-46b1-b3dc-6a35e5670201",
+      "titulo": "Empreendedorismo, Portfólio e Inserção Produtiva",
+      "ordem": 5,
+      "curso_id": "a1b2c3d4-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "dee7c884-9336-4234-acce-a46089221f13",
+      "titulo": "Inclusão Digital e Serviços Básicos",
+      "ordem": 1,
+      "curso_id": "d15305f8-ae11-4528-8a34-43834b860a68"
+    },
+    {
+      "id": "2408338a-92a0-4100-83a7-6c0c0f7816c7",
+      "titulo": "Produtividade e Apoio Administrativo",
+      "ordem": 2,
+      "curso_id": "d15305f8-ae11-4528-8a34-43834b860a68"
+    },
+    {
+      "id": "8d3bb0a3-4ac3-4da4-b304-0ea3903133e5",
+      "titulo": "Design e Conteúdo Digital",
+      "ordem": 3,
+      "curso_id": "d15305f8-ae11-4528-8a34-43834b860a68"
+    },
+    {
+      "id": "c5011007-43f6-4b4c-a912-dbe8a64ef3f2",
+      "titulo": "Vendas, Divulgação e Atendimento Digital",
+      "ordem": 4,
+      "curso_id": "d15305f8-ae11-4528-8a34-43834b860a68"
+    },
+    {
+      "id": "9580287a-2154-4cb6-8a71-439d691094bf",
+      "titulo": "Empreendedorismo, Portfólio e Inserção Produtiva",
+      "ordem": 5,
+      "curso_id": "d15305f8-ae11-4528-8a34-43834b860a68"
+    }
+  ]
+}
