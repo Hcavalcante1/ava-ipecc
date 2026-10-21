@@ -856,9 +856,13 @@ async function renderAtividades() {
       return `<section class="panel"><h2>${esc(c.titulo)}</h2>
         ${aulasC.length ? aulasC.map(a => {
           const st = entregaMap[`${m.id}:${a.id}`];
+          const done = st==='enviada'||st==='avaliada';
+          const statusIcon = done
+            ? `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+            : `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
           return `<div class="row">
-            <div><strong style="font-size:14px">${esc(a.titulo)}</strong>
-            <p class="muted">${st==='enviada'?'Enviada ✓':st==='avaliada'?'Avaliada ✓':'Pendente'}</p></div>
+            <div style="display:flex;align-items:center;gap:10px">${statusIcon}<div><strong style="font-size:14px">${esc(a.titulo)}</strong>
+            <p class="muted">${st==='enviada'?'Enviada':st==='avaliada'?'Avaliada':'Pendente'}</p></div></div>
             <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}/${encodeURIComponent(a.id)}">Abrir →</a>
           </div>`;
         }).join('') : '<p class="muted">Nenhuma atividade publicada.</p>'}
@@ -908,14 +912,20 @@ async function renderCertificados() {
     const minimo = curso.pct_minimo||70;
     const elegivel = pct >= minimo;
 
+    const medalIcon = `<div style="width:48px;height:48px;border-radius:50%;background:var(--green-light);color:var(--green);display:grid;place-items:center;flex-shrink:0">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+    </div>`;
     if (cert) {
       const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
       const link = `${baseUrl}#validar/${cert.codigo}`;
       return `<div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-        <div>
-          <div class="eyebrow" style="margin-bottom:4px">CERTIFICADO EMITIDO</div>
-          <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
-          <p class="muted" style="margin-top:4px;font-size:13px">${cert.carga_horas||curso.carga_horas||0}h · emitido em ${dt}</p>
+        <div style="display:flex;align-items:center;gap:16px">
+          ${medalIcon}
+          <div>
+            <div class="eyebrow" style="margin-bottom:4px">CERTIFICADO EMITIDO</div>
+            <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
+            <p class="muted" style="margin-top:4px;font-size:13px">${cert.carga_horas||curso.carga_horas||0}h · emitido em ${dt}</p>
+          </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn-secondary" onclick="baixarCertificado('${cert.codigo}')">⬇ Baixar PDF</button>
@@ -924,10 +934,13 @@ async function renderCertificados() {
       </div>`;
     }
     return `<div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-      <div>
-        <div class="eyebrow" style="margin-bottom:4px">${elegivel?'ELEGÍVEL PARA CERTIFICADO':'EM ANDAMENTO'}</div>
-        <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
-        <p class="muted" style="margin-top:4px;font-size:13px">Progresso: ${pct}% (mínimo ${minimo}%)</p>
+      <div style="display:flex;align-items:center;gap:16px">
+        ${medalIcon}
+        <div>
+          <div class="eyebrow" style="margin-bottom:4px">${elegivel?'ELEGÍVEL PARA CERTIFICADO':'EM ANDAMENTO'}</div>
+          <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
+          <p class="muted" style="margin-top:4px;font-size:13px">Progresso: ${pct}% (mínimo ${minimo}%)</p>
+        </div>
       </div>
       ${elegivel ? `<button class="btn-primary" onclick="emitirCertificado('${m.id}','${curso.id}',${curso.carga_horas||0})">🎓 Emitir certificado</button>` : `<span class="tag warn">Conclua ${minimo}% das aulas</span>`}
     </div>`;
