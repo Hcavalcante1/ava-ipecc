@@ -120,6 +120,27 @@ textarea.fi{min-height:85px;resize:vertical}
 
 #toast{position:fixed;bottom:24px;right:24px;background:#193e30;color:#fff;padding:13px 22px;border-radius:9px;font-size:13px;font-weight:500;z-index:99;display:none;box-shadow:0 4px 20px #0004}
 
+/* ── Certificado imprimível ── */
+.cert-wrap{display:none}
+@media print{
+  .shell,.aside,aside,header,footer,.back-link,.btn-primary,.btn-secondary,#toast,.notice{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .cert-wrap{display:block!important;margin:0;padding:0}
+  .cert-page{width:297mm;height:210mm;padding:18mm 22mm;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;border:8px double #17634d}
+  .cert-logo{font-family:'DM Serif Display',Georgia,serif;font-size:28px;font-weight:400;color:#17634d;letter-spacing:1px;margin-bottom:6px}
+  .cert-inst{font-size:10px;letter-spacing:2px;color:#74827d;text-transform:uppercase;margin-bottom:28px}
+  .cert-declara{font-size:13px;color:#555;margin-bottom:10px}
+  .cert-nome{font-family:'DM Serif Display',Georgia,serif;font-size:38px;color:#19352e;margin:8px 0 14px;border-bottom:2px solid #17634d;padding-bottom:10px;width:80%}
+  .cert-curso-label{font-size:11px;color:#74827d;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .cert-curso{font-family:'DM Serif Display',Georgia,serif;font-size:22px;color:#19352e;margin-bottom:6px}
+  .cert-carga{font-size:13px;color:#74827d;margin-bottom:24px}
+  .cert-assinaturas{display:flex;justify-content:center;gap:60px;margin-top:20px;width:80%}
+  .cert-assinatura{text-align:center;border-top:1px solid #aaa;padding-top:8px;min-width:140px;font-size:11px;color:#555}
+  .cert-footer{position:absolute;bottom:14mm;font-size:9px;color:#aaa;letter-spacing:.5px}
+  .cert-qr{position:absolute;bottom:16mm;right:22mm}
+  .cert-data{font-size:11px;color:#74827d;margin-bottom:20px}
+}
+
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-center{display:flex;justify-content:center;padding:48px;color:var(--muted)}
@@ -151,6 +172,7 @@ textarea.fi{min-height:85px;resize:vertical}
   .hero h2{font-size:24px}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <aside>
   <a class="brand" href="#inicio">
@@ -394,12 +416,20 @@ const isAdmin = () => userPerfil?.papel === 'admin';
 const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel);
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',certificados:'Certificados',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',certificados:'Certificados',gestao:'Cursos e turmas',relatorios:'Relatórios',curso:'Sala de aprendizagem',validar:'Validar Certificado'};
 
 async function render() {
-  if (!currentUser) return;
   const parts = location.hash.slice(1).split('/').map(p=>{try{return decodeURIComponent(p);}catch{return '';}});
   const view = parts[0] || 'inicio';
+  // rota pública — não exige login
+  if (view === 'validar') {
+    $('#crumb').textContent = 'Validar Certificado';
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    $('#main').innerHTML = loading();
+    try { await renderValidar(parts[1]); } catch(err) { $('#main').innerHTML=`<p>${esc(err.message)}</p>`; }
+    return;
+  }
+  if (!currentUser) return;
   $('#crumb').textContent = LABELS[view] || 'Visão geral';
   document.querySelectorAll('nav a').forEach(a => {
     const h = a.getAttribute('href').slice(1);
@@ -411,6 +441,7 @@ async function render() {
     else if (view === 'cursos') await renderCursos();
     else if (view === 'atividades') await renderAtividades();
     else if (view === 'certificados') await renderCertificados();
+    else if (view === 'validar') await renderValidar(parts[1]);
     else if (view === 'gestao') await renderGestao();
     else if (view === 'relatorios') await renderRelatorios();
     else await renderDashboard();
@@ -672,6 +703,25 @@ async function renderCurso(cursoId, aulaId) {
           concluida: true, concluida_em: new Date().toISOString()
         }, {onConflict:'matricula_id,aula_id'});
         toast('Atividade concluída ✓');
+        // verifica elegibilidade para certificado
+        if (matriculaId) {
+          const [{data: progresso}, {data: turmaInfo}] = await Promise.all([
+            supa.from('ava_progresso').select('id',{count:'exact'}).eq('matricula_id',matriculaId).eq('concluida',true),
+            supa.from('ava_matriculas').select('ava_turmas(ava_cursos(id,carga_horas,pct_minimo))').eq('id',matriculaId).single()
+          ]);
+          const cursoInfo = turmaInfo?.ava_turmas?.ava_cursos;
+          if (cursoInfo) {
+            const {count: totalAulas} = await supa.from('ava_aulas').select('id',{count:'exact',head:true}).eq('publicada',true);
+            const pct = totalAulas ? Math.round((progresso?.length||0)/totalAulas*100) : 0;
+            if (pct >= (cursoInfo.pct_minimo||70)) {
+              const {data: certExiste} = await supa.from('ava_certificados').select('id').eq('matricula_id',matriculaId).maybeSingle();
+              if (!certExiste) {
+                await supa.from('ava_certificados').insert({matricula_id:matriculaId,tipo:'conclusao',carga_horas:cursoInfo.carga_horas||0});
+                toast('🎓 Parabéns! Certificado emitido automaticamente!');
+              }
+            }
+          }
+        }
         await renderCurso(cursoId, aulaIdBtn);
       } else {
         toast('Rascunho salvo.'); btn.disabled=false;
@@ -723,20 +773,181 @@ async function renderAtividades() {
 
 // ── Certificados ──────────────────────────────────────────────────
 async function renderCertificados() {
-  const {data: certs} = currentUser ? await supa.from('ava_certificados').select('*,ava_matriculas(ava_turmas(nome,ava_cursos(titulo)))').eq('ava_matriculas.aluno_id', currentUser.id) : {data:[]};
+  if (!currentUser) return;
+
+  // busca certificados do aluno via matriculas
+  const {data: matriculas} = await supa.from('ava_matriculas')
+    .select('id,ava_turmas(nome,ava_cursos(id,titulo,carga_horas,pct_minimo))')
+    .eq('aluno_id', currentUser.id).eq('status','ativa');
+
+  const mids = (matriculas||[]).map(m=>m.id);
+  const {data: certs} = mids.length
+    ? await supa.from('ava_certificados').select('id,codigo,emitido_em,carga_horas,matricula_id').in('matricula_id', mids)
+    : {data:[]};
+
+  const certByMat = Object.fromEntries((certs||[]).map(c=>[c.matricula_id, c]));
+
+  // verifica progresso para cada matrícula
+  const progRows = mids.length ? (await supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id',mids)).data||[] : [];
+  const progByMat = {};
+  progRows.forEach(p => { if (!progByMat[p.matricula_id]) progByMat[p.matricula_id]=0; if (p.concluida) progByMat[p.matricula_id]++; });
+  const aulasTotais = {};
+  for (const m of (matriculas||[])) {
+    const cid = m.ava_turmas?.ava_cursos?.id;
+    if (cid && aulasTotais[cid]===undefined) {
+      const {count} = await supa.from('ava_aulas').select('id',{count:'exact',head:true})
+        .eq('publicada',true).eq('ava_modulos.curso_id', cid);
+      aulasTotais[cid] = count||0;
+    }
+  }
+
+  const baseUrl = location.origin + location.pathname;
+
+  const cards = (matriculas||[]).map(m => {
+    const curso = m.ava_turmas?.ava_cursos;
+    if (!curso) return '';
+    const cert = certByMat[m.id];
+    const concl = progByMat[m.id]||0;
+    const total = aulasTotais[curso.id]||1;
+    const pct = Math.round(concl/total*100);
+    const minimo = curso.pct_minimo||70;
+    const elegivel = pct >= minimo;
+
+    if (cert) {
+      const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+      const link = `${baseUrl}#validar/${cert.codigo}`;
+      return `<div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+        <div>
+          <div class="eyebrow" style="margin-bottom:4px">CERTIFICADO EMITIDO</div>
+          <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
+          <p class="muted" style="margin-top:4px;font-size:13px">${cert.carga_horas||curso.carga_horas||0}h · emitido em ${dt}</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-secondary" onclick="baixarCertificado('${cert.codigo}')">⬇ Baixar PDF</button>
+          <button class="btn-secondary" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado ✓'))">🔗 Copiar link</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="eyebrow" style="margin-bottom:4px">${elegivel?'ELEGÍVEL PARA CERTIFICADO':'EM ANDAMENTO'}</div>
+        <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:20px">${esc(curso.titulo)}</h2>
+        <p class="muted" style="margin-top:4px;font-size:13px">Progresso: ${pct}% (mínimo ${minimo}%)</p>
+      </div>
+      ${elegivel ? `<button class="btn-primary" onclick="emitirCertificado('${m.id}','${curso.id}',${curso.carga_horas||0})">🎓 Emitir certificado</button>` : `<span class="tag warn">Conclua ${minimo}% das aulas</span>`}
+    </div>`;
+  }).join('');
+
   $('#main').innerHTML = `
     <div class="topline"><div>
       <div class="eyebrow">IPECC · FORMAÇÃO</div>
       <h1 class="page-title">Certificados</h1>
     </div></div>
-    <div class="panel">
-      <span class="tag warn">EMISSÃO AINDA NÃO DISPONÍVEL</span>
-      <h2 style="margin-top:16px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:22px">Certificado de 200 horas presenciais</h2>
-      <p style="margin-top:10px;font-size:14px;line-height:1.7">O TRP exige frequência presencial mínima de 70% e aproveitamento satisfatório. A emissão depende dos registros presenciais e da validação pedagógica.</p>
-      <div style="margin-top:20px">
-        <div class="row"><strong>Frequência presencial</strong><span class="tag warn">Aguardando registro</span></div>
-        <div class="row"><strong>Aproveitamento</strong><span class="tag warn">Aguardando avaliação</span></div>
-        <div class="row"><strong>Certificados emitidos</strong><span class="tag ${(certs?.length||0)>0?'':'warn'}">${certs?.length||0}</span></div>
+    ${cards || '<div class="panel"><p class="muted">Nenhuma matrícula ativa encontrada.</p></div>'}`;
+}
+
+async function emitirCertificado(matriculaId, cursoId, cargaHoras) {
+  // verifica se já existe
+  const {data: existe} = await supa.from('ava_certificados').select('id').eq('matricula_id', matriculaId).maybeSingle();
+  if (existe) { toast('Certificado já emitido. Recarregando...'); await renderCertificados(); return; }
+  const {error} = await supa.from('ava_certificados').insert({
+    matricula_id: matriculaId,
+    tipo: 'conclusao',
+    carga_horas: cargaHoras
+  });
+  if (error) { toast('Erro ao emitir: '+error.message, false); return; }
+  toast('Certificado emitido! 🎓');
+  await renderCertificados();
+}
+
+async function baixarCertificado(codigo) {
+  // busca dados completos
+  const {data: cert} = await supa.from('ava_certificados')
+    .select('id,codigo,emitido_em,carga_horas,ava_matriculas(aluno_id,ava_turmas(nome,ava_cursos(titulo,carga_horas)))')
+    .eq('codigo', codigo).single();
+  if (!cert) { toast('Certificado não encontrado.', false); return; }
+  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo').eq('id', cert.ava_matriculas?.aluno_id).single();
+
+  const nome = perfil?.nome_completo || 'Participante';
+  const cursotitulo = cert.ava_matriculas?.ava_turmas?.ava_cursos?.titulo || '';
+  const carga = cert.carga_horas || cert.ava_matriculas?.ava_turmas?.ava_cursos?.carga_horas || 0;
+  const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const validUrl = location.origin + location.pathname + '#validar/' + cert.codigo;
+
+  // injeta certificado imprimível
+  let wrap = document.getElementById('cert-print-area');
+  if (!wrap) { wrap = document.createElement('div'); wrap.id='cert-print-area'; wrap.className='cert-wrap'; document.body.appendChild(wrap); }
+
+  wrap.innerHTML = `<div class="cert-page">
+    <div class="cert-logo">IPECC</div>
+    <div class="cert-inst">Instituto Político de Pesquisa e Capacitação Continuada</div>
+    <div class="cert-declara">Certifica que</div>
+    <div class="cert-nome">${esc(nome)}</div>
+    <div class="cert-curso-label">concluiu com aproveitamento o curso</div>
+    <div class="cert-curso">${esc(cursotitulo)}</div>
+    <div class="cert-carga">Carga horária: ${carga}h</div>
+    <div class="cert-data">Emitido em ${dt}</div>
+    <div class="cert-assinaturas">
+      <div class="cert-assinatura">Coordenação Pedagógica<br>IPECC</div>
+      <div class="cert-assinatura">Direção Geral<br>IPECC</div>
+    </div>
+    <div class="cert-footer">Código de validação: ${cert.codigo} · Verifique em: ${validUrl}</div>
+    <div class="cert-qr" id="cert-qr-box"></div>
+  </div>`;
+
+  // gera QR Code
+  const qrEl = document.getElementById('cert-qr-box');
+  if (window.QRCode && qrEl) {
+    qrEl.innerHTML='';
+    new window.QRCode(qrEl, {text: validUrl, width:80, height:80, colorDark:'#17634d', colorLight:'#ffffff'});
+  }
+
+  setTimeout(() => { window.print(); }, 300);
+}
+
+// ── Validar (pública) ─────────────────────────────────────────────
+async function renderValidar(codigo) {
+  if (!codigo) {
+    $('#main').innerHTML = `<div class="panel"><p class="muted">Código de validação não informado.</p></div>`;
+    return;
+  }
+  const {data: cert} = await supa.from('ava_certificados')
+    .select('id,codigo,emitido_em,carga_horas,ava_matriculas(aluno_id,ava_turmas(nome,ava_cursos(titulo,carga_horas)))')
+    .eq('codigo', codigo).maybeSingle();
+
+  if (!cert) {
+    $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">VALIDAÇÃO</div><h1 class="page-title">Certificado</h1></div></div>
+      <div class="panel" style="text-align:center;padding:48px 24px">
+        <div style="font-size:48px;margin-bottom:16px">❌</div>
+        <h2>Certificado não encontrado</h2>
+        <p class="muted" style="margin-top:8px">O código informado não corresponde a nenhum certificado emitido.</p>
+        <p class="muted" style="margin-top:4px;font-size:12px;word-break:break-all">Código: ${esc(codigo)}</p>
+      </div>`;
+    return;
+  }
+
+  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo').eq('id', cert.ava_matriculas?.aluno_id).single();
+  const nome = perfil?.nome_completo || 'Participante';
+  const cursotitulo = cert.ava_matriculas?.ava_turmas?.ava_cursos?.titulo || '';
+  const carga = cert.carga_horas || cert.ava_matriculas?.ava_turmas?.ava_cursos?.carga_horas || 0;
+  const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  $('#main').innerHTML = `
+    <div class="topline"><div><div class="eyebrow">VALIDAÇÃO DE CERTIFICADO</div><h1 class="page-title">Certificado Autêntico ✓</h1></div></div>
+    <div class="panel" style="max-width:600px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <div style="width:52px;height:52px;background:var(--green-light);border-radius:50%;display:grid;place-items:center;font-size:26px;flex-shrink:0">🎓</div>
+        <div>
+          <div class="eyebrow">CERTIFICADO VÁLIDO</div>
+          <h2 style="font-family:'DM Serif Display',Georgia,serif;font-weight:400;font-size:22px;margin-top:2px">${esc(cursotitulo)}</h2>
+        </div>
+      </div>
+      <div class="row"><strong>Participante</strong><span>${esc(nome)}</span></div>
+      <div class="row"><strong>Carga horária</strong><span>${carga}h</span></div>
+      <div class="row"><strong>Emitido em</strong><span>${dt}</span></div>
+      <div class="row"><strong>Código</strong><span style="font-size:12px;font-family:monospace">${esc(cert.codigo)}</span></div>
+      <div style="margin-top:20px;padding:14px;background:var(--green-light);border-radius:8px;font-size:13px;color:var(--green)">
+        ✓ Este certificado foi emitido pelo IPECC e sua autenticidade foi verificada com sucesso.
       </div>
     </div>`;
 }
