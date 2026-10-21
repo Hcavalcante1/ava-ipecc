@@ -1396,13 +1396,19 @@ document.addEventListener('click', e => {
 $('#course-form').addEventListener('submit', async e => {
   e.preventDefault();
   const f = new FormData(e.target);
-  const {error} = await supa.from('ava_cursos').insert({
+  const {data: novoCurso, error} = await supa.from('ava_cursos').insert({
     titulo: f.get('title').trim(),
     descricao: f.get('description').trim(),
     carga_horas: Number(f.get('hours')),
     tema: f.get('tema')?.trim()||null,
-  });
+  }).select('id').single();
   if (error) { toast(error.message,false); return; }
+  // cria a turma inicial informada no formulário, para que o curso já nasça matriculável
+  const nomeCohort = f.get('cohort')?.trim();
+  if (nomeCohort && novoCurso?.id) {
+    const {error: errTurma} = await supa.from('ava_turmas').insert({curso_id: novoCurso.id, nome: nomeCohort});
+    if (errTurma) toast('Curso criado, mas a turma inicial falhou: '+errTurma.message, false);
+  }
   $('#dlg').close(); e.target.reset();
   toast('Curso criado.');
   render();
