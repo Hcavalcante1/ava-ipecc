@@ -267,6 +267,28 @@ textarea.fi{min-height:85px;resize:vertical}
   </form>
 </dialog>
 
+<dialog id="dlg-usuario">
+  <form id="usuario-form">
+    <div class="dialog-head">
+      <h2>Novo usuário</h2>
+      <button type="button" class="close-btn" aria-label="Fechar">×</button>
+    </div>
+    <p class="muted" style="margin:-4px 0 4px;font-size:13px">A pessoa recebe um e-mail de convite e define a própria senha.</p>
+    <label class="field"><span>Nome</span><input class="fi" name="nome" required maxlength="120"></label>
+    <label class="field"><span>Nome completo (para certificados)</span><input class="fi" name="nome_completo" maxlength="160"></label>
+    <label class="field"><span>E-mail</span><input class="fi" name="email" type="email" required></label>
+    <label class="field"><span>Telefone</span><input class="fi" name="telefone" maxlength="20"></label>
+    <label class="field"><span>Papel</span>
+      <select class="fi" name="papel">
+        <option value="aluno">Aluno</option>
+        <option value="professor">Professor</option>
+        <option value="monitor">Monitor</option>
+      </select>
+    </label>
+    <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:6px" id="btn-criar-usuario">Criar e enviar convite</button>
+  </form>
+</dialog>
+
 <div id="toast"></div>
 
 <script>
@@ -429,7 +451,7 @@ let currentUser = null;
 let userPerfil  = null; // {id, nome, email, papel}
 
 // ── Auth ──────────────────────────────────────────────────────────
-function renderLogin(msg) {
+function renderLogin(msg, ok=false) {
   $('aside').style.display = 'none';
   $('header').style.display = 'none';
   $('.shell').style.marginLeft = '0';
@@ -444,7 +466,7 @@ function renderLogin(msg) {
         <div class="panel">
           <h2 style="margin-bottom:4px">Entrar</h2>
           <p class="muted" style="margin-bottom:20px">Use o e-mail cadastrado pelo IPECC.</p>
-          ${msg?`<p style="color:#b13232;font-size:13px;margin-bottom:12px">${esc(msg)}</p>`:''}
+          ${msg?`<p style="color:${ok?'var(--green)':'#b13232'};font-size:13px;margin-bottom:12px">${esc(msg)}</p>`:''}
           <form id="login-form">
             <label class="field"><span>E-mail</span><input class="fi" type="email" name="email" required autocomplete="username"></label>
             <label class="field"><span>Senha</span><input class="fi" type="password" name="password" required autocomplete="current-password"></label>
@@ -1038,9 +1060,11 @@ async function baixarCertificado(codigo) {
     .select('id,codigo,emitido_em,carga_horas,ava_matriculas(aluno_id,ava_turmas(nome,ava_cursos(titulo,carga_horas)))')
     .eq('codigo', codigo).single();
   if (!cert) { toast('Certificado não encontrado.', false); return; }
-  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo').eq('id', cert.ava_matriculas?.aluno_id).single();
+  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo,nome').eq('id', cert.ava_matriculas?.aluno_id).single();
 
-  const nome = perfil?.nome_completo || 'Participante';
+  // nome_completo é o nome oficial para documentos; cai para o nome de exibição
+  // (sempre preenchido no cadastro) antes do genérico, para nunca emitir certificado anônimo
+  const nome = perfil?.nome_completo || perfil?.nome || 'Participante';
   const cursotitulo = cert.ava_matriculas?.ava_turmas?.ava_cursos?.titulo || '';
   const carga = cert.carga_horas || cert.ava_matriculas?.ava_turmas?.ava_cursos?.carga_horas || 0;
   const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
@@ -1242,7 +1266,8 @@ async function renderGestao() {
     </div>
     <div style="display:flex;gap:10px">
       ${isAdmin()?`<button class="btn-primary" id="btn-novo-curso">+ Curso</button>
-      <button class="btn-secondary" id="btn-nova-matricula">+ Matrícula</button>`:''}
+      <button class="btn-secondary" id="btn-nova-matricula">+ Matrícula</button>
+      <button class="btn-secondary" id="btn-novo-usuario">+ Usuário</button>`:''}
     </div></div>
 
     <div class="panel">
@@ -1292,6 +1317,7 @@ async function renderGestao() {
       sel.innerHTML = (turmas||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.nome)}</option>`).join('');
       $('#dlg-matricula').showModal();
     });
+    $('#btn-novo-usuario')?.addEventListener('click', () => $('#dlg-usuario').showModal());
 
     // ── gestão de trilhas ──
     const {data: trilhas} = await supa.from('ava_trilhas').select('id,titulo,publicada,ordem').order('ordem');
@@ -1463,6 +1489,39 @@ $('#matricula-form').addEventListener('submit', async e => {
   render();
 });
 
+$('#usuario-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const btn = $('#btn-criar-usuario');
+  const original = btn.textContent;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Criando…';
+  try {
+    // cria o usuário no Supabase Auth + perfil correspondente via função do servidor
+    // (usa a service role key, que nunca fica exposta no navegador)
+    const r = await fetch(SUPA_URL + '/functions/v1/ava-criar-usuario', {
+      method: 'POST',
+      headers: supa._headers(),
+      body: JSON.stringify({
+        nome: f.get('nome')?.trim(),
+        nome_completo: f.get('nome_completo')?.trim() || null,
+        email: f.get('email')?.trim(),
+        telefone: f.get('telefone')?.trim() || null,
+        papel: f.get('papel'),
+        redirectTo: location.origin + location.pathname + '#nova-senha'
+      })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || d.error) { toast('Erro: ' + (d.error || 'falha ao criar usuário'), false); return; }
+    $('#dlg-usuario').close(); e.target.reset();
+    toast(d.reenviado ? 'Usuário já existia — perfil sincronizado.' : 'Usuário criado. Convite enviado por e-mail.');
+    render();
+  } catch (err) {
+    toast('Erro: ' + err.message, false);
+  } finally {
+    btn.disabled = false; btn.textContent = original;
+  }
+});
+
 document.addEventListener('submit', async e => {
   if (!e.target.matches('.aula-form')) return;
   e.preventDefault();
@@ -1589,9 +1648,9 @@ async function imprimirComprovante(matriculaId) {
     .select('id,created_at,status,ava_turmas(nome,dia_semana,hora_inicio,hora_fim,vagas,ava_cursos(titulo,carga_horas,descricao))')
     .eq('id', matriculaId).single();
   if (!mat) { toast('Matrícula não encontrada.', false); return; }
-  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo,telefone').eq('id', currentUser.id).single();
+  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo,nome,telefone').eq('id', currentUser.id).single();
 
-  const nome = perfil?.nome_completo || currentUser.email;
+  const nome = perfil?.nome_completo || perfil?.nome || currentUser.email;
   const curso = mat.ava_turmas?.ava_cursos;
   const turma = mat.ava_turmas;
   const dtMat = new Date(mat.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
@@ -1690,7 +1749,12 @@ function renderNovaSenha() {
     const {error} = await supa.auth.updateUser({password: f.get('senha')});
     if (error) { toast('Erro: '+error.message, false); return; }
     toast('Senha redefinida com sucesso!');
-    setTimeout(() => location.hash = 'inicio', 1500);
+    // o token de recuperação não é uma sessão completa (sem refresh_token) — não
+    // persistimos login automático; o usuário volta para a tela de entrar e usa a senha nova
+    _session = null;
+    try { localStorage.removeItem('ava_session'); } catch{}
+    history.replaceState(null, '', location.pathname + location.search);
+    setTimeout(() => renderLogin('Senha redefinida com sucesso. Faça login com sua nova senha.', true), 1200);
   });
 }
 
