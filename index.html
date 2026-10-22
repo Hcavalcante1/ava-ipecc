@@ -485,6 +485,11 @@ function renderLogin(msg, ok=false) {
             <a href="#" id="link-recuperar" style="color:var(--green)">Esqueceu a senha? Fale com o IPECC ou clique aqui.</a>
           </p>
         </div>
+        <p class="muted" style="margin-top:18px;font-size:12px;text-align:center;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+          <a href="#catalogo" style="color:var(--fg-muted,inherit)">Catálogo de cursos</a>
+          <a href="#stats" style="color:var(--fg-muted,inherit)">Estatísticas</a>
+          <a href="#validar" style="color:var(--fg-muted,inherit)">Validar certificado</a>
+        </p>
       </div>
     </div>`;
   document.getElementById('link-recuperar')?.addEventListener('click', e => {
@@ -551,11 +556,11 @@ const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel
 function isRotaPublica() {
   if (location.hash.includes('access_token=') && location.hash.includes('type=recovery')) return true;
   const view = location.hash.slice(1).split('/')[0];
-  return view === 'stats' || view === 'validar' || view === 'nova-senha';
+  return view === 'stats' || view === 'validar' || view === 'nova-senha' || view === 'catalogo';
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -592,6 +597,14 @@ async function render() {
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     $('#main').innerHTML = loading();
     try { await renderStats(); } catch(err) { $('#main').innerHTML=`<p>${esc(err.message)}</p>`; }
+    return;
+  }
+  if (view === 'catalogo') {
+    prepararChromePublico();
+    $('#crumb').textContent = 'Catálogo de Cursos';
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    $('#main').innerHTML = loading();
+    try { await renderCatalogo(); } catch(err) { $('#main').innerHTML=`<p>${esc(err.message)}</p>`; }
     return;
   }
   if (view === 'nova-senha') {
@@ -2020,6 +2033,58 @@ async function imprimirComprovante(matriculaId) {
 }
 
 // ── Estatísticas públicas ─────────────────────────────────────────
+// ── Catálogo público (sem login) ─────────────────────────────────
+async function renderCatalogo() {
+  const [{data: trilhas}, {data: trilhaCursos}, {data: cursos}] = await Promise.all([
+    supa.from('ava_trilhas').select('id,titulo,descricao,ordem').eq('publicada', true).order('ordem'),
+    supa.from('ava_trilha_cursos').select('trilha_id,curso_id,ordem'),
+    supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('ativo', true)
+  ]);
+  const cursoPorId = Object.fromEntries((cursos||[]).map(c=>[c.id, c]));
+  const idsEmTrilha = new Set();
+  const cardCurso = c => `<div class="panel" style="display:flex;flex-direction:column;gap:6px">
+    <h3 style="font-size:15px">${esc(c.titulo)}</h3>
+    ${c.descricao ? `<p class="muted" style="font-size:13px;line-height:1.5">${esc(c.descricao)}</p>` : ''}
+    ${c.carga_horas ? `<span class="tag" style="align-self:flex-start">${esc(String(c.carga_horas))}h</span>` : ''}
+  </div>`;
+
+  const blocosTrilhas = (trilhas||[]).map(t => {
+    const cids = (trilhaCursos||[]).filter(tc=>tc.trilha_id===t.id).sort((a,b)=>(a.ordem||0)-(b.ordem||0)).map(tc=>tc.curso_id);
+    cids.forEach(id=>idsEmTrilha.add(id));
+    const cs = cids.map(id=>cursoPorId[id]).filter(Boolean);
+    if (!cs.length) return '';
+    return `<section style="margin-top:28px">
+      <h2 style="font-size:18px;margin-bottom:2px">${esc(t.titulo)}</h2>
+      ${t.descricao ? `<p class="muted" style="margin-bottom:14px">${esc(t.descricao)}</p>` : '<div style="margin-bottom:14px"></div>'}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+        ${cs.map(cardCurso).join('')}
+      </div>
+    </section>`;
+  }).join('');
+
+  const avulsos = (cursos||[]).filter(c=>!idsEmTrilha.has(c.id));
+  const blocoAvulsos = avulsos.length ? `<section style="margin-top:28px">
+    <h2 style="font-size:18px;margin-bottom:14px">${(trilhas||[]).length ? 'Outros cursos' : 'Cursos disponíveis'}</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+      ${avulsos.map(cardCurso).join('')}
+    </div>
+  </section>` : '';
+
+  const vazio = !(trilhas||[]).length && !(cursos||[]).length;
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · CATÁLOGO</div>
+      <h1 class="page-title">Catálogo de Cursos</h1>
+      <p class="muted">Conheça as trilhas e cursos oferecidos pelo IPECC.</p>
+    </div></div>
+    ${vazio ? '<div class="panel"><p class="muted">Nenhum curso publicado no momento.</p></div>' : blocosTrilhas + blocoAvulsos}
+    ${currentUser ? '' : `<div class="panel" style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <p style="font-size:14px">Já é aluno ou quer saber mais sobre matrícula?</p>
+      <a class="btn-primary" href="${location.pathname}">Acessar plataforma →</a>
+    </div>`}`;
+}
+
 async function renderStats() {
   // matrículas e certificados vêm de uma função agregada no servidor: a RLS
   // dessas tabelas só libera linhas do próprio usuário (ou admin), então uma
@@ -2053,7 +2118,10 @@ async function renderStats() {
     </div>
     ${currentUser ? '' : `<div class="panel" style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
       <p style="font-size:14px">Junte-se à nossa comunidade de aprendizagem.</p>
-      <a class="btn-primary" href="${location.pathname}">Acessar plataforma →</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn-secondary" href="#catalogo">Ver catálogo de cursos</a>
+        <a class="btn-primary" href="${location.pathname}">Acessar plataforma →</a>
+      </div>
     </div>`}`;
 }
 
