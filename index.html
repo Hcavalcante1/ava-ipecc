@@ -1301,7 +1301,7 @@ async function renderTrilha(trilhaId) {
   const cursos = (tc||[]).map(r=>r.ava_cursos).filter(Boolean);
   const rows = cursos.map((c,i) => {
     const mat = matriculasCursos[c.id];
-    return `<div class="row" style="align-items:center">
+    return `<div class="row" style="align-items:center" data-curso-row="${esc(c.id)}">
       <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
         <div style="width:32px;height:32px;border-radius:50%;background:var(--green-light);color:var(--green);font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0">${i+1}</div>
         <div>
@@ -1309,9 +1309,28 @@ async function renderTrilha(trilhaId) {
           <p class="muted" style="font-size:12px">${c.carga_horas||0}h${c.tema?` · ${esc(c.tema)}`:''}</p>
         </div>
       </div>
-      <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}" style="flex-shrink:0">${mat?'Acessar →':'Ver curso →'}</a>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+        <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}">${mat?'Acessar →':'Ver curso →'}</a>
+        ${isAdmin()?`<button class="btn-secondary trilha-remover-curso" data-curso="${esc(c.id)}" title="Remover da trilha" style="color:#b13232">Remover</button>`:''}
+      </div>
     </div>`;
   }).join('');
+
+  let addCursoHTML = '';
+  if (isAdmin()) {
+    const {data: todosCursos} = await supa.from('ava_cursos').select('id,titulo').order('created_at');
+    const idsNaTrilha = new Set(cursos.map(c=>c.id));
+    const disponiveis = (todosCursos||[]).filter(c=>!idsNaTrilha.has(c.id));
+    addCursoHTML = `<div class="panel" style="margin-top:16px">
+      <form id="trilha-add-curso" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <label class="field" style="flex:1;min-width:200px"><span>Adicionar curso a esta trilha</span>
+          <select class="fi" name="curso_id" ${disponiveis.length?'':'disabled'}>
+            ${disponiveis.length ? disponiveis.map(c=>`<option value="${esc(c.id)}">${esc(c.titulo)}</option>`).join('') : '<option value="">Todos os cursos já estão nesta trilha</option>'}
+          </select></label>
+        <button type="submit" class="btn-secondary" ${disponiveis.length?'':'disabled'}>Adicionar</button>
+      </form>
+    </div>`;
+  }
 
   $('#main').innerHTML = `
     <div class="topline"><div>
@@ -1322,7 +1341,30 @@ async function renderTrilha(trilhaId) {
     </div></div>
     <div class="panel">
       ${rows||'<p class="muted">Nenhum curso nesta trilha ainda.</p>'}
-    </div>`;
+    </div>
+    ${addCursoHTML}`;
+
+  if (isAdmin()) {
+    $('#main').querySelectorAll('.trilha-remover-curso').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Remover este curso da trilha?')) return;
+        btn.disabled = true;
+        const {error} = await supa.from('ava_trilha_cursos').delete().eq('trilha_id', trilhaId).eq('curso_id', btn.dataset.curso);
+        if (error) { toast('Erro: '+error.message, false); btn.disabled = false; return; }
+        toast('Curso removido da trilha.');
+        await renderTrilha(trilhaId);
+      });
+    });
+    $('#trilha-add-curso')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const cid = new FormData(e.target).get('curso_id');
+      if (!cid) return;
+      const {error} = await supa.from('ava_trilha_cursos').insert({trilha_id: trilhaId, curso_id: cid, ordem: cursos.length});
+      if (error) { toast('Erro: '+error.message, false); return; }
+      toast('Curso adicionado à trilha.');
+      await renderTrilha(trilhaId);
+    });
+  }
 }
 
 // ── Gestão ────────────────────────────────────────────────────────
@@ -1423,10 +1465,11 @@ async function renderGestao() {
         <h2 style="font-size:20px;font-family:'DM Serif Display',Georgia,serif;font-weight:400;display:flex;align-items:center;gap:10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--green);flex-shrink:0"><path d="M4 19V5a2 2 0 0 1 2-2h8.5L20 7.5V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg>Trilhas de Aprendizagem</h2>
       </div></div>
       <div class="panel" style="margin-bottom:16px">
-        ${(trilhas||[]).length ? (trilhas||[]).map(t=>`<div class="row">
+        ${(trilhas||[]).length ? (trilhas||[]).map(t=>`<div class="row" data-trilha="${esc(t.id)}">
           <span>${esc(t.titulo)}</span>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="tag ${t.publicada?'':'warn'}">${t.publicada?'Publicada':'Rascunho'}</span>
+            <button class="btn-secondary trilha-toggle-pub" data-publicada="${t.publicada?'1':'0'}">${t.publicada?'Despublicar':'Publicar'}</button>
             <a class="btn-secondary" href="#trilha/${t.id}">Ver</a>
           </div>
         </div>`).join('') : '<p class="muted">Nenhuma trilha criada.</p>'}
@@ -1450,6 +1493,18 @@ async function renderGestao() {
         </form>
       </details>`;
     $('#main').appendChild(trilhaSection);
+
+    trilhaSection.querySelectorAll('.trilha-toggle-pub').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const trilhaId = btn.closest('[data-trilha]').dataset.trilha;
+        const novaPublicada = btn.dataset.publicada !== '1';
+        btn.disabled = true;
+        const {error} = await supa.from('ava_trilhas').update({publicada: novaPublicada}).eq('id', trilhaId);
+        if (error) { toast('Erro: '+error.message, false); btn.disabled = false; return; }
+        toast(novaPublicada ? 'Trilha publicada.' : 'Trilha despublicada.');
+        await renderGestao();
+      });
+    });
 
     document.getElementById('trilha-form')?.addEventListener('submit', async e => {
       e.preventDefault();
