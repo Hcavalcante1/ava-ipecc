@@ -877,8 +877,10 @@ async function renderCurso(cursoId, aulaId) {
             if (pct >= (cursoInfo.pct_minimo||70)) {
               const {data: certExiste} = await supa.from('ava_certificados').select('id').eq('matricula_id',matriculaId).maybeSingle();
               if (!certExiste) {
-                await supa.from('ava_certificados').insert({matricula_id:matriculaId,tipo:'conclusao',carga_horas:cursoInfo.carga_horas||0});
-                toast('Parabéns! Certificado emitido automaticamente.');
+                // emissão via função do servidor (RLS não permite insert direto do aluno
+                // nesta tabela); o toast de sucesso só é mostrado se a emissão de fato ocorreu
+                const {error: errCert} = await supa.rpc('ava_emitir_certificado', {p_matricula_id: matriculaId});
+                if (!errCert) toast('Parabéns! Certificado emitido automaticamente.');
               }
             }
           }
@@ -1621,16 +1623,20 @@ async function imprimirComprovante(matriculaId) {
 
 // ── Estatísticas públicas ─────────────────────────────────────────
 async function renderStats() {
-  const [{data: cursos}, {data: mats}, {data: certs}, {data: aulas}] = await Promise.all([
+  // matrículas e certificados vêm de uma função agregada no servidor: a RLS
+  // dessas tabelas só libera linhas do próprio usuário (ou admin), então uma
+  // leitura direta do cliente mostraria sempre zero para qualquer visitante
+  // público ou aluno comum nesta página — que é justamente a de transparência
+  const [{data: cursos}, {data: statsPub}, {data: aulas}] = await Promise.all([
     supa.from('ava_cursos').select('id,titulo,carga_horas').eq('ativo', true),
-    supa.from('ava_matriculas').select('id,status'),
-    supa.from('ava_certificados').select('id'),
+    supa.rpc('ava_stats_publicas'),
     supa.from('ava_aulas').select('id').eq('publicada', true)
   ]);
+  const statsRow = Array.isArray(statsPub) ? statsPub[0] : statsPub;
 
   const totalCursos   = cursos?.length || 0;
-  const totalMats     = (mats||[]).filter(m=>m.status==='ativa').length;
-  const totalCerts    = certs?.length || 0;
+  const totalMats     = statsRow?.total_matriculas_ativas || 0;
+  const totalCerts    = statsRow?.total_certificados || 0;
   const totalAulas    = aulas?.length || 0;
   const totalHoras    = (cursos||[]).reduce((s,c)=>s+(c.carga_horas||0),0);
 
