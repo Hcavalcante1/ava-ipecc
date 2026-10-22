@@ -205,12 +205,12 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
       <span>Certificados</span>
     </a>
-    <div class="nav-label">Gestão</div>
-    <a href="#gestao">
+    <div class="nav-label" id="nav-label-gestao" style="display:none">Gestão</div>
+    <a href="#gestao" id="nav-link-gestao" style="display:none">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       <span>Cursos e turmas</span>
     </a>
-    <a href="#relatorios">
+    <a href="#relatorios" id="nav-link-relatorios" style="display:none">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span>Relatórios</span>
     </a>
@@ -595,6 +595,19 @@ async function render() {
     return;
   }
   if (!currentUser) return;
+  // nav de Gestão (Cursos e turmas / Relatórios) só aparece para quem tem
+  // acesso de fato — para um aluno comum esses itens eram sempre visíveis,
+  // mesmo sem nenhuma ação disponível ao entrar neles
+  const navGestaoVisivel = isStaff();
+  const dGestao = navGestaoVisivel ? '' : 'none';
+  $('#nav-label-gestao').style.display = dGestao;
+  $('#nav-link-gestao').style.display = navGestaoVisivel ? 'flex' : 'none';
+  $('#nav-link-relatorios').style.display = navGestaoVisivel ? 'flex' : 'none';
+  if ((view === 'gestao' || view === 'relatorios') && !navGestaoVisivel) {
+    toast('Você não tem acesso a essa área.', false);
+    location.hash = 'inicio';
+    return;
+  }
   $('#crumb').textContent = LABELS[view] || 'Visão geral';
   document.querySelectorAll('nav a').forEach(a => {
     const h = a.getAttribute('href').slice(1);
