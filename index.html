@@ -864,7 +864,7 @@ async function renderCurso(cursoId, aulaId) {
   // materiais de apoio
   let materiais = [];
   if (aula) {
-    const {data:mats} = await supa.from('ava_materiais').select('id,nome,url,tipo').eq('aula_id', aula.id);
+    const {data:mats} = await supa.from('ava_materiais').select('id,titulo,url,tipo').eq('aula_id', aula.id);
     materiais = mats || [];
   }
 
@@ -891,8 +891,15 @@ async function renderCurso(cursoId, aulaId) {
           <p style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Materiais de apoio</p>
           ${materiais.map(mat=>`<a href="${esc(mat.url)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px;font-size:13px;color:var(--green)">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            ${esc(mat.nome)}</a>`).join('')}
+            ${esc(mat.titulo)}</a>`).join('')}
         </div>` : ''}
+        ${aula && isAdmin() ? `<details style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--green);text-transform:uppercase">+ Adicionar material de apoio</summary>
+          <form class="material-form" data-aula="${esc(aula.id)}" style="margin-top:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <label class="field" style="flex:1;min-width:160px"><span>Título</span><input class="fi" name="titulo" required maxlength="150"></label>
+            <label class="field" style="flex:2;min-width:220px"><span>URL</span><input class="fi" name="url" type="url" required placeholder="https://..."></label>
+            <button type="submit" class="btn-secondary">Adicionar</button>
+          </form>
+        </details>` : ''}
         ${aula?.prompt ? `<div class="panel" style="background:var(--bg);border:0;margin-top:16px">
           <strong style="font-size:14px">Pratique e registre</strong>
           <p class="muted" style="margin:6px 0 10px">${esc(aula.prompt)}</p>
@@ -1813,6 +1820,21 @@ $('#usuario-form')?.addEventListener('submit', async e => {
 });
 
 document.addEventListener('submit', async e => {
+  if (e.target.matches('.material-form')) {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await supa.from('ava_materiais').insert({
+      aula_id: e.target.dataset.aula,
+      titulo: f.get('titulo').trim(),
+      url: f.get('url').trim(),
+      tipo: 'link',
+      ordem: 0
+    });
+    if (error) { toast(error.message,false); return; }
+    toast('Material adicionado.');
+    render();
+    return;
+  }
   if (e.target.matches('.turma-form')) {
     e.preventDefault();
     const f = new FormData(e.target);
