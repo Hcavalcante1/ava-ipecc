@@ -1343,10 +1343,22 @@ async function renderGestao() {
     <div class="panel">
       <div class="section-header"><h2 style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>${esc(c.titulo)}</h2><a href="#curso/${encodeURIComponent(c.id)}" class="btn-secondary">Abrir →</a></div>
       <p class="muted">${c.carga_horas}h presenciais</p>
-      ${isAdmin()?`<details style="margin-top:16px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Adicionar aula/atividade</summary>
+      ${isAdmin()?`<details style="margin-top:16px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Nova turma</summary>
+      <form class="turma-form" data-curso="${esc(c.id)}" style="margin-top:14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <label class="field" style="flex:1;min-width:160px"><span>Nome da turma</span><input class="fi" name="nome" required maxlength="100"></label>
+        <label class="field" style="width:120px"><span>Vagas</span><input class="fi" name="vagas" type="number" value="20" min="1"></label>
+        <button type="submit" class="btn-secondary">Criar turma</button>
+      </form></details>
+      <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Novo módulo</summary>
+      <form class="modulo-form" data-curso="${esc(c.id)}" style="margin-top:14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <label class="field" style="flex:1;min-width:180px"><span>Título do módulo</span><input class="fi" name="titulo" required maxlength="150"></label>
+        <label class="field" style="width:90px"><span>Ordem</span><input class="fi" name="ordem" type="number" value="0" min="0"></label>
+        <button type="submit" class="btn-secondary">Criar módulo</button>
+      </form></details>
+      <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--green)">+ Adicionar aula/atividade</summary>
       <form class="aula-form" data-curso="${esc(c.id)}" style="margin-top:14px">
         <label class="field"><span>Módulo</span>
-          <select class="fi" name="modulo_id" data-curso="${esc(c.id)}">
+          <select class="fi" name="modulo_id" data-curso="${esc(c.id)}" required>
             <option value="">Carregando…</option>
           </select></label>
         <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="100"></label>
@@ -1363,7 +1375,10 @@ async function renderGestao() {
     document.querySelectorAll('select[data-curso]').forEach(sel => {
       const cid = sel.dataset.curso;
       const opts = (mods||[]).filter(m=>m.curso_id===cid);
-      sel.innerHTML = opts.map(m=>`<option value="${esc(m.id)}">${esc(m.titulo)}</option>`).join('') || '<option value="">Sem módulos</option>';
+      sel.innerHTML = opts.map(m=>`<option value="${esc(m.id)}">${esc(m.titulo)}</option>`).join('') || '<option value="" disabled selected>Crie um módulo primeiro ↑</option>';
+      sel.disabled = !opts.length;
+      const btn = sel.closest('form')?.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = !opts.length;
     });
 
     $('#btn-novo-curso')?.addEventListener('click', () => $('#dlg').showModal());
@@ -1494,7 +1509,7 @@ async function renderRelatorios() {
     </div>`;
 
   $('#export-csv')?.addEventListener('click', () => {
-    const cell = v => '"'+String(v).replace(/^[=+@\-]/,"'$&").replace(/"/,'""')+'"';
+    const cell = v => '"'+String(v).replace(/^[=+@\-]/,"'$&").replace(/"/g,'""')+'"';
     const rows = [['Turma','Status da matrícula','Ativ.Concluídas'],
       ...(mats||[]).map(m=>[m.ava_turmas?.nome||m.turma_id, m.status, progMap[m.id]?.ok||0])];
     const blob = new Blob(['﻿'+rows.map(r=>r.map(cell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
@@ -1578,9 +1593,36 @@ $('#usuario-form')?.addEventListener('submit', async e => {
 });
 
 document.addEventListener('submit', async e => {
+  if (e.target.matches('.turma-form')) {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await supa.from('ava_turmas').insert({
+      curso_id: e.target.dataset.curso,
+      nome: f.get('nome').trim(),
+      vagas: Number(f.get('vagas')||20)
+    });
+    if (error) { toast(error.message,false); return; }
+    toast('Turma criada.');
+    render();
+    return;
+  }
+  if (e.target.matches('.modulo-form')) {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await supa.from('ava_modulos').insert({
+      curso_id: e.target.dataset.curso,
+      titulo: f.get('titulo').trim(),
+      ordem: Number(f.get('ordem')||0)
+    });
+    if (error) { toast(error.message,false); return; }
+    toast('Módulo criado.');
+    render();
+    return;
+  }
   if (!e.target.matches('.aula-form')) return;
   e.preventDefault();
   const f = new FormData(e.target);
+  if (!f.get('modulo_id')) { toast('Crie um módulo antes de adicionar a aula.', false); return; }
   const {error} = await supa.from('ava_aulas').insert({
     modulo_id: f.get('modulo_id'),
     titulo: f.get('titulo').trim(),
