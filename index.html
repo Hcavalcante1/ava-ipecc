@@ -218,6 +218,10 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Correções</span>
     </a>
+    <a href="#usuarios" id="nav-link-usuarios" style="display:none">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Usuários</span>
+    </a>
   </nav>
   <div class="aside-footer">
     <a href="#perfil" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--muted);font-size:13px;font-weight:500">
@@ -514,6 +518,14 @@ supa.auth.onAuthStateChange(async (_event, session) => {
   if (session?.user) {
     currentUser = session.user;
     await loadPerfil(session.user.id);
+    // conta desativada por um admin (campo ava_perfis.ativo) — antes esse campo
+    // não tinha nenhum efeito real, era só um rótulo na UI; agora barra o acesso
+    if (userPerfil && userPerfil.ativo === false) {
+      await supa.auth.signOut();
+      currentUser = null; userPerfil = null;
+      renderLogin('Sua conta foi desativada. Entre em contato com a coordenação.');
+      return;
+    }
     $('aside').style.display = '';
     $('header').style.display = '';
     $('.shell').style.marginLeft = '';
@@ -543,7 +555,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -608,7 +620,13 @@ async function render() {
   $('#nav-link-gestao').style.display = navGestaoVisivel ? 'flex' : 'none';
   $('#nav-link-relatorios').style.display = navGestaoVisivel ? 'flex' : 'none';
   $('#nav-link-correcoes').style.display = navGestaoVisivel ? 'flex' : 'none';
+  $('#nav-link-usuarios').style.display = isAdmin() ? 'flex' : 'none';
   if ((view === 'gestao' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
+    toast('Você não tem acesso a essa área.', false);
+    location.hash = 'inicio';
+    return;
+  }
+  if (view === 'usuarios' && !isAdmin()) {
     toast('Você não tem acesso a essa área.', false);
     location.hash = 'inicio';
     return;
@@ -631,6 +649,7 @@ async function render() {
     else if (view === 'gestao') await renderGestao();
     else if (view === 'relatorios') await renderRelatorios();
     else if (view === 'correcoes') await renderCorrecoes();
+    else if (view === 'usuarios') await renderUsuarios();
     else await renderDashboard();
   } catch(err) {
     $('#main').innerHTML = `<div class="panel"><p class="muted">Erro ao carregar: ${esc(err.message)}</p></div>`;
@@ -1522,6 +1541,71 @@ async function renderRelatorios() {
     const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'ipecc-relatorio.csv'});
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  });
+}
+
+// ── Usuários (admin gerencia papel/status de todos os cadastrados) ─
+async function renderUsuarios() {
+  const {data: perfis} = await supa.from('ava_perfis')
+    .select('id,nome,nome_completo,email,telefone,papel,ativo,created_at')
+    .order('created_at', {ascending: false});
+
+  const PAPEIS = ['aluno','monitor','professor','admin'];
+  const rotulo = {aluno:'Aluno', monitor:'Monitor', professor:'Professor', admin:'Admin'};
+
+  const linhas = (perfis||[]).map(p => `<tr data-perfil="${esc(p.id)}">
+    <td>
+      <strong style="font-size:13px">${esc(p.nome_completo||p.nome||'—')}</strong>
+      <p class="muted" style="font-size:12px">${esc(p.email||'')}${p.telefone?' · '+esc(p.telefone):''}</p>
+    </td>
+    <td>
+      <select class="fi usuario-papel" style="padding:6px 8px;font-size:13px" ${p.id===currentUser.id?'disabled title="Você não pode alterar seu próprio papel"':''}>
+        ${PAPEIS.map(pp=>`<option value="${pp}" ${pp===p.papel?'selected':''}>${rotulo[pp]}</option>`).join('')}
+      </select>
+    </td>
+    <td>
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400;margin:0">
+        <input type="checkbox" class="usuario-ativo" ${p.ativo?'checked':''} ${p.id===currentUser.id?'disabled title="Você não pode desativar sua própria conta"':''}>
+        <span class="muted" style="font-size:12px">${p.ativo?'Ativo':'Inativo'}</span>
+      </label>
+    </td>
+  </tr>`).join('');
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · GESTÃO</div>
+      <h1 class="page-title">Usuários</h1>
+      <p class="sub">${(perfis||[]).length} cadastrado${(perfis||[]).length===1?'':'s'}</p>
+    </div>
+    <button class="btn-secondary" id="btn-novo-usuario-2">+ Usuário</button>
+    </div>
+    <div class="panel">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Usuário</th><th>Papel</th><th>Status</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="3" class="muted">Nenhum usuário cadastrado.</td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+
+  $('#btn-novo-usuario-2')?.addEventListener('click', () => $('#dlg-usuario').showModal());
+
+  $('#main').querySelectorAll('select.usuario-papel').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const id = sel.closest('[data-perfil]').dataset.perfil;
+      sel.disabled = true;
+      const {error} = await supa.from('ava_perfis').update({papel: sel.value}).eq('id', id);
+      if (error) { toast('Erro: '+error.message, false); } else { toast('Papel atualizado.'); }
+      sel.disabled = false;
+    });
+  });
+  $('#main').querySelectorAll('input.usuario-ativo').forEach(chk => {
+    chk.addEventListener('change', async () => {
+      const id = chk.closest('[data-perfil]').dataset.perfil;
+      chk.disabled = true;
+      const {error} = await supa.from('ava_perfis').update({ativo: chk.checked}).eq('id', id);
+      if (error) { toast('Erro: '+error.message, false); chk.checked = !chk.checked; }
+      else { toast(chk.checked ? 'Usuário ativado.' : 'Usuário desativado.'); chk.nextElementSibling.textContent = chk.checked?'Ativo':'Inativo'; }
+      chk.disabled = false;
+    });
   });
 }
 
