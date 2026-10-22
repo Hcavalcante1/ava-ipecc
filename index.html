@@ -1021,14 +1021,10 @@ async function renderCertificados() {
 }
 
 async function emitirCertificado(matriculaId, cursoId, cargaHoras) {
-  // verifica se já existe
-  const {data: existe} = await supa.from('ava_certificados').select('id').eq('matricula_id', matriculaId).maybeSingle();
-  if (existe) { toast('Certificado já emitido. Recarregando...'); await renderCertificados(); return; }
-  const {error} = await supa.from('ava_certificados').insert({
-    matricula_id: matriculaId,
-    tipo: 'conclusao',
-    carga_horas: cargaHoras
-  });
+  // a elegibilidade e a emissao sao verificadas no servidor (função
+  // SECURITY DEFINER), não apenas no cálculo feito aqui no cliente —
+  // a tabela ava_certificados não permite INSERT direto de alunos via RLS
+  const {error} = await supa.rpc('ava_emitir_certificado', {p_matricula_id: matriculaId});
   if (error) { toast('Erro ao emitir: '+error.message, false); return; }
   toast('Certificado emitido com sucesso.');
   await renderCertificados();
