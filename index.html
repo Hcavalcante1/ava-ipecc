@@ -450,11 +450,11 @@ function renderLogin(msg) {
   document.getElementById('link-recuperar')?.addEventListener('click', e => {
     e.preventDefault();
     const email = document.querySelector('#login-form [name="email"]')?.value?.trim();
-    if (!email) { alert('Preencha o e-mail primeiro.'); return; }
+    if (!email) { toast('Preencha o e-mail primeiro.', false); return; }
     supa.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname + '#nova-senha'})
       .then(({error}) => {
-        if (error) alert('Erro: ' + error.message);
-        else alert('Link de recuperação enviado para ' + email + '. Verifique sua caixa de entrada.');
+        if (error) toast('Erro: ' + error.message, false);
+        else toast('Link de recuperação enviado para ' + email + '. Verifique sua caixa de entrada.');
       });
   });
   $('#login-form').addEventListener('submit', async e => {
