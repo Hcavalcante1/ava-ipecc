@@ -1207,7 +1207,7 @@ async function renderTrilha(trilhaId) {
           <p class="muted" style="font-size:12px">${c.carga_horas||0}h${c.tema?` · ${esc(c.tema)}`:''}</p>
         </div>
       </div>
-      <a class="btn-secondary" href="#cursos" style="flex-shrink:0">${mat?'Acessar →':'Ver curso →'}</a>
+      <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}" style="flex-shrink:0">${mat?'Acessar →':'Ver curso →'}</a>
     </div>`;
   }).join('');
 
@@ -1317,7 +1317,15 @@ async function renderGestao() {
         <form id="trilha-form" style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
           <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="200"></label>
           <label class="field"><span>Descrição</span><textarea class="fi" name="descricao" style="min-height:80px" maxlength="1000"></textarea></label>
-          <label class="field"><span>Cursos (IDs separados por vírgula, na ordem desejada)</span><textarea class="fi" name="curso_ids" placeholder="uuid1, uuid2, uuid3" style="min-height:60px;font-size:12px;font-family:monospace"></textarea></label>
+          <label class="field"><span>Cursos nesta trilha</span>
+            <div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:10px">
+              ${(cursos||[]).map((c,i)=>`<label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:400;margin:0">
+                <input type="checkbox" name="curso_check" value="${esc(c.id)}">
+                <input type="number" name="ordem_${esc(c.id)}" value="${i}" min="0" title="Ordem na trilha" style="width:52px;padding:4px 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)">
+                <span>${esc(c.titulo)}</span>
+              </label>`).join('') || '<span class="muted">Nenhum curso cadastrado ainda.</span>'}
+            </div>
+          </label>
           <label class="field" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="publicada"> <span>Publicar imediatamente</span></label>
           <button type="submit" class="btn-primary">Criar trilha</button>
         </form>
@@ -1330,14 +1338,19 @@ async function renderGestao() {
       const titulo = f.get('titulo')?.trim();
       const descricao = f.get('descricao')?.trim()||null;
       const publicada = f.get('publicada')==='on';
-      const cursoIdsRaw = f.get('curso_ids')?.trim()||'';
-      const cursoIds = cursoIdsRaw ? cursoIdsRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+      const cursoEntries = [...e.target.querySelectorAll('input[name="curso_check"]:checked')]
+        .map(chk => {
+          const cid = chk.value;
+          const ordemInput = e.target.querySelector('input[name="ordem_'+CSS.escape(cid)+'"]');
+          return {curso_id: cid, ordem: Number(ordemInput?.value || 0)};
+        })
+        .sort((a,b) => a.ordem - b.ordem);
       const {data: novaTrilha, error} = await supa.from('ava_trilhas').insert({titulo,descricao,publicada}).select('id').single();
       if (error) { toast('Erro: '+error.message, false); return; }
-      if (cursoIds.length) {
-        await supa.from('ava_trilha_cursos').insert(cursoIds.map((cid,i)=>({trilha_id:novaTrilha.id,curso_id:cid,ordem:i})));
+      if (cursoEntries.length) {
+        await supa.from('ava_trilha_cursos').insert(cursoEntries.map((ce,i)=>({trilha_id:novaTrilha.id,curso_id:ce.curso_id,ordem:i})));
       }
-      toast('Trilha criada ✓');
+      toast('Trilha criada');
       e.target.reset();
       await renderGestao();
     });
