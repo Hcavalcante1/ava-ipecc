@@ -343,6 +343,15 @@ const supa = {
   // REST helpers
   from(table) {
     return new SupaQuery(table);
+  },
+  async rpc(fn, args={}) {
+    try {
+      const r = await fetch(SUPA_URL+'/rest/v1/rpc/'+fn, {method:'POST', headers:supa._headers(), body:JSON.stringify(args)});
+      const text = await r.text();
+      let d; try { d = text ? JSON.parse(text) : null; } catch { d = text; }
+      if (!r.ok) return {data:null, error:{message:(d?.message||d?.hint||text||r.statusText)}};
+      return {data:d, error:null};
+    } catch(err) { return {data:null, error:{message:err.message}}; }
   }
 };
 
@@ -1076,9 +1085,12 @@ async function renderValidar(codigo) {
     $('#main').innerHTML = `<div class="panel"><p class="muted">Código de validação não informado.</p></div>`;
     return;
   }
-  const {data: cert} = await supa.from('ava_certificados')
-    .select('id,codigo,emitido_em,carga_horas,ava_matriculas(aluno_id,ava_turmas(nome,ava_cursos(titulo,carga_horas)))')
-    .eq('codigo', codigo).maybeSingle();
+  // validação pública via RPC dedicada (SECURITY DEFINER) — a leitura direta
+  // das tabelas é bloqueada por RLS para visitantes sem login, então a
+  // validação precisa passar por uma função que devolve só os campos
+  // necessários para conferir a autenticidade do certificado
+  const {data: rows} = await supa.rpc('ava_validar_certificado', {p_codigo: codigo});
+  const cert = Array.isArray(rows) ? rows[0] : null;
 
   if (!cert) {
     $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">VALIDAÇÃO</div><h1 class="page-title">Certificado</h1></div></div>
@@ -1091,14 +1103,13 @@ async function renderValidar(codigo) {
     return;
   }
 
-  const {data: perfil} = await supa.from('ava_perfis').select('nome_completo').eq('id', cert.ava_matriculas?.aluno_id).single();
-  const nome = perfil?.nome_completo || 'Participante';
-  const cursotitulo = cert.ava_matriculas?.ava_turmas?.ava_cursos?.titulo || '';
-  const carga = cert.carga_horas || cert.ava_matriculas?.ava_turmas?.ava_cursos?.carga_horas || 0;
+  const nome = cert.nome_completo || 'Participante';
+  const cursotitulo = cert.curso_titulo || '';
+  const carga = cert.carga_horas || 0;
   const dt = new Date(cert.emitido_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 
   $('#main').innerHTML = `
-    <div class="topline"><div><div class="eyebrow">VALIDAÇÃO DE CERTIFICADO</div><h1 class="page-title">Certificado Autêntico ✓</h1></div></div>
+    <div class="topline"><div><div class="eyebrow">VALIDAÇÃO DE CERTIFICADO</div><h1 class="page-title">Certificado Autêntico</h1></div></div>
     <div class="panel" style="max-width:600px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
         <div style="width:52px;height:52px;background:var(--green-light);color:var(--green);border-radius:50%;display:grid;place-items:center;flex-shrink:0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
@@ -1112,7 +1123,7 @@ async function renderValidar(codigo) {
       <div class="row"><strong>Emitido em</strong><span>${dt}</span></div>
       <div class="row"><strong>Código</strong><span style="font-size:12px;font-family:monospace">${esc(cert.codigo)}</span></div>
       <div style="margin-top:20px;padding:14px;background:var(--green-light);border-radius:8px;font-size:13px;color:var(--green)">
-        ✓ Este certificado foi emitido pelo IPECC e sua autenticidade foi verificada com sucesso.
+        Este certificado foi emitido pelo IPECC e sua autenticidade foi verificada com sucesso.
       </div>
     </div>`;
 }
