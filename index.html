@@ -449,6 +449,7 @@ function temaIcon(tema, size=40) {
 // ── State ─────────────────────────────────────────────────────────
 let currentUser = null;
 let userPerfil  = null; // {id, nome, email, papel}
+let _cursoClickHandler = null; // referência do listener de clique da sala de aprendizagem (ver renderCurso)
 
 // ── Auth ──────────────────────────────────────────────────────────
 function renderLogin(msg, ok=false) {
@@ -627,18 +628,32 @@ async function renderDashboard() {
   ]);
   const totalCursos = cursos?.length || 0;
 
-  // progresso geral
+  // progresso geral e por curso — concluídas (ava_progresso) sobre o total de
+  // aulas publicadas de cada curso matriculado, para alimentar a % dos cards
   let totalConcluidas = 0;
+  const pctPorMatricula = {};
   if (matriculas?.length) {
     const mids = matriculas.map(m=>m.id);
-    const {data: prog} = await supa.from('ava_progresso').select('id').in('matricula_id', mids).eq('concluida', true);
-    totalConcluidas = prog?.length || 0;
+    const {data: prog} = await supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id', mids);
+    const progByMat = {};
+    (prog||[]).forEach(p => { if (p.concluida) { progByMat[p.matricula_id] = (progByMat[p.matricula_id]||0)+1; totalConcluidas++; } });
+    const aulasTotaisPorCurso = {};
+    for (const m of matriculas) {
+      const cid = m.ava_turmas?.ava_cursos?.id;
+      if (cid && aulasTotaisPorCurso[cid] === undefined) {
+        const {count} = await supa.from('ava_aulas').select('id,ava_modulos!inner(curso_id)',{count:'exact',head:true})
+          .eq('publicada',true).eq('ava_modulos.curso_id', cid);
+        aulasTotaisPorCurso[cid] = count||0;
+      }
+      const total = aulasTotaisPorCurso[cid] || 0;
+      pctPorMatricula[m.id] = total ? Math.round((progByMat[m.id]||0)/total*100) : 0;
+    }
   }
 
   const cursosCards = (matriculas?.length ? matriculas.map((m,i) => {
     const c = m.ava_turmas?.ava_cursos;
     if (!c) return '';
-    return courseCardHTML({id:c.id,titulo:c.titulo,descricao:c.descricao,carga_horas:c.carga_horas,cohort:m.ava_turmas?.nome}, i, 0, 1);
+    return courseCardHTML({id:c.id,titulo:c.titulo,descricao:c.descricao,carga_horas:c.carga_horas,cohort:m.ava_turmas?.nome}, i, pctPorMatricula[m.id]||0, 1);
   }) : (cursos||[]).map((c,i) => courseCardHTML(c, i, 0, 0))).join('');
 
   $('#main').innerHTML = `
@@ -671,9 +686,23 @@ async function renderCursos(filtroTema='') {
   if (error) throw error;
 
   let matriculaMap = {};
+  let pctPorCurso = {};
   if (currentUser && cursos?.length) {
     const {data: mats} = await supa.from('ava_matriculas').select('id,turma_id,ava_turmas(nome,curso_id)').eq('aluno_id',currentUser.id).eq('status','ativa');
     (mats||[]).forEach(m => { if(m.ava_turmas) matriculaMap[m.ava_turmas.curso_id] = m; });
+
+    // % de progresso por curso matriculado, para o card não mostrar sempre 0%
+    const mids = Object.values(matriculaMap).map(m=>m.id);
+    if (mids.length) {
+      const {data: prog} = await supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id', mids);
+      const progByMat = {};
+      (prog||[]).forEach(p => { if (p.concluida) progByMat[p.matricula_id] = (progByMat[p.matricula_id]||0)+1; });
+      for (const [cid, m] of Object.entries(matriculaMap)) {
+        const {count} = await supa.from('ava_aulas').select('id,ava_modulos!inner(curso_id)',{count:'exact',head:true})
+          .eq('publicada',true).eq('ava_modulos.curso_id', cid);
+        pctPorCurso[cid] = count ? Math.round((progByMat[m.id]||0)/count*100) : 0;
+      }
+    }
   }
 
   // temas únicos para o filtro
@@ -692,7 +721,7 @@ async function renderCursos(filtroTema='') {
     </div>` : ''}
     <div class="courses">${cursosVisiveis.map((c,i) => {
       const m = matriculaMap[c.id];
-      return courseCardHTML({...c, cohort: m?.ava_turmas?.nome || ''}, i, 0, m?1:0);
+      return courseCardHTML({...c, cohort: m?.ava_turmas?.nome || ''}, i, pctPorCurso[c.id]||0, m?1:0);
     }).join('') || '<p class="muted">Nenhum curso neste tema.</p>'}</div>`;
 
   // eventos dos filtros de tema
@@ -749,7 +778,10 @@ async function inscreverSe(cursoId) {
   const {error} = await supa.from('ava_matriculas').insert({aluno_id: currentUser.id, turma_id: turma.id});
   if (error) { toast('Erro ao se inscrever: '+error.message, false); return; }
   toast('Inscrição realizada com sucesso!');
-  renderCursos();
+  // atualiza a view atual (catálogo, sala de aula, etc.) em vez de sempre
+  // levar para a lista de cursos — inscrever-se de dentro da sala de aula
+  // não deve "chutar" o aluno para fora dela
+  render();
 }
 
 // ── Sala de aula ──────────────────────────────────────────────────
@@ -833,7 +865,11 @@ async function renderCurso(cursoId, aulaId) {
           <button class="btn-secondary" id="btn-salvar" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">Salvar rascunho</button>
           <button class="btn-primary" id="btn-concluir" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">${progSet.has(aula.id)?'Atualizar':'Concluir'}</button>
         </div>` : ''}
-        ${!matriculaId ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
+        ${!matriculaId && currentUser && !isStaff() ? `<div class="panel" style="background:var(--bg);border:0;margin-top:16px;text-align:center">
+          <p class="muted" style="margin-bottom:10px">Você não tem matrícula ativa neste curso.</p>
+          <button class="btn-primary" data-inscrever-curso="${esc(cursoId)}">Inscrever-se →</button>
+        </div>` : ''}
+        ${!matriculaId && isStaff() ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
       </section>
       <section class="panel">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Conteúdo do curso</h3>
@@ -857,8 +893,13 @@ async function renderCurso(cursoId, aulaId) {
     if (contentEl) contentEl.innerHTML = aula.conteudo || '';
   }
 
-  // events
-  $('#main').addEventListener('click', async e => {
+  // events — listener único e persistente no #main: como só o innerHTML é
+  // trocado a cada render (o nó #main nunca é recriado), um "{once:true}" aqui
+  // desligava a escuta no primeiro clique em qualquer lugar da sala de aula
+  // (ex.: "Salvar rascunho"), deixando "Concluir" e tudo mais sem resposta até
+  // a próxima navegação de hash. Trocamos a referência a cada render em vez disso.
+  if (_cursoClickHandler) $('#main').removeEventListener('click', _cursoClickHandler);
+  _cursoClickHandler = async e => {
     // inscrição autosservida (a partir da sala de aula)
     const bi = e.target.closest('[data-inscrever-curso]');
     if (bi) { await inscreverSe(bi.dataset.inscreverCurso); return; }
@@ -912,7 +953,8 @@ async function renderCurso(cursoId, aulaId) {
         toast('Rascunho salvo.'); btn.disabled=false;
       }
     }
-  }, {once:true});
+  };
+  $('#main').addEventListener('click', _cursoClickHandler);
 }
 
 // ── Atividades ────────────────────────────────────────────────────
