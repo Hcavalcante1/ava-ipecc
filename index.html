@@ -809,7 +809,7 @@ async function renderCurso(cursoId, aulaId) {
         </div>
         <div style="display:flex;gap:10px;margin-top:14px">
           <button class="btn-secondary" id="btn-salvar" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">Salvar rascunho</button>
-          <button class="btn-primary" id="btn-concluir" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">${progSet.has(aula.id)?'Atualizar ✓':'Concluir ✓'}</button>
+          <button class="btn-primary" id="btn-concluir" data-aula="${esc(aula.id)}" data-mat="${esc(matriculaId||'')}">${progSet.has(aula.id)?'Atualizar':'Concluir'}</button>
         </div>` : ''}
         ${!matriculaId ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
       </section>
@@ -862,7 +862,7 @@ async function renderCurso(cursoId, aulaId) {
           matricula_id: matriculaId, aula_id: aulaIdBtn,
           concluida: true, concluida_em: new Date().toISOString()
         }, {onConflict:'matricula_id,aula_id'});
-        toast('Atividade concluída ✓');
+        toast('Atividade concluída');
         // verifica elegibilidade para certificado
         if (matriculaId) {
           const [{data: progresso}, {data: turmaInfo}] = await Promise.all([
@@ -995,7 +995,7 @@ async function renderCertificados() {
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px" onclick="baixarCertificado('${cert.codigo}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Baixar PDF</button>
-          <button class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado ✓'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Copiar link</button>
+          <button class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado'))"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Copiar link</button>
         </div>
       </div>`;
     }
@@ -1571,7 +1571,7 @@ async function renderPerfil() {
       telefone: f.get('telefone')?.trim()||null
     }).eq('id', currentUser.id);
     if (error) { toast('Erro: '+error.message, false); return; }
-    toast('Perfil salvo ✓');
+    toast('Perfil salvo');
     await loadPerfil(currentUser.id);
   });
 
@@ -1580,7 +1580,7 @@ async function renderPerfil() {
     const nova = e.target.nova_senha.value;
     const {error} = await supa.auth.updateUser({password: nova});
     if (error) { toast('Erro: '+error.message, false); return; }
-    toast('Senha alterada com sucesso ✓');
+    toast('Senha alterada com sucesso');
     e.target.reset();
   });
 }
@@ -1687,7 +1687,7 @@ function renderNovaSenha() {
     if (f.get('senha') !== f.get('confirma')) { toast('As senhas não conferem.', false); return; }
     const {error} = await supa.auth.updateUser({password: f.get('senha')});
     if (error) { toast('Erro: '+error.message, false); return; }
-    toast('Senha redefinida com sucesso! ✓');
+    toast('Senha redefinida com sucesso!');
     setTimeout(() => location.hash = 'inicio', 1500);
   });
 }
