@@ -535,9 +535,13 @@ supa.auth.onAuthStateChange(async (_event, session) => {
     $('header').style.display = '';
     $('.shell').style.marginLeft = '';
     $('footer').style.display = '';
-    // show avatar initials
+    // show avatar initials — elemento pode ainda não existir no instante em que
+    // este callback dispara (ex.: logo após o fluxo de nova senha); sem essa
+    // checagem, um erro aqui travava a tela de login presa em "Entrando..."
+    // mesmo com o login já concluído no servidor.
     const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    $('#avatar-btn-display').textContent = initials;
+    const avatarEl = $('#avatar-btn-display');
+    if (avatarEl) avatarEl.textContent = initials;
     render();
   } else {
     currentUser = null; userPerfil = null;
@@ -2185,7 +2189,8 @@ function renderNovaSenha() {
   $('.shell').style.marginLeft = '';
   $('footer').style.display = '';
   const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-  $('#avatar-btn-display').textContent = initials;
+  const avatarElInit = $('#avatar-btn-display');
+  if (avatarElInit) avatarElInit.textContent = initials;
   await render();
 })();
 </script>
