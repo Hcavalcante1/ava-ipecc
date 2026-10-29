@@ -554,7 +554,10 @@ const isStaff = () => ['admin','professor','monitor'].includes(userPerfil?.papel
 
 // rotas que não exigem login (validação pública de certificado, estatísticas e troca de senha via e-mail)
 function isRotaPublica() {
-  if (location.hash.includes('access_token=') && location.hash.includes('type=recovery')) return true;
+  // o Supabase redireciona com access_token tanto para recuperação de senha
+  // (type=recovery) quanto para convite de novo usuário (type=invite) — os dois
+  // caem na mesma tela de "definir senha"
+  if (location.hash.includes('access_token=') && (location.hash.includes('type=recovery') || location.hash.includes('type=invite'))) return true;
   const view = location.hash.slice(1).split('/')[0];
   return view === 'stats' || view === 'validar' || view === 'nova-senha' || view === 'catalogo';
 }
@@ -588,8 +591,9 @@ function prepararChromePublico() {
 async function render() {
   const parts = location.hash.slice(1).split('/').map(p=>{try{return decodeURIComponent(p);}catch{return '';}});
   let view = parts[0] || 'inicio';
-  // o Supabase substitui o hash inteiro pelo token de recuperação ao redirecionar do e-mail
-  if (location.hash.includes('access_token=') && location.hash.includes('type=recovery')) view = 'nova-senha';
+  // o Supabase substitui o hash inteiro pelo token ao redirecionar do e-mail,
+  // seja de recuperação de senha (type=recovery) ou de convite (type=invite)
+  if (location.hash.includes('access_token=') && (location.hash.includes('type=recovery') || location.hash.includes('type=invite'))) view = 'nova-senha';
   // rotas públicas — não exigem login
   if (view === 'stats') {
     prepararChromePublico();
@@ -2125,13 +2129,14 @@ async function renderStats() {
     </div>`}`;
 }
 
-// ── Nova senha (redirect pós-email) ──────────────────────────────
+// ── Nova senha (redirect pós-email, recuperação ou convite) ──────
 function renderNovaSenha() {
-  // o Supabase redireciona com o token de recuperação no hash (#access_token=...&type=recovery)
-  // ou na query (?access_token=...&type=recovery) — capturamos dos dois lugares.
+  // o Supabase redireciona com o token no hash (#access_token=...&type=recovery|invite)
+  // ou na query (?access_token=...&type=...) — capturamos dos dois lugares.
   const raw = (location.hash.includes('access_token=') ? location.hash : location.search).replace(/^[#?]/, '');
   const recoveryParams = new URLSearchParams(raw);
   const recoveryToken = recoveryParams.get('access_token');
+  const ehConvite = recoveryParams.get('type') === 'invite';
   if (recoveryToken) _session = {access_token: recoveryToken};
   $('#main').innerHTML = `
     <div style="max-width:380px;margin:60px auto">
@@ -2140,8 +2145,8 @@ function renderNovaSenha() {
         <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
       </div>
       <div class="panel">
-        <h2 style="margin-bottom:4px">Criar nova senha</h2>
-        <p class="muted" style="margin-bottom:20px">Digite e confirme sua nova senha.</p>
+        <h2 style="margin-bottom:4px">${ehConvite ? 'Bem-vindo(a)! Defina sua senha' : 'Criar nova senha'}</h2>
+        <p class="muted" style="margin-bottom:20px">${ehConvite ? 'Para concluir seu cadastro, escolha a senha que vai usar para entrar.' : 'Digite e confirme sua nova senha.'}</p>
         <form id="nova-senha-form" style="display:flex;flex-direction:column;gap:12px">
           <label class="field"><span>Nova senha</span><input class="fi" type="password" name="senha" required minlength="6" autocomplete="new-password"></label>
           <label class="field"><span>Confirmar senha</span><input class="fi" type="password" name="confirma" required minlength="6" autocomplete="new-password"></label>
@@ -2155,13 +2160,13 @@ function renderNovaSenha() {
     if (f.get('senha') !== f.get('confirma')) { toast('As senhas não conferem.', false); return; }
     const {error} = await supa.auth.updateUser({password: f.get('senha')});
     if (error) { toast('Erro: '+error.message, false); return; }
-    toast('Senha redefinida com sucesso!');
-    // o token de recuperação não é uma sessão completa (sem refresh_token) — não
+    toast(ehConvite ? 'Senha criada com sucesso!' : 'Senha redefinida com sucesso!');
+    // o token (recuperação ou convite) não é uma sessão completa (sem refresh_token) — não
     // persistimos login automático; o usuário volta para a tela de entrar e usa a senha nova
     _session = null;
     try { localStorage.removeItem('ava_session'); } catch{}
     history.replaceState(null, '', location.pathname + location.search);
-    setTimeout(() => renderLogin('Senha redefinida com sucesso. Faça login com sua nova senha.', true), 1200);
+    setTimeout(() => renderLogin(ehConvite ? 'Cadastro concluído! Faça login com a senha que você criou.' : 'Senha redefinida com sucesso. Faça login com sua nova senha.', true), 1200);
   });
 }
 
