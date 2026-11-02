@@ -687,7 +687,8 @@ supa.auth.onAuthStateChange(async (_event, session) => {
     // este callback dispara (ex.: logo após o fluxo de nova senha); sem essa
     // checagem, um erro aqui travava a tela de login presa em "Entrando..."
     // mesmo com o login já concluído no servidor.
-    const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const displayName = userPerfil?.nome_completo || userPerfil?.nome || session.user.email || 'U';
+    const initials = displayName.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const avatarEl = $('#avatar-btn-display');
     if (avatarEl) avatarEl.textContent = initials;
     render();
@@ -871,7 +872,7 @@ async function renderDashboard() {
   $('#main').innerHTML = `
     <div class="topline"><div>
       <div class="eyebrow">IPECC · APRENDIZAGEM</div>
-      <h1 class="page-title">Olá, ${esc(userPerfil?.nome?.split(' ')[0] || 'bem-vindo')}.</h1>
+      <h1 class="page-title">Olá, ${esc((userPerfil?.nome_completo || userPerfil?.nome || '').split(' ')[0] || 'bem-vindo')}.</h1>
       <p class="sub">Seu painel de aprendizagem — ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p>
     </div></div>
     <div class="hero">
@@ -2558,6 +2559,10 @@ async function renderPerfil() {
     if (error) { toast('Erro: '+error.message, false); return; }
     toast('Perfil salvo');
     await loadPerfil(currentUser.id);
+    const displayName = userPerfil?.nome_completo || userPerfil?.nome || currentUser.email || 'U';
+    const avatarEl = $('#avatar-btn-display');
+    if (avatarEl) avatarEl.textContent = displayName.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    await render();
   });
 
   document.getElementById('perfil-cadastral-form')?.addEventListener('submit', async e => {
@@ -2847,7 +2852,8 @@ function renderNovaSenha() {
   $('header').style.display = '';
   $('.shell').style.marginLeft = '';
   $('footer').style.display = '';
-  const initials = (userPerfil?.nome || session.user.email || 'U').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const displayName = userPerfil?.nome_completo || userPerfil?.nome || session.user.email || 'U';
+  const initials = displayName.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   const avatarElInit = $('#avatar-btn-display');
   if (avatarElInit) avatarElInit.textContent = initials;
   await render();
