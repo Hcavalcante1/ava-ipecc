@@ -1252,7 +1252,12 @@ async function baixarCertificado(codigo) {
     new window.QRCode(qrEl, {text: validUrl, width:80, height:80, colorDark:'#17634d', colorLight:'#ffffff'});
   }
 
-  setTimeout(() => { window.print(); }, 300);
+  const tituloOriginal = document.title;
+  document.title = `Certificado - ${cursotitulo} - ${nome}`.replace(/[\\/:*?"<>|]/g, '-');
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { document.title = tituloOriginal; }, 500);
+  }, 300);
 }
 
 // ── Validar (pública) ─────────────────────────────────────────────
@@ -2185,7 +2190,12 @@ async function imprimirComprovante(matriculaId) {
     </div>
     <div class="cert-footer">Documento gerado em ${new Date().toLocaleDateString('pt-BR')} · ID da matrícula: ${esc(matriculaId)}</div>
   </div>`;
-  setTimeout(() => window.print(), 300);
+  const tituloOriginalComp = document.title;
+  document.title = `Comprovante - ${curso?.titulo||''} - ${nome}`.replace(/[\\/:*?"<>|]/g, '-');
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => { document.title = tituloOriginalComp; }, 500);
+  }, 300);
 }
 
 // ── Estatísticas públicas ─────────────────────────────────────────
