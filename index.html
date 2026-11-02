@@ -246,6 +246,10 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
       <span>Certificados</span>
     </a>
+    <a href="#solicitacoes">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Solicitações</span>
+    </a>
     <div class="nav-label" id="nav-label-gestao" style="display:none">Gestão</div>
     <a href="#gestao" id="nav-link-gestao" style="display:none">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -711,7 +715,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -811,6 +815,7 @@ async function render() {
     else if (view === 'cursos') await renderCursos();
     else if (view === 'atividades') await renderAtividades();
     else if (view === 'certificados') await renderCertificados();
+    else if (view === 'solicitacoes') await renderSolicitacoes();
     else if (view === 'perfil')  await renderPerfil();
     else if (view === 'trilhas') await renderTrilhas();
     else if (view === 'trilha')  await renderTrilha(parts[1]);
@@ -1313,6 +1318,116 @@ async function emitirCertificado(matriculaId, cursoId, cargaHoras) {
   if (error) { toast('Erro ao emitir: '+error.message, false); return; }
   toast('Certificado emitido com sucesso.');
   await renderCertificados();
+}
+
+// ── Central de solicitações (chamados de suporte) ──────────────────
+const SOLIC_CATEGORIAS = {documentos:'Documentos', matricula:'Matrícula', tecnico:'Técnico', financeiro:'Financeiro', outro:'Outro'};
+const SOLIC_STATUS = {
+  aberta:       {label:'Aberta',        cls:'warn'},
+  em_andamento: {label:'Em andamento',  cls:'warn'},
+  concluida:    {label:'Concluída',     cls:'ok'},
+  cancelada:    {label:'Cancelada',     cls:'muted'}
+};
+
+async function renderSolicitacoes() {
+  if (!currentUser) return;
+  const staff = isStaff();
+
+  const [{data: minhas}, {data: todas}] = await Promise.all([
+    supa.from('ava_solicitacoes').select('*').eq('aluno_id', currentUser.id).order('created_at',{ascending:false}),
+    staff ? supa.from('ava_solicitacoes').select('*,ava_perfis!ava_solicitacoes_aluno_id_fkey(nome_completo,nome,email)').order('created_at',{ascending:false}) : {data:null}
+  ]);
+
+  const statusBadge = s => {
+    const st = SOLIC_STATUS[s] || SOLIC_STATUS.aberta;
+    return `<span class="tag ${st.cls}">${esc(st.label)}</span>`;
+  };
+
+  const rowMinha = s => `<div class="panel" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <strong style="font-size:14px">${esc(s.assunto)}</strong>
+          ${statusBadge(s.status)}
+        </div>
+        <p class="muted" style="font-size:12px">${esc(SOLIC_CATEGORIAS[s.categoria]||s.categoria)} · aberta em ${new Date(s.created_at).toLocaleDateString('pt-BR')}</p>
+        <p style="font-size:13px;margin-top:8px;white-space:pre-wrap">${esc(s.mensagem)}</p>
+        ${s.resposta ? `<div style="margin-top:10px;padding:10px 12px;background:var(--green-light);border-radius:8px">
+          <p class="muted" style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px">Resposta do IPECC</p>
+          <p style="font-size:13px;white-space:pre-wrap">${esc(s.resposta)}</p>
+        </div>` : ''}
+      </div>
+      ${s.status==='aberta' ? `<button type="button" class="btn-secondary solic-cancelar-btn" data-id="${esc(s.id)}" style="font-size:12px;flex-shrink:0">Cancelar</button>` : ''}
+    </div>
+  </div>`;
+
+  const rowStaff = s => {
+    const aluno = s.ava_perfis;
+    const nomeAluno = aluno?.nome_completo || aluno?.nome || aluno?.email || 'Aluno';
+    return `<div class="panel" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <strong style="font-size:14px">${esc(s.assunto)}</strong>
+            ${statusBadge(s.status)}
+          </div>
+          <p class="muted" style="font-size:12px">${esc(nomeAluno)} · ${esc(SOLIC_CATEGORIAS[s.categoria]||s.categoria)} · ${new Date(s.created_at).toLocaleDateString('pt-BR')}</p>
+          <p style="font-size:13px;margin-top:8px;white-space:pre-wrap">${esc(s.mensagem)}</p>
+        </div>
+      </div>
+      <form class="solic-resposta-form" data-id="${esc(s.id)}" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+        <label class="field"><span>Resposta</span><textarea class="fi" name="resposta" rows="2" placeholder="Escreva uma resposta (opcional)">${esc(s.resposta||'')}</textarea></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select class="fi" name="status" style="max-width:180px">
+            ${Object.entries(SOLIC_STATUS).map(([v,st]) => `<option value="${v}" ${s.status===v?'selected':''}>${esc(st.label)}</option>`).join('')}
+          </select>
+          <button type="submit" class="btn-primary" style="font-size:12px">Salvar</button>
+        </div>
+      </form>
+    </div>`;
+  };
+
+  $('#main').innerHTML = `
+    <div class="topline"><div>
+      <div class="eyebrow">IPECC · SUPORTE</div>
+      <h1 class="page-title">Solicitações</h1>
+    </div></div>
+
+    <div class="panel" style="margin-bottom:20px">
+      <h2 style="font-size:16px;font-weight:600;margin-bottom:12px">Nova solicitação</h2>
+      <form id="solic-form" style="display:flex;flex-direction:column;gap:10px;max-width:520px">
+        <label class="field"><span>Categoria</span>
+          <select class="fi" name="categoria">
+            ${Object.entries(SOLIC_CATEGORIAS).map(([v,l]) => `<option value="${v}">${esc(l)}</option>`).join('')}
+          </select>
+        </label>
+        <label class="field"><span>Assunto</span><input class="fi" name="assunto" required maxlength="150" placeholder="Ex: Dúvida sobre meu certificado"></label>
+        <label class="field"><span>Mensagem</span><textarea class="fi" name="mensagem" rows="4" required maxlength="2000" placeholder="Descreva sua solicitação..."></textarea></label>
+        <button type="submit" class="btn-primary" style="align-self:flex-start">Enviar solicitação</button>
+      </form>
+    </div>
+
+    ${staff ? `
+    <div style="margin-bottom:12px"><h2 style="font-size:16px;font-weight:600">Todas as solicitações</h2></div>
+    ${(todas||[]).length ? (todas||[]).map(rowStaff).join('') : '<div class="panel"><p class="muted">Nenhuma solicitação recebida.</p></div>'}
+    ` : `
+    <div style="margin-bottom:12px"><h2 style="font-size:16px;font-weight:600">Minhas solicitações</h2></div>
+    ${(minhas||[]).length ? (minhas||[]).map(rowMinha).join('') : '<div class="panel"><p class="muted">Você ainda não abriu nenhuma solicitação.</p></div>'}
+    `}`;
+
+  document.getElementById('solic-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await supa.from('ava_solicitacoes').insert({
+      aluno_id: currentUser.id,
+      categoria: f.get('categoria'),
+      assunto: f.get('assunto').trim(),
+      mensagem: f.get('mensagem').trim()
+    });
+    if (error) { toast('Erro: '+error.message, false); return; }
+    toast('Solicitação enviada.');
+    await renderSolicitacoes();
+  });
 }
 
 async function baixarCertificado(codigo) {
@@ -2113,6 +2228,14 @@ document.addEventListener('click', async e => {
     toast('Material removido.');
     render();
   }
+  const cancelarSolicBtn = e.target.closest('.solic-cancelar-btn');
+  if (cancelarSolicBtn) {
+    if (!confirm('Cancelar esta solicitação?')) return;
+    const {error} = await supa.from('ava_solicitacoes').update({status:'cancelada'}).eq('id', cancelarSolicBtn.dataset.id);
+    if (error) { toast('Erro: '+error.message, false); return; }
+    toast('Solicitação cancelada.');
+    await renderSolicitacoes();
+  }
 });
 
 $('#course-form').addEventListener('submit', async e => {
@@ -2184,6 +2307,21 @@ $('#usuario-form')?.addEventListener('submit', async e => {
 });
 
 document.addEventListener('submit', async e => {
+  if (e.target.matches('.solic-resposta-form')) {
+    e.preventDefault();
+    const formEl = e.target;
+    const f = new FormData(formEl);
+    const {error} = await supa.from('ava_solicitacoes').update({
+      resposta: f.get('resposta')?.trim() || null,
+      status: f.get('status'),
+      respondido_por: currentUser.id,
+      respondido_em: new Date().toISOString()
+    }).eq('id', formEl.dataset.id);
+    if (error) { toast('Erro: '+error.message, false); return; }
+    toast('Solicitação atualizada.');
+    await renderSolicitacoes();
+    return;
+  }
   if (e.target.matches('.material-form')) {
     e.preventDefault();
     const formEl = e.target;
@@ -2283,7 +2421,7 @@ async function renderPerfil() {
   ]);
   const progByMat = {};
   (prog||[]).forEach(p => { if (p.concluida) progByMat[p.matricula_id]=(progByMat[p.matricula_id]||0)+1; });
-  const certIds = new Set((certs||[]).map(c=>c.matricula_id));
+  const certByMatPerfil = Object.fromEntries((certs||[]).map(c=>[c.matricula_id, c]));
 
   const nome = perfil?.nome_completo || perfil?.nome || currentUser.email;
   const papel = perfil?.papel || 'aluno';
@@ -2293,14 +2431,15 @@ async function renderPerfil() {
     const c = m.ava_turmas?.ava_cursos;
     if (!c) return '';
     const concl = progByMat[m.id]||0;
-    const temCert = certIds.has(m.id);
+    const cert = certByMatPerfil[m.id];
     return `<div class="row" style="align-items:center;flex-wrap:wrap;gap:8px">
       <div style="flex:1;min-width:0">
         <strong style="font-size:14px">${esc(c.titulo)}</strong>
         <p class="muted" style="font-size:12px">${esc(m.ava_turmas?.nome||'')} · ${concl} aulas concluídas</p>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${temCert ? `<button class="btn-secondary" style="font-size:12px;display:inline-flex;align-items:center;gap:6px" onclick="imprimirComprovante('${m.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Comprovante</button>` : ''}
+        <button class="btn-secondary" style="font-size:12px;display:inline-flex;align-items:center;gap:6px" onclick="imprimirComprovante('${m.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Comprovante</button>
+        ${cert ? `<button class="btn-secondary" style="font-size:12px;display:inline-flex;align-items:center;gap:6px" onclick="baixarCertificado('${cert.codigo}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Certificado</button>` : ''}
         <a class="btn-secondary" style="font-size:12px" href="#cursos">Acessar</a>
       </div>
     </div>`;
@@ -2344,6 +2483,54 @@ async function renderPerfil() {
       </div>
     </div>
 
+    <div class="panel" style="margin-bottom:20px">
+      <div class="eyebrow" style="margin-bottom:12px">DADOS CADASTRAIS</div>
+      <form id="perfil-cadastral-form" style="display:flex;flex-direction:column;gap:10px;max-width:640px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <label class="field"><span>Gênero</span>
+            <select class="fi" name="genero">
+              <option value="">Não informar</option>
+              <option value="feminino" ${perfil?.genero==='feminino'?'selected':''}>Feminino</option>
+              <option value="masculino" ${perfil?.genero==='masculino'?'selected':''}>Masculino</option>
+              <option value="outro" ${perfil?.genero==='outro'?'selected':''}>Outro</option>
+            </select>
+          </label>
+          <label class="field"><span>Raça/Cor</span>
+            <select class="fi" name="raca_cor">
+              <option value="">Não informar</option>
+              <option value="branca" ${perfil?.raca_cor==='branca'?'selected':''}>Branca</option>
+              <option value="preta" ${perfil?.raca_cor==='preta'?'selected':''}>Preta</option>
+              <option value="parda" ${perfil?.raca_cor==='parda'?'selected':''}>Parda</option>
+              <option value="amarela" ${perfil?.raca_cor==='amarela'?'selected':''}>Amarela</option>
+              <option value="indigena" ${perfil?.raca_cor==='indigena'?'selected':''}>Indígena</option>
+            </select>
+          </label>
+        </div>
+        <label class="field"><span>Vínculo profissional</span>
+          <select class="fi" name="vinculo_profissional">
+            <option value="">Selecione</option>
+            <option value="servidor_publico" ${perfil?.vinculo_profissional==='servidor_publico'?'selected':''}>Servidor público</option>
+            <option value="terceirizado" ${perfil?.vinculo_profissional==='terceirizado'?'selected':''}>Terceirizado</option>
+            <option value="estudante" ${perfil?.vinculo_profissional==='estudante'?'selected':''}>Estudante</option>
+            <option value="autonomo" ${perfil?.vinculo_profissional==='autonomo'?'selected':''}>Autônomo</option>
+            <option value="clt" ${perfil?.vinculo_profissional==='clt'?'selected':''}>CLT</option>
+            <option value="voluntario" ${perfil?.vinculo_profissional==='voluntario'?'selected':''}>Voluntário</option>
+            <option value="outro" ${perfil?.vinculo_profissional==='outro'?'selected':''}>Outro</option>
+          </select>
+        </label>
+        <label class="field"><span>Instituição/Organização</span><input class="fi" name="instituicao" value="${esc(perfil?.instituicao||'')}" placeholder="Ex: IPECC, Prefeitura de Suzano..."></label>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+          <label class="field"><span>UF de atuação</span><input class="fi" name="uf_atuacao" value="${esc(perfil?.uf_atuacao||'')}" maxlength="2" placeholder="SP" style="text-transform:uppercase"></label>
+          <label class="field"><span>Cidade de atuação</span><input class="fi" name="cidade_atuacao" value="${esc(perfil?.cidade_atuacao||'')}" placeholder="Suzano"></label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+          <label class="field"><span>UF de residência</span><input class="fi" name="uf_residencia" value="${esc(perfil?.uf_residencia||'')}" maxlength="2" placeholder="SP" style="text-transform:uppercase"></label>
+          <label class="field"><span>Cidade de residência</span><input class="fi" name="cidade_residencia" value="${esc(perfil?.cidade_residencia||'')}" placeholder="Suzano"></label>
+        </div>
+        <button type="submit" class="btn-primary" style="align-self:flex-start">Salvar dados cadastrais</button>
+      </form>
+    </div>
+
     <div class="panel">
       <h2 style="font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Minhas matrículas</h2>
       ${matRows || '<p class="muted">Nenhuma matrícula.</p>'}
@@ -2371,6 +2558,23 @@ async function renderPerfil() {
     if (error) { toast('Erro: '+error.message, false); return; }
     toast('Perfil salvo');
     await loadPerfil(currentUser.id);
+  });
+
+  document.getElementById('perfil-cadastral-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await supa.from('ava_perfis').update({
+      genero: f.get('genero')||null,
+      raca_cor: f.get('raca_cor')||null,
+      vinculo_profissional: f.get('vinculo_profissional')||null,
+      instituicao: f.get('instituicao')?.trim()||null,
+      uf_atuacao: f.get('uf_atuacao')?.trim().toUpperCase()||null,
+      cidade_atuacao: f.get('cidade_atuacao')?.trim()||null,
+      uf_residencia: f.get('uf_residencia')?.trim().toUpperCase()||null,
+      cidade_residencia: f.get('cidade_residencia')?.trim()||null
+    }).eq('id', currentUser.id);
+    if (error) { toast('Erro: '+error.message, false); return; }
+    toast('Dados cadastrais salvos');
   });
 
   document.getElementById('senha-form')?.addEventListener('submit', async e => {
