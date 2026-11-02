@@ -127,6 +127,7 @@ textarea.fi{min-height:85px;resize:vertical}
 /* ── Certificado imprimível ── */
 .cert-wrap{display:none}
 @media print{
+  @page{size:A4 landscape;margin:0}
   .shell,.aside,aside,header,footer,.back-link,.btn-primary,.btn-secondary,#toast,.notice{display:none!important}
   body{background:#fff!important;color:#000!important}
   .cert-wrap{display:block!important;margin:0;padding:0}
