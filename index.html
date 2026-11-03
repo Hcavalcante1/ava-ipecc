@@ -1294,7 +1294,7 @@ async function renderAtividades() {
         ${aulasC.length ? aulasC.map(a => {
           const st = entregaMap[`${m.id}:${a.id}`];
           const done = st==='enviada'||st==='avaliada';
-          const pos = aulasC.findIndex(x=>x.id===a.id);
+          const pos = aulasC.indexOf(a);
           const anterior = pos > 0 ? aulasC[pos-1] : null;
           const anteriorStatus = anterior ? entregaMap[`${m.id}:${anterior.id}`] : null;
           // #atividades é o fluxo do aluno, mesmo quando a conta também possui gestão.
