@@ -1046,6 +1046,15 @@ async function renderCurso(cursoId, aulaId) {
     }
   }
 
+  // O aluno segue a sequência: a atividade fica vinculada à aula anterior
+  // concluída e não pode ser acessada apenas alterando a URL.
+  const aulaIndex = aula ? todasAulas.findIndex(a => a.id === aula.id) : -1;
+  const aulaAnterior = aulaIndex > 0 ? todasAulas[aulaIndex - 1] : null;
+  if (!ambienteProfessor && aulaAnterior && !progSet.has(aulaAnterior.id)) {
+    $('#main').innerHTML = `<a class="back-link" href="#atividades">← Voltar para atividades</a><div class="panel" style="text-align:center;padding:48px"><div class="eyebrow">ATIVIDADE COMPLEMENTAR</div><h2>Atividade bloqueada</h2><p class="muted">Conclua primeiro a atividade anterior para liberar esta atividade vinculada à aula correspondente.</p><p style="margin-top:10px;font-weight:700">Anterior: ${esc(aulaAnterior.titulo||'Atividade anterior')}</p><a class="btn-primary" style="margin-top:18px" href="#curso/${encodeURIComponent(cursoId)}/${encodeURIComponent(aulaAnterior.id)}">Abrir atividade anterior →</a></div>`;
+    return;
+  }
+
   // resposta salva
   let respostaSalva = '';
   if (aula && matriculaId) {
@@ -1122,7 +1131,10 @@ async function renderCurso(cursoId, aulaId) {
           ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>{
             const okIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
             const pendIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
-            return `<button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${esc(a.id)}" data-curso="${esc(cursoId)}" style="display:flex;align-items:center;gap:8px">${progSet.has(a.id)?okIcon:pendIcon}<span>${esc(a.titulo)}</span></button>`;
+            const lista = (m.ava_aulas||[]).filter(x=>x.publicada||isAdmin()).sort((x,y)=>x.ordem-y.ordem);
+            const prev = lista[lista.findIndex(x=>x.id===a.id)-1];
+            const locked = !ambienteProfessor && !!prev && !progSet.has(prev.id);
+            return `<button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${locked?'':esc(a.id)}" data-curso="${esc(cursoId)}" ${locked?'disabled':''} title="${locked?'Conclua a atividade anterior para liberar':''}" style="display:flex;align-items:center;gap:8px;${locked?'opacity:.55;cursor:not-allowed':''}">${progSet.has(a.id)?okIcon:pendIcon}<span>${esc(a.titulo)}${locked?' · bloqueada':''}</span></button>`;
           }).join('')}`).join('')}
       </section>
     </div>`}`;
@@ -1282,13 +1294,17 @@ async function renderAtividades() {
         ${aulasC.length ? aulasC.map(a => {
           const st = entregaMap[`${m.id}:${a.id}`];
           const done = st==='enviada'||st==='avaliada';
+          const pos = aulasC.findIndex(x=>x.id===a.id);
+          const anterior = pos > 0 ? aulasC[pos-1] : null;
+          const anteriorStatus = anterior ? entregaMap[`${m.id}:${anterior.id}`] : null;
+          const bloqueada = !isStaff() && !!anterior && !['enviada','avaliada'].includes(anteriorStatus);
           const statusIcon = done
             ? `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
             : `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
           return `<div class="row">
             <div style="display:flex;align-items:center;gap:10px">${statusIcon}<div><strong style="font-size:14px">${esc(a.titulo)}</strong>
-            <p class="muted">${st==='enviada'?'Enviada':st==='avaliada'?'Avaliada':'Pendente'}</p></div></div>
-            <a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}/${encodeURIComponent(a.id)}">Abrir →</a>
+            <p class="muted">${done?'Concluída':bloqueada?'Bloqueada · conclua a anterior':'Liberada · próxima atividade'}</p></div></div>
+            ${bloqueada ? `<button class="btn-secondary" type="button" disabled style="opacity:.55;cursor:not-allowed">Bloqueada</button>` : `<a class="btn-secondary" href="#curso/${encodeURIComponent(c.id)}/${encodeURIComponent(a.id)}">Abrir →</a>`}
           </div>`;
         }).join('') : '<p class="muted">Nenhuma atividade publicada.</p>'}
       </section>`;
