@@ -720,7 +720,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -800,7 +800,7 @@ async function render() {
   $('#nav-link-usuarios').style.display = isStaff() ? 'flex' : 'none';
   const navUsuariosLabel = $('#nav-link-usuarios-label');
   if (navUsuariosLabel) navUsuariosLabel.textContent = isAdmin() ? 'Usuários' : 'Convidar alunos';
-  if ((view === 'gestao' || view === 'sala-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
+  if ((view === 'gestao' || view === 'sala-professor' || view === 'aula-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
     toast('Você não tem acesso a essa área.', false);
     location.hash = 'inicio';
     return;
@@ -828,6 +828,7 @@ async function render() {
     else if (view === 'validar') await renderValidar(parts[1]);
     else if (view === 'gestao') await renderGestao();
     else if (view === 'sala-professor') await renderSalaProfessor();
+    else if (view === 'aula-professor') await renderAulaProfessor();
     else if (view === 'relatorios') await renderRelatorios();
     else if (view === 'correcoes') await renderCorrecoes();
     else if (view === 'usuarios') await renderUsuarios();
@@ -1813,11 +1814,21 @@ async function renderSalaProfessor() {
   const curso = (cursos||[])[0];
   const etapas = [['Acolhida e diagnóstico','30 min'],['Cidadania, ética e fundamentos','45 min'],['Dados pessoais e LGPD','50 min'],['Senhas, 2FA e dispositivos','55 min'],['Phishing e casos reais','60 min'],['Oficina em grupos','50 min'],['Plano pessoal de proteção','35 min'],['Avaliação e fechamento','15 min']];
   $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">IPECC · DOCÊNCIA</div><h1 class="page-title">Ambiente do Professor</h1><p class="sub">Planeje, conduza e acompanhe a aula presencial.</p></div><a class="btn-secondary" href="#gestao">Gestão do curso →</a></div>
-    <div class="panel"><div class="eyebrow">AULA PRESENCIAL · 5 HORAS</div><h2>${esc(curso?.titulo||'Informática Produtiva')}</h2><p class="muted">Aula 1 — Cidadania digital, ética, segurança e proteção de dados</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn-primary" href="#curso/${encodeURIComponent(curso?.id||'')}/94624342-b9d5-4e76-9345-cd1433fe3699">Abrir aula interativa</a><button class="btn-secondary" id="prof-imprimir-roteiro">Imprimir roteiro</button></div></div>
+<div class="panel"><div class="eyebrow">AULA PRESENCIAL · 5 HORAS</div><h2>${esc(curso?.titulo||'Informática Produtiva')}</h2><p class="muted">Aula 1 — Cidadania digital, ética, segurança e proteção de dados</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn-primary" href="#aula-professor">Abrir aula interativa</a><button class="btn-secondary" id="prof-imprimir-roteiro">Imprimir roteiro</button></div></div>
     <div class="panel"><div class="section-header"><h2>Roteiro pedagógico de regência</h2><span class="tag">8 etapas · 5h</span></div><div id="prof-roteiro">${etapas.map((e,i)=>`<label style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="prof-etapa"><span><b>${i+1}. ${e[0]}</b><br><small class="muted">${e[1]}</small></span></label>`).join('')}</div><p id="prof-progresso" class="muted" style="margin-top:14px">0/8 etapas concluídas</p></div>
     <div class="panel"><div class="section-header"><h2>Materiais para a aula</h2><a class="btn-secondary" href="#curso/${encodeURIComponent(curso?.id||'')}/94624342-b9d5-4e76-9345-cd1433fe3699">Abrir materiais →</a></div><p class="muted">Casos reais, materiais de apoio, atividade interativa e registro da aula ficam vinculados à Aula 1.</p></div>`;
   document.querySelectorAll('.prof-etapa').forEach((x)=>x.addEventListener('change',()=>{const n=[...document.querySelectorAll('.prof-etapa:checked')].length;$('#prof-progresso').textContent=`${n}/8 etapas concluídas`}));
   $('#prof-imprimir-roteiro')?.addEventListener('click',()=>window.print());
+}
+
+async function renderAulaProfessor() {
+  const etapas = ['Diagnóstico','Simulação de mensagem','Dados pessoais','Proteção de conta','Caso real','Resposta a incidente','Produto PARE','Avaliação'];
+  $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">AMBIENTE DO PROFESSOR · AULA PRESENCIAL</div><h1 class="page-title">Aula 1 — Cidadania digital, ética, segurança e proteção de dados</h1><p class="sub">Conteúdo interativo da regência · 5 horas</p></div><a class="btn-secondary" href="#sala-professor">← Voltar ao ambiente do professor</a></div><div class="panel"><div class="eyebrow">MISSÃO DE SEGURANÇA</div><h2>Proteja uma identidade digital</h2><p class="muted">O professor conduz cada etapa com a turma e usa o feedback para discutir a decisão.</p><div id="prof-aula-etapas"></div></div><div class="panel"><div class="eyebrow">ROTEIRO PEDAGÓGICO</div><h2>Condução da aula · 5 horas</h2><div id="prof-aula-roteiro"></div></div>`;
+  const respostas = ['Parar e confirmar por canal oficial','Há urgência, canal suspeito e pedido de Pix','Nunca compartilhar senha ou código','Senha exclusiva, atualização, bloqueio e 2FA','Desligar e abrir o aplicativo oficial','Contatar banco, contestar e registrar ocorrência','Qual é a finalidade e quais dados são necessários?','Nunca compartilhar senha ou código'];
+  const perguntas = ['“Seu CPF será bloqueado hoje. Pague o Pix.”','Mensagem com logotipo e urgência: qual sinal?','Senha e código SMS podem ser enviados?','Qual proteção mínima para uma conta?','Falsa central pede Pix para conta segura.','Você já pagou um Pix fraudulento.','Antes de compartilhar um cadastro, pergunte:','Regra final para levar para casa:'];
+  $('#prof-aula-etapas').innerHTML = perguntas.map((p,i)=>`<article style="padding:16px 0;border-top:1px solid var(--line)"><div class="eyebrow">TELA ${i+1} · ${etapas[i]}</div><h3>${p}</h3><button class="btn-secondary prof-answer" data-i="${i}">${respostas[i]}</button><div class="muted prof-feedback" data-i="${i}" style="margin-top:8px"></div></article>`).join('');
+  $('#prof-aula-roteiro').innerHTML = [['Acolhida e diagnóstico','30 min'],['Cidadania, ética e fundamentos','45 min'],['Dados pessoais e LGPD','50 min'],['Senhas, 2FA e dispositivos','55 min'],['Phishing e casos reais','60 min'],['Oficina em grupos','50 min'],['Plano pessoal de proteção','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+  $('#main').querySelectorAll('.prof-answer').forEach(b=>b.addEventListener('click',()=>{b.disabled=true;const f=$(`#prof-aula-roteiro`);const out=document.querySelector(`.prof-feedback[data-i="${b.dataset.i}"]`);if(out)out.textContent='Feedback para condução: decisão segura. Peça que a turma justifique o canal de confirmação e a providência.';}));
 }
 
 // ── Gestão ────────────────────────────────────────────────────────
