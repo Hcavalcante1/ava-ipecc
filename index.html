@@ -238,6 +238,11 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Atividades</span>
     </a>
+    <div class="nav-label">Materiais do aluno</div>
+    <a href="#pdf-atividades" id="nav-link-pdf-atividades">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v4h4M9 12h6M9 16h6"/></svg>
+      <span>PDFs das atividades</span>
+    </a>
     <a href="#trilhas">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
       <span>Trilhas</span>
@@ -724,7 +729,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -828,6 +833,7 @@ async function render() {
     if (view === 'curso')       await renderCurso(parts[1], parts[2]);
     else if (view === 'cursos') await renderCursos();
     else if (view === 'atividades') await renderAtividades();
+    else if (view === 'pdf-atividades') await renderPdfAtividades();
     else if (view === 'certificados') await renderCertificados();
     else if (view === 'solicitacoes') await renderSolicitacoes();
     else if (view === 'perfil')  await renderPerfil();
@@ -1320,6 +1326,20 @@ async function renderAtividades() {
         }).join('') : '<p class="muted">Nenhuma atividade publicada.</p>'}
       </section>`;
     }).join('')}`;
+}
+
+// ── PDFs das atividades ─────────────────────────────────────────
+async function renderPdfAtividades() {
+  if (!currentUser) return;
+  const {data: mats} = await supa.from('ava_matriculas').select('id,ava_turmas(nome,ava_cursos(id,titulo))').eq('aluno_id',currentUser.id).eq('status','ativa');
+  if (!mats?.length) { $('#main').innerHTML=`<div class="panel"><p class="muted">Você não tem matrículas ativas.</p></div>`; return; }
+  const cursoIds = [...new Set(mats.map(m=>m.ava_turmas?.ava_cursos?.id).filter(Boolean))];
+  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,ordem,ava_modulos!inner(curso_id,ordem)').in('ava_modulos.curso_id',cursoIds).eq('publicada',true);
+  const porCurso = {};
+  (aulas||[]).forEach(a => { const cid=a.ava_modulos?.curso_id; if(cid) (porCurso[cid]||=(porCurso[cid]=[])).push(a); });
+  $('#main').innerHTML = `
+    <div class="topline"><div><div class="eyebrow">MATERIAIS DO ALUNO</div><h1 class="page-title">PDFs das atividades</h1><p class="muted" style="margin-top:6px">Materiais complementares para leitura, impressão e montagem da apostila.</p></div></div>
+    ${mats.map(m=>{ const c=m.ava_turmas?.ava_cursos; if(!c) return ''; const list=[...(porCurso[c.id]||[])].sort((a,b)=>(a.ava_modulos?.ordem||0)-(b.ava_modulos?.ordem||0)||(a.ordem||0)-(b.ordem||0)); return `<section class="panel"><div class="eyebrow">CURSO</div><h2 style="margin:4px 0 14px">${esc(c.titulo)}</h2>${list.length?list.map((a,i)=>`<div class="row"><div><strong style="font-size:14px">${i+1}. ${esc(a.titulo)}</strong><p class="muted">PDF da atividade complementar</p></div><a class="btn-secondary" href="/materiais/atividades/${encodeURIComponent(a.id)}.pdf" target="_blank" rel="noopener" download>Baixar PDF →</a></div>`).join(''):'<p class="muted">Nenhuma atividade publicada.</p>'}</section>`}).join('')}`;
 }
 
 // ── Certificados ──────────────────────────────────────────────────
