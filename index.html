@@ -1282,7 +1282,7 @@ async function renderAtividades() {
 
   // aulas por curso
   const cursoIds = [...new Set(mats.map(m=>m.ava_turmas?.ava_cursos?.id).filter(Boolean))];
-  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,modulo_id,ava_modulos(curso_id)').eq('publicada',true);
+  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,modulo_id,ordem,ava_modulos(curso_id,ordem)').eq('publicada',true);
   const aulasPorCurso = {};
   (aulas||[]).forEach(a => {
     const cid = a.ava_modulos?.curso_id;
@@ -1295,9 +1295,9 @@ async function renderAtividades() {
       <h1 class="page-title">Atividades</h1>
     </div></div>
     ${mats.map(m => {
-      const c = m.ava_turmas?.ava_cursos;
+    const c = m.ava_turmas?.ava_cursos;
       if (!c) return '';
-      const aulasC = aulasPorCurso[c.id]||[];
+      const aulasC = [...(aulasPorCurso[c.id]||[])].sort((a,b)=>(a.ava_modulos?.ordem||0)-(b.ava_modulos?.ordem||0) || (a.ordem||0)-(b.ordem||0));
       return `<section class="panel"><h2>${esc(c.titulo)}</h2>
         ${aulasC.length ? aulasC.map(a => {
           const st = entregaMap[`${m.id}:${a.id}`];
