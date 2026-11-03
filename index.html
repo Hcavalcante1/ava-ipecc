@@ -1297,7 +1297,8 @@ async function renderAtividades() {
           const pos = aulasC.findIndex(x=>x.id===a.id);
           const anterior = pos > 0 ? aulasC[pos-1] : null;
           const anteriorStatus = anterior ? entregaMap[`${m.id}:${anterior.id}`] : null;
-          const bloqueada = !isStaff() && !!anterior && !['enviada','avaliada'].includes(anteriorStatus);
+          // #atividades é o fluxo do aluno, mesmo quando a conta também possui gestão.
+          const bloqueada = !!anterior && !['enviada','avaliada'].includes(anteriorStatus);
           const statusIcon = done
             ? `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
             : `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
