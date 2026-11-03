@@ -1013,7 +1013,10 @@ async function inscreverSe(cursoId) {
 // ── Sala de aula ──────────────────────────────────────────────────
 async function renderCurso(cursoId, aulaId) {
   if (!cursoId) { location.hash='#cursos'; return; }
-  const ambienteProfessor = isStaff();
+  // A sala de aprendizagem aberta por #atividades é sempre a visão do aluno,
+  // inclusive quando a mesma conta também possui permissões de gestão.
+  // A regência do professor fica separada em #aula-professor.
+  const ambienteProfessor = false;
 
   const [{data:curso},{data:modulos}] = await Promise.all([
     supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('id',cursoId).single(),
