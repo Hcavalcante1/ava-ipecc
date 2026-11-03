@@ -1097,9 +1097,9 @@ async function renderCurso(cursoId, aulaId) {
         ${!matriculaId && isStaff() ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
       </section>
       <section class="panel">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Conteúdo do curso</h3>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Atividades complementares do AVA</h3>
         <div class="progress-bar" style="margin-bottom:8px"><i style="width:${pct}%"></i></div>
-        <p class="muted" style="margin-bottom:16px">${progSet.size}/${todasAulas.length} atividades</p>
+        <p class="muted" style="margin-bottom:16px">${progSet.size}/${todasAulas.length} atividades complementares publicadas</p>
         ${(modulos||[]).map((m,i)=>`
           <p style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 6px">${i+1}. ${esc(m.titulo)}</p>
           ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>{
@@ -1115,7 +1115,34 @@ async function renderCurso(cursoId, aulaId) {
     const titleEl = $('#aula-titulo');
     if (titleEl) titleEl.textContent = aula.titulo || '';
     const contentEl = $('#lesson-content');
-    if (contentEl) contentEl.innerHTML = aula.conteudo || '';
+    if (contentEl) {
+      contentEl.innerHTML = aula.conteudo || '';
+      if ((aula.titulo||'').toLowerCase().includes('cidadania digital')) {
+        contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0">
+          <div class="eyebrow">AULA INTERATIVA · 5 DESAFIOS</div>
+          <h3 style="margin:6px 0 8px">Aprenda decidindo</h3>
+          <p class="muted">Avance pelas situações. Escolha, confira o resultado e registre sua decisão.</p>
+          <div class="progress-bar" style="margin:12px 0"><i id="aula1-progress" style="width:0%"></i></div>
+        </div>
+        <div id="aula1-interativa"></div>`;
+        contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)">
+          <div class="eyebrow">DESAFIO FINAL</div>
+          <h3 style="margin:6px 0 8px">Monte seu protocolo PARE</h3>
+          <div id="aula1-final"></div>
+        </section>`);
+        const cases = [
+          ['Desafio 1 · Urgência','“Seu CPF será bloqueado. Pague agora pelo link.”',['Pagar.','Sair e consultar o portal oficial digitando o endereço.','Abrir o link.'],1],
+          ['Desafio 2 · Falsa central','“Faça um Pix para a conta segura do banco.”',['Fazer o Pix.','Desligar e abrir o aplicativo oficial.','Informar o código.'],1],
+          ['Desafio 3 · Perfil falso','Um número usa sua foto e pede dinheiro aos seus contatos.',['Negociar.','Avisar, denunciar e registrar ocorrência.','Enviar valor de teste.'],1],
+          ['Desafio 4 · Dados','Um cadastro pede CPF, foto, senha e código SMS para liberar um benefício.',['Enviar tudo.','Perguntar finalidade e não fornecer senha/código.','Mandar primeiro a senha.'],1],
+          ['Desafio 5 · Incidente','Você fez um Pix para um golpista.',['Apagar tudo.','Contatar o banco, contestar, registrar ocorrência e guardar provas.','Fazer outro Pix.'],1]
+        ];
+        const host = $('#aula1-interativa');
+        if (host) host.innerHTML = cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">${c[0]}</div><h3 style="margin:6px 0 12px">Escolha a próxima ação</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula1-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula1-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+        const final = $('#aula1-final');
+        if (final) final.innerHTML = ['Pare','Avalie','Reconfirme','Encerre/denuncie'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula1-final-input" data-step="${i}" placeholder="Escreva sua ação" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula1-finalizar" style="margin-top:8px">Conferir protocolo</button><div id="aula1-final-feedback" class="aula1-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
+      }
+    }
   }
 
   // events — listener único e persistente no #main: como só o innerHTML é
@@ -1125,6 +1152,24 @@ async function renderCurso(cursoId, aulaId) {
   // a próxima navegação de hash. Trocamos a referência a cada render em vez disso.
   if (_cursoClickHandler) $('#main').removeEventListener('click', _cursoClickHandler);
   _cursoClickHandler = async e => {
+    if (e.target.closest('#aula1-finalizar')) {
+      const values = [...document.querySelectorAll('.aula1-final-input')].map(x=>x.value.trim());
+      const f = document.querySelector('#aula1-final-feedback');
+      if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Protocolo completo. Você criou uma sequência de resposta segura.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    const choice = e.target.closest('.aula1-choice');
+    if (choice) {
+      const group = [...document.querySelectorAll(`[data-case="${choice.dataset.case}"]`)];
+      group.forEach(b => { b.disabled = true; });
+      choice.style.background = choice.dataset.choice === '1' ? '#e4f6e9' : '#fff0ed';
+      const feedback = document.querySelector(`[data-feedback="${choice.dataset.case}"]`);
+      if (feedback) { feedback.style.display = 'block'; feedback.innerHTML = (choice.dataset.choice === '1' ? '<strong>Decisão segura.</strong> Pare, confirme por canal oficial e proteja os registros.' : '<strong>Risco.</strong> A urgência, o pagamento, o código ou o link não verificado exigem interrupção.'); }
+      const done = document.querySelectorAll('.aula1-choice[disabled][data-choice="1"]').length;
+      const progress = document.querySelector('#aula1-progress');
+      if (progress) progress.style.width = `${Math.round(done/5*100)}%`;
+      return;
+    }
     // inscrição autosservida (a partir da sala de aula)
     const bi = e.target.closest('[data-inscrever-curso]');
     if (bi) { await inscreverSe(bi.dataset.inscreverCurso); return; }
