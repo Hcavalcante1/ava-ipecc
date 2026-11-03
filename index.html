@@ -1057,13 +1057,6 @@ async function renderCurso(cursoId, aulaId) {
     materiais = mats || [];
   }
 
-  // A Aula 1 presencial pertence ao ambiente de docência. O aluno acessa
-  // apenas as atividades complementares publicadas no AVA.
-  if (!ambienteProfessor && aula?.id === '94624342-b9d5-4e76-9345-cd1433fe3699') {
-    $('#main').innerHTML = `<a class="back-link" href="#cursos">← Voltar</a><div class="panel" style="text-align:center;padding:48px"><div class="eyebrow">CONTEÚDO DO PROFESSOR</div><h2>Aula presencial disponível no ambiente do professor</h2><p class="muted">O aluno deve acessar somente as atividades complementares do AVA.</p><a class="btn-primary" style="margin-top:16px" href="#atividades">Ver atividades complementares →</a></div>`;
-    return;
-  }
-
   const pct = todasAulas.length ? Math.round(progSet.size/todasAulas.length*100) : 0;
 
   $('#main').innerHTML = `
@@ -1139,11 +1132,11 @@ async function renderCurso(cursoId, aulaId) {
     if (contentEl) {
       contentEl.innerHTML = aula.conteudo || '';
       if ((aula.titulo||'').toLowerCase().includes('computador, periféricos')) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:18px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">RECURSO PÚBLICO RECOMENDADO</div><h3 style="margin:6px 0 8px">Introdução à informática · CECIERJ/CEDERJ</h3><p class="muted">Videoaula institucional disponibilizada pela Fundação CECIERJ/Consórcio CEDERJ, sob licença Creative Commons BY-NC-ND. Acesse na fonte original, sem cópia ou alteração.</p><a class="btn-secondary" href="https://eduplay.rnp.br/app/video/112243" target="_blank" rel="noopener">Assistir na fonte institucional →</a><p class="muted" style="font-size:11px;margin-top:8px">Fonte e licença: <a href="https://www.cecierj.edu.br/videoaulas/" target="_blank" rel="noopener">CECIERJ/CEDERJ</a>.</p></section>`);
-      if (ambienteProfessor && (aula.titulo||'').toLowerCase().includes('cidadania digital')) {
+      if ((aula.titulo||'').toLowerCase().includes('cidadania digital')) {
         contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0">
-          <div class="eyebrow">AULA INTERATIVA · MISSÃO DE SEGURANÇA</div>
+          <div class="eyebrow">${ambienteProfessor?'AULA INTERATIVA · MISSÃO DE SEGURANÇA':'ATIVIDADE COMPLEMENTAR INTERATIVA · MISSÃO DE SEGURANÇA'}</div>
           <h3 style="margin:6px 0 8px">Proteja uma identidade digital</h3>
-          <p class="muted">Você vai analisar, escolher, corrigir e responder a incidentes.</p>
+          <p class="muted">${ambienteProfessor?'Você vai analisar, escolher, corrigir e responder a incidentes.':'Analise situações reais, escolha uma resposta e receba o feedback na hora. Esta atividade complementa a aula presencial.'}</p>
           <div class="progress-bar" style="margin:12px 0"><i id="aula1-progress" style="width:0%"></i></div>
         </div><div id="aula1-interativa"></div>`;
         contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)">
