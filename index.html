@@ -259,6 +259,10 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 6.5 2z"/></svg>
       <span>Ambiente do professor</span>
     </a>
+    <a href="#material-pedagogico" id="nav-link-material-pedagogico" style="display:none">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span>Material pedagógico do curso</span>
+    </a>
     <a href="#relatorios" id="nav-link-relatorios" style="display:none">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span>Relatórios</span>
@@ -720,7 +724,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -793,6 +797,7 @@ async function render() {
   $('#nav-label-gestao').style.display = dGestao;
   $('#nav-link-gestao').style.display = navGestaoVisivel ? 'flex' : 'none';
   $('#nav-link-sala-professor').style.display = navGestaoVisivel ? 'flex' : 'none';
+  $('#nav-link-material-pedagogico').style.display = navGestaoVisivel ? 'flex' : 'none';
   $('#nav-link-relatorios').style.display = navGestaoVisivel ? 'flex' : 'none';
   $('#nav-link-correcoes').style.display = navGestaoVisivel ? 'flex' : 'none';
   // professor/monitor também vê este item, mas só para convidar alunos —
@@ -800,7 +805,7 @@ async function render() {
   $('#nav-link-usuarios').style.display = isStaff() ? 'flex' : 'none';
   const navUsuariosLabel = $('#nav-link-usuarios-label');
   if (navUsuariosLabel) navUsuariosLabel.textContent = isAdmin() ? 'Usuários' : 'Convidar alunos';
-  if ((view === 'gestao' || view === 'sala-professor' || view === 'aula-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
+  if ((view === 'gestao' || view === 'sala-professor' || view === 'material-pedagogico' || view === 'aula-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
     toast('Você não tem acesso a essa área.', false);
     location.hash = 'inicio';
     return;
@@ -828,6 +833,7 @@ async function render() {
     else if (view === 'validar') await renderValidar(parts[1]);
     else if (view === 'gestao') await renderGestao();
     else if (view === 'sala-professor') await renderSalaProfessor();
+    else if (view === 'material-pedagogico') await renderMaterialPedagogico();
     else if (view === 'aula-professor') await renderAulaProfessor();
     else if (view === 'relatorios') await renderRelatorios();
     else if (view === 'correcoes') await renderCorrecoes();
@@ -1828,12 +1834,19 @@ async function renderSalaProfessor() {
   $('#prof-imprimir-roteiro')?.addEventListener('click',()=>window.print());
 }
 
+async function renderMaterialPedagogico() {
+  $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">GESTÃO · DOCUMENTOS DO CURSO</div><h1 class="page-title">Material pedagógico do curso</h1><p class="sub">Apostila e roteiro diagramados da Aula 1.</p></div><a class="btn-secondary" href="#sala-professor">← Voltar ao ambiente do professor</a></div><div class="panel"><div class="eyebrow">AULA 1 · CIDADANIA DIGITAL</div><h2>Arquivos para a regência</h2><p class="muted">Esta seção é exclusiva do professor/admin. Os alunos não visualizam estes arquivos.</p><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px"><a class="btn-primary" href="/materiais/aula-1-apostila.pdf" target="_blank" rel="noopener">Abrir apostila do aluno →</a><a class="btn-secondary" href="/materiais/aula-1-roteiro-professor.pdf" target="_blank" rel="noopener">Abrir roteiro do professor →</a></div></div>`;
+}
+
 async function renderAulaProfessor() {
   const etapas = ['Diagnóstico','Simulação de mensagem','Dados pessoais','Proteção de conta','Caso real','Resposta a incidente','Decisão profissional','Avaliação'];
   $('#main').innerHTML = `<div class="topline"><div><div class="eyebrow">AMBIENTE DO PROFESSOR · AULA PRESENCIAL</div><h1 class="page-title">Aula 1 — Cidadania digital, ética, segurança e proteção de dados</h1><p class="sub">Conteúdo interativo da regência · 5 horas</p></div><a class="btn-secondary" href="#sala-professor">← Voltar ao ambiente do professor</a></div><div class="panel"><div class="eyebrow">MATERIAIS DA REGÊNCIA · PROFESSOR/ADMIN</div><h2>Apostila e roteiro</h2><p class="muted">Arquivos de planejamento e exportação da Aula 1. Não aparecem para alunos.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><a class="btn-primary" href="https://www.canva.com/d/wnow-QLJefqz038" target="_blank" rel="noopener">Abrir apostila diagramada →</a><a class="btn-secondary" href="https://www.canva.com/d/MQ-S4_N2BstXCdJ" target="_blank" rel="noopener">Abrir roteiro diagramado →</a></div></div><div class="panel"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h2>Condução da aula · 5 horas</h2><div id="prof-aula-roteiro"></div></div><div class="panel"><div class="eyebrow">AULA INTERATIVA · MISSÃO DE SEGURANÇA</div><h2>Proteja uma identidade digital</h2><p class="muted">Você vai analisar, escolher, corrigir e responder a incidentes.</p><div class="panel" style="background:var(--bg);font-family:monospace;white-space:pre-line">REMETENTE: atendimento-gov\nASSUNTO: último aviso\n\nSeu CPF será bloqueado hoje. Pague o Pix em 10 minutos.</div><div id="prof-aula-etapas"></div></div><div class="panel"><div class="eyebrow">DESAFIO FINAL</div><h2>Monte seu protocolo PARE</h2><div id="prof-aula-final"></div></div>`;
   const materiaisLocais = $('#main')?.querySelectorAll('a[href*="canva.com/d/"]') || [];
   if (materiaisLocais[0]) materiaisLocais[0].href = '/materiais/aula-1-apostila.pdf';
   if (materiaisLocais[1]) materiaisLocais[1].href = '/materiais/aula-1-roteiro-professor.pdf';
+  const linksMaterial = $('#main')?.querySelectorAll('a[href*="canva.com/d/"]') || [];
+  if (linksMaterial[0]) linksMaterial[0].href = '/materiais/aula-1-apostila.pdf';
+  if (linksMaterial[1]) linksMaterial[1].href = '/materiais/aula-1-roteiro-professor.pdf';
   const casos = [
     ['Você recebe uma mensagem urgente de um órgão público.',['Clicar e resolver logo.','Parar e confirmar por canal oficial.','Responder pedindo desconto.'],1],
     ['REMETENTE: atendimento-gov / ASSUNTO: último aviso / AÇÃO: pagar Pix em 10 minutos',['É oficial porque usa logotipo.','Há urgência, canal suspeito e pedido de Pix.','O prazo curto confirma a autenticidade.'],1],
