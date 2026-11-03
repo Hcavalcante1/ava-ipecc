@@ -1105,6 +1105,7 @@ async function renderCurso(cursoId, aulaId) {
             ${isStaff() ? `<button type="button" class="material-delete-btn" data-material-id="${esc(mat.id)}" title="Remover" style="flex-shrink:0;background:none;border:0;color:#b33;cursor:pointer;padding:2px 6px;font-size:13px">✕</button>` : ''}
           </div>`).join('')}
         </div>` : ''}
+        ${aula ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">PDF DA ATIVIDADE</div><p class="muted" style="margin:5px 0 10px">Baixe a versão para leitura, impressão ou montagem da apostila desta atividade.</p><a class="btn-secondary" href="/materiais/atividades/${encodeURIComponent(aula.id)}.pdf" target="_blank" rel="noopener" download>Baixar PDF da atividade →</a></div>` : ''}
         ${aula && isStaff() ? `<details style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--green);text-transform:uppercase">+ Adicionar material de apoio</summary>
           <form class="material-form" data-aula="${esc(aula.id)}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;max-width:460px">
             <label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="150" placeholder="Ex: Apostila do módulo 1"></label>
