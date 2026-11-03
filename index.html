@@ -1028,7 +1028,8 @@ async function renderCurso(cursoId, aulaId) {
   if (!curso) { $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel">Curso não encontrado.</div>`; return; }
 
   // aplainar aulas
-  const todasAulas = (modulos||[]).flatMap(m => (m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).map(a=>({...a,modulo:m})));
+  const todasAulas = (modulos||[]).flatMap(m => (m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).map(a=>({...a,modulo:m})))
+    .sort((a,b)=>(a.modulo?.ordem||0)-(b.modulo?.ordem||0) || (a.ordem||0)-(b.ordem||0));
   const aula = todasAulas.find(a=>a.id===aulaId) || todasAulas[0];
 
   // progresso
