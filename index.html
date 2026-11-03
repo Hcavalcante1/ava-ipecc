@@ -1053,16 +1053,21 @@ async function renderCurso(cursoId, aulaId) {
   // concluída e não pode ser acessada apenas alterando a URL.
   const aulaIndex = aula ? todasAulas.findIndex(a => a.id === aula.id) : -1;
   const aulaAnterior = aulaIndex > 0 ? todasAulas[aulaIndex - 1] : null;
-  if (!ambienteProfessor && aulaAnterior && !progSet.has(aulaAnterior.id)) {
-    $('#main').innerHTML = `<a class="back-link" href="#atividades">← Voltar para atividades</a><div class="panel" style="text-align:center;padding:48px"><div class="eyebrow">ATIVIDADE COMPLEMENTAR</div><h2>Atividade bloqueada</h2><p class="muted">Conclua primeiro a atividade anterior para liberar esta atividade vinculada à aula correspondente.</p><p style="margin-top:10px;font-weight:700">Anterior: ${esc(aulaAnterior.titulo||'Atividade anterior')}</p><a class="btn-primary" style="margin-top:18px" href="#curso/${encodeURIComponent(cursoId)}/${encodeURIComponent(aulaAnterior.id)}">Abrir atividade anterior →</a></div>`;
-    return;
-  }
-
   // resposta salva
   let respostaSalva = '';
   if (aula && matriculaId) {
     const {data:ent} = await supa.from('ava_entregas').select('resposta,status').eq('matricula_id',matriculaId).eq('aula_id',aula.id).single();
     respostaSalva = ent?.resposta || '';
+  }
+
+  let anteriorConcluida = false;
+  if (aulaAnterior && matriculaId) {
+    const {data:entAnterior} = await supa.from('ava_entregas').select('status').eq('matricula_id',matriculaId).eq('aula_id',aulaAnterior.id).maybeSingle();
+    anteriorConcluida = ['enviada','avaliada'].includes(entAnterior?.status);
+  }
+  if (!ambienteProfessor && aulaAnterior && !anteriorConcluida) {
+    $('#main').innerHTML = `<a class="back-link" href="#atividades">← Voltar para atividades</a><div class="panel" style="text-align:center;padding:48px"><div class="eyebrow">ATIVIDADE COMPLEMENTAR</div><h2>Atividade bloqueada</h2><p class="muted">Conclua primeiro a atividade anterior para liberar esta atividade vinculada à aula correspondente.</p><p style="margin-top:10px;font-weight:700">Anterior: ${esc(aulaAnterior.titulo||'Atividade anterior')}</p><a class="btn-primary" style="margin-top:18px" href="#curso/${encodeURIComponent(cursoId)}/${encodeURIComponent(aulaAnterior.id)}">Abrir atividade anterior →</a></div>`;
+    return;
   }
 
   // materiais de apoio
