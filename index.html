@@ -792,7 +792,10 @@ async function render() {
   // nav de Gestão (Cursos e turmas / Relatórios) só aparece para quem tem
   // acesso de fato — para um aluno comum esses itens eram sempre visíveis,
   // mesmo sem nenhuma ação disponível ao entrar neles
-  const navGestaoVisivel = isStaff();
+  // Nas rotas do aluno, inclusive para uma conta de teste que acumule
+  // permissões, a navegação deve apresentar somente a experiência do aluno.
+  // A gestão permanece disponível apenas nas rotas próprias do professor/admin.
+  const navGestaoVisivel = isStaff() && !['atividades','curso'].includes(view);
   const dGestao = navGestaoVisivel ? '' : 'none';
   $('#nav-label-gestao').style.display = dGestao;
   $('#nav-link-gestao').style.display = navGestaoVisivel ? 'flex' : 'none';
@@ -802,7 +805,7 @@ async function render() {
   $('#nav-link-correcoes').style.display = navGestaoVisivel ? 'flex' : 'none';
   // professor/monitor também vê este item, mas só para convidar alunos —
   // a gestão completa de usuários (mudar papel, ativar/desativar) é só do admin
-  $('#nav-link-usuarios').style.display = isStaff() ? 'flex' : 'none';
+  $('#nav-link-usuarios').style.display = navGestaoVisivel ? 'flex' : 'none';
   const navUsuariosLabel = $('#nav-link-usuarios-label');
   if (navUsuariosLabel) navUsuariosLabel.textContent = isAdmin() ? 'Usuários' : 'Convidar alunos';
   if ((view === 'gestao' || view === 'sala-professor' || view === 'material-pedagogico' || view === 'aula-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
