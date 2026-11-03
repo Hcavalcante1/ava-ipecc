@@ -1000,6 +1000,7 @@ async function inscreverSe(cursoId) {
 // ── Sala de aula ──────────────────────────────────────────────────
 async function renderCurso(cursoId, aulaId) {
   if (!cursoId) { location.hash='#cursos'; return; }
+  const ambienteProfessor = isStaff();
 
   const [{data:curso},{data:modulos}] = await Promise.all([
     supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('id',cursoId).single(),
@@ -1055,7 +1056,7 @@ async function renderCurso(cursoId, aulaId) {
     ${todasAulas.length === 0 ? `<div class="panel" style="text-align:center;padding:48px"><p class="muted">Nenhuma atividade publicada ainda.</p>${isAdmin()?`<a class="btn-secondary" style="margin-top:16px" href="#gestao">Gerenciar conteúdo</a>`:''}</div>` : `
     <div class="lesson-layout">
       <section class="panel" id="lesson-body">
-        <span class="tag warn">ATIVIDADE COMPLEMENTAR</span>
+        <span class="tag ${ambienteProfessor?'':'warn'}">${ambienteProfessor?'SALA DE AULA PRESENCIAL · PROFESSOR/ADMIN':'ATIVIDADE COMPLEMENTAR DO AVA'}</span>
         <h2 class="lesson-title" id="aula-titulo"></h2>
         ${aula?.video_url ? `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:16px 0">
           <iframe src="${esc(aula.video_url.replace('watch?v=','embed/').replace('youtu.be/','youtube.com/embed/'))}"
@@ -1097,9 +1098,9 @@ async function renderCurso(cursoId, aulaId) {
         ${!matriculaId && isStaff() ? `<p class="muted" style="margin-top:12px;font-size:12px">Você não tem matrícula ativa neste curso.</p>` : ''}
       </section>
       <section class="panel">
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Atividades complementares do AVA</h3>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 6.5 2z"/></svg>${ambienteProfessor?'Aulas do curso · ambiente do professor/admin':'Atividades complementares do AVA'}</h3>
         <div class="progress-bar" style="margin-bottom:8px"><i style="width:${pct}%"></i></div>
-        <p class="muted" style="margin-bottom:16px">${progSet.size}/${todasAulas.length} atividades complementares publicadas</p>
+        <p class="muted" style="margin-bottom:16px">${ambienteProfessor?'Conteúdo oficial do curso · '+todasAulas.length+' aulas':' '+progSet.size+'/'+todasAulas.length+' atividades complementares publicadas'}</p>
         ${(modulos||[]).map((m,i)=>`
           <p style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 6px">${i+1}. ${esc(m.titulo)}</p>
           ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>{
@@ -1117,7 +1118,7 @@ async function renderCurso(cursoId, aulaId) {
     const contentEl = $('#lesson-content');
     if (contentEl) {
       contentEl.innerHTML = aula.conteudo || '';
-      if ((aula.titulo||'').toLowerCase().includes('cidadania digital')) {
+      if (!ambienteProfessor && (aula.titulo||'').toLowerCase().includes('cidadania digital')) {
         contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0">
           <div class="eyebrow">AULA INTERATIVA · MISSÃO DE SEGURANÇA</div>
           <h3 style="margin:6px 0 8px">Proteja uma identidade digital</h3>
