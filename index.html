@@ -1119,28 +1119,30 @@ async function renderCurso(cursoId, aulaId) {
       contentEl.innerHTML = aula.conteudo || '';
       if ((aula.titulo||'').toLowerCase().includes('cidadania digital')) {
         contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0">
-          <div class="eyebrow">AULA INTERATIVA · 5 DESAFIOS</div>
-          <h3 style="margin:6px 0 8px">Aprenda decidindo</h3>
-          <p class="muted">Avance pelas situações. Escolha, confira o resultado e registre sua decisão.</p>
+          <div class="eyebrow">AULA INTERATIVA · MISSÃO DE SEGURANÇA</div>
+          <h3 style="margin:6px 0 8px">Proteja uma identidade digital</h3>
+          <p class="muted">Você vai analisar, escolher, corrigir e responder a incidentes.</p>
           <div class="progress-bar" style="margin:12px 0"><i id="aula1-progress" style="width:0%"></i></div>
-        </div>
-        <div id="aula1-interativa"></div>`;
+        </div><div id="aula1-interativa"></div>`;
         contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)">
           <div class="eyebrow">DESAFIO FINAL</div>
           <h3 style="margin:6px 0 8px">Monte seu protocolo PARE</h3>
           <div id="aula1-final"></div>
         </section>`);
         const cases = [
-          ['Desafio 1 · Urgência','“Seu CPF será bloqueado. Pague agora pelo link.”',['Pagar.','Sair e consultar o portal oficial digitando o endereço.','Abrir o link.'],1],
-          ['Desafio 2 · Falsa central','“Faça um Pix para a conta segura do banco.”',['Fazer o Pix.','Desligar e abrir o aplicativo oficial.','Informar o código.'],1],
-          ['Desafio 3 · Perfil falso','Um número usa sua foto e pede dinheiro aos seus contatos.',['Negociar.','Avisar, denunciar e registrar ocorrência.','Enviar valor de teste.'],1],
-          ['Desafio 4 · Dados','Um cadastro pede CPF, foto, senha e código SMS para liberar um benefício.',['Enviar tudo.','Perguntar finalidade e não fornecer senha/código.','Mandar primeiro a senha.'],1],
-          ['Desafio 5 · Incidente','Você fez um Pix para um golpista.',['Apagar tudo.','Contatar o banco, contestar, registrar ocorrência e guardar provas.','Fazer outro Pix.'],1]
+          ['Tela 1 · Diagnóstico','Você recebe uma mensagem urgente de um órgão público.',['Clicar e resolver logo.','Parar e confirmar por canal oficial.','Responder pedindo desconto.'],1],
+          ['Tela 2 · Simulação de mensagem','REMETENTE: atendimento-gov\nASSUNTO: último aviso\nAÇÃO: pagar Pix em 10 minutos',['É oficial porque usa logotipo.','Há urgência, canal suspeito e pedido de Pix.','O prazo curto confirma a autenticidade.'],1],
+          ['Tela 3 · Dados pessoais','Arraste mentalmente o dado para a decisão: senha e código SMS.',['Podem ser enviados para suporte.','Nunca devem ser compartilhados.','Devem ser publicados para segurança.'],1],
+          ['Tela 4 · Proteção de conta','Qual combinação protege melhor uma conta importante?',['Senha repetida e sem bloqueio.','Senha exclusiva, atualização, bloqueio e 2FA.','Código SMS enviado ao atendente.'],1],
+          ['Tela 5 · Caso real','Falsa central pede Pix para “conta segura”.',['Fazer Pix.','Desligar e abrir o aplicativo oficial.','Informar o código.'],1],
+          ['Tela 6 · Resposta a incidente','Você fez Pix para um golpista.',['Apagar provas.','Contatar banco, contestar, registrar ocorrência e guardar provas.','Fazer outro Pix.'],1],
+          ['Tela 7 · Decisão profissional','Antes de compartilhar um cadastro, qual pergunta vem primeiro?',['Qual é a finalidade e quais dados são necessários?','Posso enviar senha também?','O link tem aparência bonita?'],0],
+          ['Tela 8 · Avaliação','Qual regra você levará para casa?',['Nunca compartilhar senha ou código.','Pagar quando houver ameaça.','Confiar no nome do remetente.'],0]
         ];
         const host = $('#aula1-interativa');
-        if (host) host.innerHTML = cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">${c[0]}</div><h3 style="margin:6px 0 12px">Escolha a próxima ação</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula1-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula1-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+        if (host) host.innerHTML = `<div class="panel" style="background:var(--surface);border:1px solid var(--line);margin-bottom:12px"><div class="eyebrow">SIMULAÇÃO</div><div style="font-family:monospace;white-space:pre-line;padding:14px;background:var(--bg);border-radius:8px">REMETENTE: atendimento-gov\nASSUNTO: último aviso\n\nSeu CPF será bloqueado hoje. Pague o Pix em 10 minutos.</div></div>` + cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">${c[0]}</div><h3 style="margin:6px 0 12px">Escolha e receba o resultado</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula1-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula1-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
         const final = $('#aula1-final');
-        if (final) final.innerHTML = ['Pare','Avalie','Reconfirme','Encerre/denuncie'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula1-final-input" data-step="${i}" placeholder="Escreva sua ação" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula1-finalizar" style="margin-top:8px">Conferir protocolo</button><div id="aula1-final-feedback" class="aula1-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
+        if (final) final.innerHTML = ['Pare','Avalie','Reconfirme','Encerre/denuncie'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula1-final-input" data-step="${i}" placeholder="Digite sua ação" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula1-finalizar" style="margin-top:8px">Finalizar missão</button><div id="aula1-final-feedback" class="aula1-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
       }
     }
   }
