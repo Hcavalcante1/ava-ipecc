@@ -1082,6 +1082,12 @@ function renderAulaCompletaInteractive(contentEl, ambienteProfessor, aula) {
   if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Apresentação do conceito','50 min'],['Demonstração guiada','55 min'],['Prática individual ou em grupo','75 min'],['Aplicação em situação real','55 min'],['Revisão e feedback','45 min'],['Produto da aula','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
 }
 
+function renderInteractivePreservingLesson(contentEl, renderFn) {
+  const lessonContent = contentEl.innerHTML;
+  renderFn();
+  if (lessonContent) contentEl.innerHTML = lessonContent + contentEl.innerHTML;
+}
+
 const AULA_BLOCO_5_9 = [
   {key:'aula5',match:'e-mail profissional e envio de documentos',area:'COMUNICAÇÃO PROFISSIONAL',titulo:'Escreva e envie documentos com clareza',professor:'Conduza a criação de um e-mail profissional, a escolha de anexos e a conferência antes do envio.',aluno:'Pratique assunto, destinatário, anexo e revisão antes de enviar uma mensagem de trabalho.',desafio:'Prepare um envio profissional',missao:'enviar um documento correto, para a pessoa correta, com uma mensagem clara.',cases:[['Assunto','Qual assunto ajuda o destinatário?',['Currículo - Helena Souza - vaga de auxiliar','Oi','URGENTE!!!'],0],['Destinatário','Antes de enviar, qual conferência é essencial?',['Verificar endereço e destinatários','Adicionar todos os contatos','Enviar para si mesmo sem revisar'],0],['Anexo','Como evitar esquecer o arquivo?',['Anexar, abrir e conferir o documento antes de enviar','Escrever “anexo” e não anexar','Mandar o arquivo depois sem contexto'],0],['Mensagem','Qual abertura é adequada?',['Prezada equipe, encaminho o documento solicitado.','E aí, olha isso','Segue aí'],0],['Formato','Qual formato facilita leitura e compartilhamento?',['PDF quando a formatação precisa ser preservada','Foto borrada da tela','Arquivo sem extensão'],0],['Revisão','O que fazer antes de clicar em enviar?',['Revisar texto, anexo e destinatário','Aumentar o número de destinatários','Apagar o assunto'],0]],final:['Defina o assunto','Confirme o destinatário','Anexe e abra o arquivo','Revise e envie'],roteiro:[['Acolhida e diagnóstico','30 min'],['Anatomia do e-mail profissional','45 min'],['Assunto, saudação e clareza','50 min'],['Anexos e formatos','50 min'],['Revisão e segurança','45 min'],['Oficina de envio','75 min'],['Resposta e acompanhamento','30 min'],['Avaliação e fechamento','15 min']]},
   {key:'aula6',match:'digitalização, pdf e organização documental',area:'DOCUMENTOS DIGITAIS',titulo:'Digitalize, converta e organize documentos',professor:'Conduza a digitalização, a conferência de legibilidade, a conversão para PDF e a nomeação dos arquivos.',aluno:'Pratique como transformar um documento físico em arquivo digital organizado e pronto para uso.',desafio:'Monte um documento digitalizável',missao:'criar um PDF legível, nomeado e armazenado no local correto.',cases:[['Captura','O que melhora uma digitalização?',['Documento alinhado, inteiro e bem iluminado','Foto inclinada e escura','Cortar a assinatura'],0],['Legibilidade','Como conferir o resultado?',['Abrir o PDF e verificar todas as páginas','Confiar apenas na miniatura','Enviar sem abrir'],0],['Nome','Qual nome facilita localizar o arquivo?',['2026-11-08_declaracao_assinada.pdf','scan1.pdf','documento novo final final'],0],['Formato','Quando o PDF é útil?',['Quando se quer preservar a aparência do documento','Somente para apagar texto','Para substituir qualquer arquivo editável'],0],['Pasta','Onde guardar?',['Pasta do projeto com nome e data','Área de trabalho sem organização','Pasta de downloads para sempre'],0],['Compartilhamento','Qual cuidado evita exposição?',['Compartilhar apenas com quem precisa e revisar permissões','Liberar edição pública','Enviar em grupo aberto'],0]],final:['Confira a imagem','Gere o PDF','Nomeie com data e assunto','Guarde e compartilhe com cuidado'],roteiro:[['Acolhida e diagnóstico','30 min'],['Digitalização e qualidade','50 min'],['PDF e preservação de layout','45 min'],['Nomes e versões','45 min'],['Pastas e organização','55 min'],['Oficina de digitalização','80 min'],['Compartilhamento seguro','20 min'],['Avaliação e fechamento','15 min']]},
@@ -1271,15 +1277,15 @@ async function renderCurso(cursoId, aulaId) {
         const roteiro = $('#aula1-roteiro-professor');
         if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Cidadania, ética e fundamentos','45 min'],['Dados pessoais e LGPD','50 min'],['Senhas, 2FA e dispositivos','55 min'],['Phishing e casos reais','60 min'],['Oficina em grupos','50 min'],['Plano pessoal de proteção','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="aula1-roteiro-check"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
       } else if ((aula.titulo||'').toLowerCase().includes('computador, periféricos')) {
-        renderAula2Interactive(contentEl, ambienteProfessor);
+        renderInteractivePreservingLesson(contentEl, () => renderAula2Interactive(contentEl, ambienteProfessor));
       } else if ((aula.titulo||'').toLowerCase().includes('pastas, arquivos, nuvem')) {
-        renderAula3Interactive(contentEl, ambienteProfessor);
+        renderInteractivePreservingLesson(contentEl, () => renderAula3Interactive(contentEl, ambienteProfessor));
       } else if ((aula.titulo||'').toLowerCase().includes('internet, pesquisa')) {
-        renderAula4Interactive(contentEl, ambienteProfessor);
+        renderInteractivePreservingLesson(contentEl, () => renderAula4Interactive(contentEl, ambienteProfessor));
       } else {
         const blocoCfg = AULA_BLOCO_5_9.concat(AULA_BLOCO_10_14).find(cfg => (aula.titulo||'').toLowerCase().includes(cfg.match));
-        if (blocoCfg) renderAulaBlocoInteractive(contentEl, ambienteProfessor, blocoCfg);
-        else if (aulaIndex >= 14) renderAulaCompletaInteractive(contentEl, ambienteProfessor, aula);
+        if (blocoCfg) renderInteractivePreservingLesson(contentEl, () => renderAulaBlocoInteractive(contentEl, ambienteProfessor, blocoCfg));
+        else if (aulaIndex >= 14) renderInteractivePreservingLesson(contentEl, () => renderAulaCompletaInteractive(contentEl, ambienteProfessor, aula));
       }
     }
   }
