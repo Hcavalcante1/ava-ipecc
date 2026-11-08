@@ -1044,6 +1044,18 @@ function renderAula3Interactive(contentEl, ambienteProfessor) {
   if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Pastas e critérios de organização','55 min'],['Nomes, versões e formatos','45 min'],['Nuvem e compartilhamento','55 min'],['Backup e recuperação','55 min'],['Oficina de organização','60 min'],['Dispositivos removíveis','25 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
 }
 
+function renderAula4Interactive(contentEl, ambienteProfessor) {
+  contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0"><div class="eyebrow">${ambienteProfessor?'AULA INTERATIVA · PESQUISA CONFIÁVEL':'ATIVIDADE COMPLEMENTAR INTERATIVA · PESQUISA CONFIÁVEL'}</div><h3 style="margin:6px 0 8px">Investigue antes de compartilhar</h3><p class="muted">${ambienteProfessor?'Conduza a comparação de fontes, a identificação de evidências e a decisão responsável antes do compartilhamento.':'Pratique como pesquisar, comparar fontes e reconhecer sinais de informação duvidosa.'}</p><div class="progress-bar" style="margin:12px 0"><i id="aula4-progress" style="width:0%"></i></div></div><div id="aula4-interativa"></div><section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)"><div class="eyebrow">DESAFIO FINAL</div><h3 style="margin:6px 0 8px">Monte seu protocolo de verificação</h3><div id="aula4-final"></div></section>`;
+  const cases = [['Urgência','Uma mensagem pede compartilhamento imediato. Qual é o primeiro passo?',['Parar e verificar a origem','Compartilhar para alertar todos','Confiar porque veio de um conhecido'],0],['Autoria','Qual evidência ajuda a avaliar uma publicação?',['Autor identificado, data e fonte consultável','A quantidade de emojis','O número de encaminhamentos'],0],['Comparação','Como confirmar uma informação relevante?',['Comparar com fontes independentes e confiáveis','Ler apenas o título','Escolher a versão mais alarmante'],0],['Endereço','O que observar em uma página?',['Domínio, conexão, data e coerência do conteúdo','Somente as cores do site','A promessa de prêmio'],0],['Imagem','Uma imagem parece provar uma notícia. O que fazer?',['Buscar contexto e origem da imagem','Assumir que a imagem basta','Publicar sem legenda'],0],['Decisão','Quando não há evidência suficiente, qual conduta é mais segura?',['Não compartilhar e continuar verificando','Compartilhar com “talvez seja verdade”','Apagar a fonte consultada'],0]];
+  const host = $('#aula4-interativa');
+  if (host) host.innerHTML = `<div class="panel" style="background:var(--surface);border:1px solid var(--line);margin-bottom:12px"><div class="eyebrow">SIMULAÇÃO</div><div style="padding:14px;background:var(--bg);border-radius:8px"><strong>Missão:</strong> decidir se uma informação está pronta para ser compartilhada.</div></div>` + cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">TELA ${i+1} · ${c[0]}</div><h3 style="margin:6px 0 12px">${c[1]}</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula4-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula4-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+  const final = $('#aula4-final');
+  if (final) final.innerHTML = ['Pare antes de compartilhar','Identifique a fonte','Compare evidências','Decida e registre'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula4-final-input" data-step="${i}" placeholder="Digite sua ação" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula4-finalizar" style="margin-top:8px">Finalizar verificação</button><div id="aula4-final-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
+  if (ambienteProfessor) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h3 style="margin:6px 0 10px">Condução da aula · 5 horas</h3><div id="aula4-roteiro-professor"></div></section>`);
+  const roteiro = $('#aula4-roteiro-professor');
+  if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Busca e palavras-chave','45 min'],['Autoria, data e contexto','50 min'],['Comparação de fontes','60 min'],['Imagens e evidências','45 min'],['Oficina de verificação','70 min'],['Decisão de compartilhamento','25 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+}
+
 async function renderCurso(cursoId, aulaId) {
   if (!cursoId) { location.hash='#cursos'; return; }
   // A sala de aprendizagem aberta por #atividades é sempre a visão do aluno,
@@ -1220,6 +1232,8 @@ async function renderCurso(cursoId, aulaId) {
         renderAula2Interactive(contentEl, ambienteProfessor);
       } else if ((aula.titulo||'').toLowerCase().includes('pastas, arquivos, nuvem')) {
         renderAula3Interactive(contentEl, ambienteProfessor);
+      } else if ((aula.titulo||'').toLowerCase().includes('internet, pesquisa')) {
+        renderAula4Interactive(contentEl, ambienteProfessor);
       }
     }
   }
@@ -1258,6 +1272,24 @@ async function renderCurso(cursoId, aulaId) {
       if (feedback) { feedback.style.display='block'; feedback.innerHTML = choice3.dataset.choice === '0' ? '<strong>Boa prática.</strong> Essa escolha melhora organização, recuperação ou controle de acesso.' : '<strong>Revise a decisão.</strong> Pense em localização, cópia de segurança e permissões.'; }
       const done = document.querySelectorAll('.aula3-choice[disabled][data-choice="0"]').length;
       const progress = document.querySelector('#aula3-progress');
+      if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
+      return;
+    }
+    if (e.target.closest('#aula4-finalizar')) {
+      const values = [...document.querySelectorAll('.aula4-final-input')].map(x=>x.value.trim());
+      const f = document.querySelector('#aula4-final-feedback');
+      if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Verificação concluída. Você registrou uma decisão responsável antes do compartilhamento.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    const choice4 = e.target.closest('.aula4-choice');
+    if (choice4) {
+      const group = [...document.querySelectorAll(`.aula4-choice[data-case="${choice4.dataset.case}"]`)];
+      group.forEach(b => { b.disabled = true; });
+      choice4.style.background = choice4.dataset.choice === '0' ? '#e4f6e9' : '#fff0ed';
+      const feedback = document.querySelector(`.aula4-feedback[data-feedback="${choice4.dataset.case}"]`);
+      if (feedback) { feedback.style.display='block'; feedback.innerHTML = choice4.dataset.choice === '0' ? '<strong>Boa decisão.</strong> Você priorizou evidência, contexto e confirmação.' : '<strong>Revise a decisão.</strong> Popularidade, urgência e aparência não substituem verificação.'; }
+      const done = document.querySelectorAll('.aula4-choice[disabled][data-choice="0"]').length;
+      const progress = document.querySelector('#aula4-progress');
       if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
       return;
     }
