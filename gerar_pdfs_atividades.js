@@ -42,17 +42,32 @@ function pdfFor(aulaId, items) {
     content.push(`${i+1}. ${item.titulo||'Atividade'}`, `Duracao estimada: ${item.duracao_min||15} minutos | Tipo: ${item.tipo||'atividade'}`, '', plain(item.instrucoes||''), '', `Registro solicitado: ${item.pergunta||'Registre o que aprendeu.'}`, '', 'Registro do aluno:', '________________________________________________________________________________', '');
   });
   const all=[]; content.forEach(x=>lines(x,88).forEach(y=>all.push(y)));
-  const perPage=40, pages=[]; for(let i=0;i<all.length;i+=perPage) pages.push(all.slice(i,i+perPage));
+  const perPage=40, pages=[[]]; for(let i=0;i<all.length;i+=perPage) pages.push(all.slice(i,i+perPage));
   const objects=[]; const add=o=>{objects.push(o);return objects.length;};
   const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
   const bold=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
   const pageIds=[]; const contentIds=[];
   for (let p=0;p<pages.length;p++) {
-    const cmds=['q','0.08 0.25 0.20 rg','0 792 595 50 re','f','0.86 0.67 0.25 rg','0 786 595 6 re','f','0.96 0.97 0.95 rg','40 60 515 650 re','f','Q'];
-    cmds.push('BT','/F2 18 Tf','1 1 1 rg','52 813 Td',`(${esc(p===0?'IPECC | ATIVIDADE COMPLEMENTAR':'IPECC | MATERIAL DE APOIO')}) Tj`,'ET');
-    cmds.push('BT','/F2 9 Tf','0.08 0.25 0.20 rg','52 748 Td',`(${esc(`Aula complementar  |  ${aulaId}`)}) Tj`,'ET');
+    const cmds=[];
     let y=708;
+    if (p===0) {
+      cmds.push('q','0.08 0.25 0.20 rg','0 0 595 842 re','f','0.74 0.88 0.82 rg','0 0 595 74 re','f','0.86 0.67 0.25 rg','0 74 595 5 re','f','Q');
+      cmds.push('BT','/F1 8 Tf','1 1 1 rg','52 790 Td','(IPECC - AVA NOVO RUMO) Tj','ET');
+      cmds.push('BT','/F2 28 Tf','1 1 1 rg','52 680 Td','(Atividade complementar) Tj','ET');
+      const coverTitleLines = lines(title, 42).slice(0, 3);
+      coverTitleLines.forEach((line, li) => cmds.push('BT','/F2 15 Tf','1 1 1 rg',`52 ${642-li*22} Td`,`(${esc(line)}) Tj`,'ET'));
+      cmds.push('q','0.06 0.55 0.57 rg','390 590 120 120 re','f','0.86 0.67 0.25 rg','425 618 50 64 re','f','0.08 0.25 0.20 rg','438 636 24 28 re','f','Q');
+      cmds.push('q','1 1 1 rg','52 430 458 88 re','f','Q');
+      cmds.push('BT','/F2 12 Tf','0.08 0.25 0.20 rg','70 482 Td','(Aprenda fazendo) Tj','ET');
+      cmds.push('BT','/F1 9 Tf','0.18 0.22 0.21 rg','70 458 Td','(Leia, realize e registre a atividade no AVA.) Tj','ET');
+      cmds.push('BT','/F1 8 Tf','0.08 0.25 0.20 rg','52 34 Td','(IPECC - material do aluno) Tj','ET');
+    } else {
+      cmds.push('q','0.08 0.25 0.20 rg','0 792 595 50 re','f','0.86 0.67 0.25 rg','0 786 595 6 re','f','0.96 0.97 0.95 rg','40 60 515 650 re','f','Q');
+      cmds.push('BT','/F2 18 Tf','1 1 1 rg','52 813 Td','(IPECC | MATERIAL DE APOIO) Tj','ET');
+      cmds.push('BT','/F2 9 Tf','0.08 0.25 0.20 rg','52 748 Td',`(${esc(`Atividade complementar  |  ${aulaId}`)}) Tj`,'ET');
+    }
     pages[p].forEach((line,j)=>{
+      if (p===0) return;
       const isTitle = j===0 || /^\d+\./.test(line) || line.startsWith('Registro solicitado:');
       const size=isTitle?11:9;
       const color=isTitle?'0.08 0.25 0.20':'0.18 0.22 0.21';
@@ -60,7 +75,7 @@ function pdfFor(aulaId, items) {
       cmds.push('BT',`${isTitle?'/F2':'/F1'} ${size} Tf`,`${color} rg`,`52 ${y} Td`,`(${esc(line)}) Tj`,'ET');
       y-=isTitle?24:15;
     });
-    cmds.push('BT','/F1 8 Tf','0.35 0.39 0.37 rg','52 38 Td',`(${esc(`IPECC  |  Atividade complementar  |  Pagina ${p+1} de ${pages.length}`)}) Tj`,'ET');
+    if (p>0) cmds.push('BT','/F1 8 Tf','0.35 0.39 0.37 rg','52 38 Td',`(${esc(`IPECC  |  Atividade complementar  |  Pagina ${p+1} de ${pages.length}`)}) Tj`,'ET');
     const stream=cmds.join('\n'); const cid=add(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`); contentIds.push(cid); pageIds.push(add(''));
   }
   const pagesId=add('');

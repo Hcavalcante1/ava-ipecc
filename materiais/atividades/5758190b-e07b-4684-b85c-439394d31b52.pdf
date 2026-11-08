@@ -6,7 +6,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 3 0 obj
-<< /Length 699 >>
+<< /Length 739 >>
 stream
 q
 0.08 0.25 0.20 rg
@@ -32,10 +32,16 @@ BT
 (Atividade complementar) Tj
 ET
 BT
-/F2 17 Tf
+/F2 15 Tf
 1 1 1 rg
 52 642 Td
-(Pastas, arquivos, nuvem e dispositivos removveis) Tj
+(Pastas, arquivos, nuvem e dispositivos) Tj
+ET
+BT
+/F2 15 Tf
+1 1 1 rg
+52 620 Td
+(removveis) Tj
 ET
 q
 0.06 0.55 0.57 rg
@@ -865,17 +871,17 @@ xref
 0000000009 00000 n 
 0000000079 00000 n 
 0000000154 00000 n 
-0000000904 00000 n 
-0000001041 00000 n 
-0000005453 00000 n 
-0000005590 00000 n 
-0000010050 00000 n 
-0000010187 00000 n 
-0000013323 00000 n 
-0000013461 00000 n 
-0000013538 00000 n 
+0000000944 00000 n 
+0000001081 00000 n 
+0000005493 00000 n 
+0000005630 00000 n 
+0000010090 00000 n 
+0000010227 00000 n 
+0000013363 00000 n 
+0000013501 00000 n 
+0000013578 00000 n 
 trailer
 << /Size 13 /Root 12 0 R >>
 startxref
-13589
+13629
 %%EOF
