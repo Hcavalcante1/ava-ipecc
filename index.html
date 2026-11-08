@@ -1032,6 +1032,18 @@ function renderAula2Interactive(contentEl, ambienteProfessor) {
   if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Componentes e funções','55 min'],['Periféricos e acessibilidade','45 min'],['Teclado e atalhos','50 min'],['Sistema operacional e arquivos','60 min'],['Oficina de organização','55 min'],['Prática de segurança','30 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
 }
 
+function renderAula3Interactive(contentEl, ambienteProfessor) {
+  contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0"><div class="eyebrow">${ambienteProfessor?'AULA INTERATIVA · ORGANIZAÇÃO DIGITAL':'ATIVIDADE COMPLEMENTAR INTERATIVA · ORGANIZAÇÃO DIGITAL'}</div><h3 style="margin:6px 0 8px">Organize, encontre e proteja seus arquivos</h3><p class="muted">${ambienteProfessor?'Conduza a criação de uma estrutura de pastas, o uso consciente da nuvem e a remoção segura de dispositivos.':'Pratique decisões de organização, backup e segurança para seus arquivos.'}</p><div class="progress-bar" style="margin:12px 0"><i id="aula3-progress" style="width:0%"></i></div></div><div id="aula3-interativa"></div><section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)"><div class="eyebrow">DESAFIO FINAL</div><h3 style="margin:6px 0 8px">Monte seu plano de organização</h3><div id="aula3-final"></div></section>`;
+  const cases = [['Nomeação','Qual nome facilita encontrar um documento depois?',['documento-final.docx','Novo Documento (3)','arquivo'],0],['Pastas','Como organizar melhor documentos de um projeto?',['Criar uma pasta do projeto com subpastas claras','Salvar tudo na área de trabalho','Misturar documentos de projetos diferentes'],0],['Nuvem','Qual é uma boa prática ao usar armazenamento em nuvem?',['Ativar sincronização e revisar o compartilhamento','Deixar qualquer pessoa com acesso de edição','Usar a mesma senha em todos os serviços'],0],['Backup','Por que manter uma cópia de segurança?',['Para recuperar o arquivo se o original for perdido ou danificado','Para duplicar arquivos sem organização','Para substituir toda proteção do computador'],0],['Dispositivo removível','Antes de retirar um pendrive, o que fazer?',['Ejetar com segurança','Puxar enquanto o arquivo está aberto','Desligar apenas o monitor'],0],['Privacidade','Ao compartilhar uma pasta, qual cuidado vem primeiro?',['Conferir quem terá acesso e qual permissão precisa','Enviar o link em qualquer grupo','Liberar edição para todos'],0]];
+  const host = $('#aula3-interativa');
+  if (host) host.innerHTML = `<div class="panel" style="background:var(--surface);border:1px solid var(--line);margin-bottom:12px"><div class="eyebrow">SIMULAÇÃO</div><div style="padding:14px;background:var(--bg);border-radius:8px"><strong>Missão:</strong> encontrar um documento importante em menos de um minuto e manter uma cópia protegida.</div></div>` + cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">TELA ${i+1} · ${c[0]}</div><h3 style="margin:6px 0 12px">${c[1]}</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula3-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula3-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+  const final = $('#aula3-final');
+  if (final) final.innerHTML = ['Crie uma pasta principal','Defina nomes claros','Escolha uma cópia de segurança','Revise o compartilhamento'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula3-final-input" data-step="${i}" placeholder="Digite sua decisão" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula3-finalizar" style="margin-top:8px">Finalizar plano</button><div id="aula3-final-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
+  if (ambienteProfessor) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h3 style="margin:6px 0 10px">Condução da aula · 5 horas</h3><div id="aula3-roteiro-professor"></div></section>`);
+  const roteiro = $('#aula3-roteiro-professor');
+  if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Pastas e critérios de organização','55 min'],['Nomes, versões e formatos','45 min'],['Nuvem e compartilhamento','55 min'],['Backup e recuperação','55 min'],['Oficina de organização','60 min'],['Dispositivos removíveis','25 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+}
+
 async function renderCurso(cursoId, aulaId) {
   if (!cursoId) { location.hash='#cursos'; return; }
   // A sala de aprendizagem aberta por #atividades é sempre a visão do aluno,
@@ -1206,6 +1218,8 @@ async function renderCurso(cursoId, aulaId) {
         if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Cidadania, ética e fundamentos','45 min'],['Dados pessoais e LGPD','50 min'],['Senhas, 2FA e dispositivos','55 min'],['Phishing e casos reais','60 min'],['Oficina em grupos','50 min'],['Plano pessoal de proteção','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="aula1-roteiro-check"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
       } else if ((aula.titulo||'').toLowerCase().includes('computador, periféricos')) {
         renderAula2Interactive(contentEl, ambienteProfessor);
+      } else if ((aula.titulo||'').toLowerCase().includes('pastas, arquivos, nuvem')) {
+        renderAula3Interactive(contentEl, ambienteProfessor);
       }
     }
   }
@@ -1227,6 +1241,24 @@ async function renderCurso(cursoId, aulaId) {
       const values = [...document.querySelectorAll('.aula2-final-input')].map(x=>x.value.trim());
       const f = document.querySelector('#aula2-final-feedback');
       if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Estação configurada. Você registrou uma rotina básica de uso seguro.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    if (e.target.closest('#aula3-finalizar')) {
+      const values = [...document.querySelectorAll('.aula3-final-input')].map(x=>x.value.trim());
+      const f = document.querySelector('#aula3-final-feedback');
+      if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Plano concluído. Seus arquivos agora têm uma rotina de organização e proteção.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    const choice3 = e.target.closest('.aula3-choice');
+    if (choice3) {
+      const group = [...document.querySelectorAll(`.aula3-choice[data-case="${choice3.dataset.case}"]`)];
+      group.forEach(b => { b.disabled = true; });
+      choice3.style.background = choice3.dataset.choice === '0' ? '#e4f6e9' : '#fff0ed';
+      const feedback = document.querySelector(`.aula3-feedback[data-feedback="${choice3.dataset.case}"]`);
+      if (feedback) { feedback.style.display='block'; feedback.innerHTML = choice3.dataset.choice === '0' ? '<strong>Boa prática.</strong> Essa escolha melhora organização, recuperação ou controle de acesso.' : '<strong>Revise a decisão.</strong> Pense em localização, cópia de segurança e permissões.'; }
+      const done = document.querySelectorAll('.aula3-choice[disabled][data-choice="0"]').length;
+      const progress = document.querySelector('#aula3-progress');
+      if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
       return;
     }
     const choice2 = e.target.closest('.aula2-choice');
