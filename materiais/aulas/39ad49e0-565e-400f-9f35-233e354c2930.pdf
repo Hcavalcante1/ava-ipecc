@@ -6,246 +6,540 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
 endobj
 3 0 obj
-<< /Length 674 >>
+<< /Length 989 >>
 stream
 q
-0.08 0.25 0.20 rg
+0.07 0.25 0.30 rg
 0 0 595 842 re
 f
-0.74 0.88 0.82 rg
-0 0 595 74 re
-f
-0.86 0.67 0.25 rg
-0 74 595 5 re
+0.77 0.90 0.87 rg
+0 0 595 102 re
 f
 Q
 BT
-/F1 8 Tf
+/F2 10 Tf
 1 1 1 rg
-52 790 Td
+48 790 Td
 (IPECC - AVA NOVO RUMO) Tj
 ET
 BT
-/F2 26 Tf
+/F2 30 Tf
 1 1 1 rg
-52 680 Td
-(Aula do curso) Tj
+48 674 Td
+(Aula 4) Tj
 ET
 BT
-/F2 15 Tf
+/F2 18 Tf
 1 1 1 rg
-52 638 Td
-(Frmulas, soma, mdia e controles) Tj
+48 625 Td
+(Formulas, soma, media e controles) Tj
+ET
+BT
+/F1 12 Tf
+0.77 0.90 0.87 rg
+48 502 Td
+(Apostila visual do aluno) Tj
 ET
 q
-0.06 0.55 0.57 rg
-390 590 120 120 re
+0.05 0.58 0.59 rg
+392 548 126 190 re
 f
-0.86 0.67 0.25 rg
-425 618 50 64 re
+0.98 0.70 0.20 rg
+425 595 m 455 610 l 485 595 l 480 560 l 455 535 l 430 560 l 425 595 l
+h
 f
-0.08 0.25 0.20 rg
-438 636 24 28 re
-f
+0.07 0.25 0.30 RG
+8 w
+438 575 m 451 560 l 475 590 l
+S
 Q
 q
 1 1 1 rg
-52 430 458 88 re
+48 320 499 110 re
 f
 Q
 BT
-/F2 12 Tf
-0.08 0.25 0.20 rg
-70 482 Td
+/F2 14 Tf
+0.07 0.25 0.30 rg
+70 392 Td
 (Aprenda fazendo) Tj
 ET
 BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-70 458 Td
-(Aula interativa para mediacao do professor.) Tj
+/F1 11 Tf
+0.35 0.45 0.49 rg
+70 365 Td
+(Usando a planilha de despesas da atividade anterior, adicione) Tj
 ET
 BT
-/F1 8 Tf
-0.08 0.25 0.20 rg
-52 34 Td
-(IPECC - material pedagogico) Tj
+/F1 11 Tf
+0.35 0.45 0.49 rg
+70 349 Td
+(formulas de SOMA e MEDIA. Explique o que cada formula faz e qual) Tj
+ET
+BT
+/F1 11 Tf
+0.35 0.45 0.49 rg
+70 333 Td
+(resultado ela retornou.) Tj
+ET
+BT
+/F2 10 Tf
+0.07 0.25 0.30 rg
+48 42 Td
+(IPECC - material do aluno) Tj
 ET
 endstream
 endobj
 4 0 obj
-<< /Length 2202 >>
+<< /Length 1251 >>
 stream
 q
-0.08 0.25 0.20 rg
+0.07 0.25 0.30 rg
 0 792 595 50 re
 f
-0.86 0.67 0.25 rg
-0 786 595 6 re
-f
-0.96 0.97 0.95 rg
-40 60 515 650 re
+0.98 0.70 0.20 rg
+0 0 10 842 re
 f
 Q
 BT
-/F2 18 Tf
+/F2 10 Tf
+0.77 0.90 0.87 rg
+38 818 Td
+(IPECC - AVA NOVO RUMO) Tj
+ET
+BT
+/F2 20 Tf
 1 1 1 rg
-52 813 Td
-(IPECC | MATERIAL PEDAGOGICO) Tj
+38 797 Td
+(CONTEXTO DA AULA) Tj
 ET
 BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 748 Td
-(CONTEUDO DA AULA) Tj
+/F1 10 Tf
+1 1 1 rg
+470 817 Td
+(AULA 04 - 02/05) Tj
+ET
+BT
+/F2 12 Tf
+0.05 0.58 0.59 rg
+38 735 Td
+(CONTEUDO EM PERCURSO) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 700 Td
+(Planilhas calculam por voce. Aprenda as formulas basicas: SOMA, MEDIA, MAXIMO,) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 680 Td
+(MINIMO e SE. Pratique aplica-las em situacoes reais do dia a dia.) Tj
+ET
+q
+1 1 1 rg
+38 416 519 68 re
+f
+0.05 0.58 0.59 rg
+38 478 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 452 Td
+(Registre sua aprendizagem) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 428 Td
+(O que eu compreendi? _______________________________________________) Tj
+ET
+q
+1 1 1 rg
+38 296 519 68 re
+f
+0.98 0.70 0.20 rg
+38 358 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 332 Td
+(Aplique em uma situacao real) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 308 Td
+(Qual sera sua proxima decisao? _____________________________________) Tj
 ET
 BT
 /F1 9 Tf
-0.18 0.22 0.21 rg
-52 724 Td
-(Planilhas calculam por voc. Aprenda as frmulas bsicas: SOMA, MDIA, MXIMO, MNIMO e SE. Pratique aplic-las em situaes reais do dia a dia.) Tj
+0.35 0.45 0.49 rg
+38 42 Td
+(Formulas, soma, media e controles) Tj
 ET
 BT
 /F1 9 Tf
-0.18 0.22 0.21 rg
-52 708 Td
-() Tj
-ET
-0.88 0.69 0.27 rg
-45 698 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 692 Td
-(OBJETIVO DE APRENDIZAGEM) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 668 Td
-(Usando a planilha de despesas da atividade anterior, adicione frmulas de SOMA e MDIA. Explique o que cada frmula faz e qual resultado ela retornou.) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 652 Td
-() Tj
-ET
-0.88 0.69 0.27 rg
-45 642 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 636 Td
-(ROTEIRO DE APLICACAO) Tj
-ET
-0.88 0.69 0.27 rg
-45 618 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 612 Td
-(1. Observe o contexto e identifique o problema ou necessidade.) Tj
-ET
-0.88 0.69 0.27 rg
-45 594 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 588 Td
-(2. Aplique o conceito apresentado em uma ferramenta ou situacao real.) Tj
-ET
-0.88 0.69 0.27 rg
-45 570 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 564 Td
-(3. Registre as escolhas, os procedimentos e o resultado obtido.) Tj
-ET
-0.88 0.69 0.27 rg
-45 546 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 540 Td
-(4. Revise a entrega usando os criterios de qualidade e seguranca.) Tj
-ET
-0.88 0.69 0.27 rg
-45 522 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 516 Td
-(5. Compartilhe o produto final e descreva o proximo passo.) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 492 Td
-() Tj
-ET
-0.88 0.69 0.27 rg
-45 482 505 18 re
-f
-BT
-/F2 11 Tf
-0.08 0.25 0.20 rg
-52 476 Td
-(REGISTRO DO ALUNO) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 452 Td
-(O que foi produzido? _________________________________________________) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 436 Td
-(O que foi aprendido? _________________________________________________) Tj
-ET
-BT
-/F1 9 Tf
-0.18 0.22 0.21 rg
-52 420 Td
-(Como sera aplicado? _________________________________________________) Tj
+0.35 0.45 0.49 rg
+450 42 Td
+(IPECC - material do aluno) Tj
 ET
 endstream
 endobj
 5 0 obj
-<< /Type /Page /Parent 7 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+<< /Length 1265 >>
+stream
+q
+0.07 0.25 0.30 rg
+0 792 595 50 re
+f
+0.98 0.70 0.20 rg
+0 0 10 842 re
+f
+Q
+BT
+/F2 10 Tf
+0.77 0.90 0.87 rg
+38 818 Td
+(IPECC - AVA NOVO RUMO) Tj
+ET
+BT
+/F2 20 Tf
+1 1 1 rg
+38 797 Td
+(OBJETIVO DE APRENDIZAGEM) Tj
+ET
+BT
+/F1 10 Tf
+1 1 1 rg
+470 817 Td
+(AULA 04 - 03/05) Tj
+ET
+BT
+/F2 12 Tf
+0.05 0.58 0.59 rg
+38 735 Td
+(CONTEUDO EM PERCURSO) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 700 Td
+(Usando a planilha de despesas da atividade anterior, adicione formulas de SOMA) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 680 Td
+(e MEDIA. Explique o que cada formula faz e qual resultado ela retornou.) Tj
+ET
+q
+1 1 1 rg
+38 416 519 68 re
+f
+0.05 0.58 0.59 rg
+38 478 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 452 Td
+(Registre sua aprendizagem) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 428 Td
+(O que eu compreendi? _______________________________________________) Tj
+ET
+q
+1 1 1 rg
+38 296 519 68 re
+f
+0.98 0.70 0.20 rg
+38 358 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 332 Td
+(Aplique em uma situacao real) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 308 Td
+(Qual sera sua proxima decisao? _____________________________________) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+38 42 Td
+(Formulas, soma, media e controles) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+450 42 Td
+(IPECC - material do aluno) Tj
+ET
+endstream
 endobj
 6 0 obj
-<< /Type /Page /Parent 7 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+<< /Length 1307 >>
+stream
+q
+0.07 0.25 0.30 rg
+0 792 595 50 re
+f
+0.98 0.70 0.20 rg
+0 0 10 842 re
+f
+Q
+BT
+/F2 10 Tf
+0.77 0.90 0.87 rg
+38 818 Td
+(IPECC - AVA NOVO RUMO) Tj
+ET
+BT
+/F2 20 Tf
+1 1 1 rg
+38 797 Td
+(PRATIQUE) Tj
+ET
+BT
+/F1 10 Tf
+1 1 1 rg
+470 817 Td
+(AULA 04 - 04/05) Tj
+ET
+BT
+/F2 12 Tf
+0.05 0.58 0.59 rg
+38 735 Td
+(CONTEUDO EM PERCURSO) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 700 Td
+(Transforme o conteudo em uma entrega concreta relacionada a Formulas, soma,) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 680 Td
+(media e controles. Registre as decisoes, ferramentas e criterios que voce) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 660 Td
+(utilizou.) Tj
+ET
+q
+1 1 1 rg
+38 416 519 68 re
+f
+0.05 0.58 0.59 rg
+38 478 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 452 Td
+(Registre sua aprendizagem) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 428 Td
+(O que eu compreendi? _______________________________________________) Tj
+ET
+q
+1 1 1 rg
+38 296 519 68 re
+f
+0.98 0.70 0.20 rg
+38 358 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 332 Td
+(Aplique em uma situacao real) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 308 Td
+(Qual sera sua proxima decisao? _____________________________________) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+38 42 Td
+(Formulas, soma, media e controles) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+450 42 Td
+(IPECC - material do aluno) Tj
+ET
+endstream
 endobj
 7 0 obj
-<< /Type /Pages /Kids [5 0 R 6 0 R] /Count 2 >>
+<< /Length 1225 >>
+stream
+q
+0.07 0.25 0.30 rg
+0 792 595 50 re
+f
+0.98 0.70 0.20 rg
+0 0 10 842 re
+f
+Q
+BT
+/F2 10 Tf
+0.77 0.90 0.87 rg
+38 818 Td
+(IPECC - AVA NOVO RUMO) Tj
+ET
+BT
+/F2 20 Tf
+1 1 1 rg
+38 797 Td
+(APLICA??O E REGISTRO) Tj
+ET
+BT
+/F1 10 Tf
+1 1 1 rg
+470 817 Td
+(AULA 04 - 05/05) Tj
+ET
+BT
+/F2 12 Tf
+0.05 0.58 0.59 rg
+38 735 Td
+(CONTEUDO EM PERCURSO) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 700 Td
+(Descreva o resultado, revise a qualidade e indique como essa competencia sera) Tj
+ET
+BT
+/F1 12 Tf
+0.35 0.45 0.49 rg
+38 680 Td
+(aplicada no trabalho ou nos estudos.) Tj
+ET
+q
+1 1 1 rg
+38 416 519 68 re
+f
+0.05 0.58 0.59 rg
+38 478 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 452 Td
+(Registre sua aprendizagem) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 428 Td
+(O que eu compreendi? _______________________________________________) Tj
+ET
+q
+1 1 1 rg
+38 296 519 68 re
+f
+0.98 0.70 0.20 rg
+38 358 519 8 re
+f
+Q
+BT
+/F2 12 Tf
+0.08 0.20 0.24 rg
+54 332 Td
+(Aplique em uma situacao real) Tj
+ET
+BT
+/F1 10 Tf
+0.35 0.45 0.49 rg
+54 308 Td
+(Qual sera sua proxima decisao? _____________________________________) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+38 42 Td
+(Formulas, soma, media e controles) Tj
+ET
+BT
+/F1 9 Tf
+0.35 0.45 0.49 rg
+450 42 Td
+(IPECC - material do aluno) Tj
+ET
+endstream
 endobj
 8 0 obj
-<< /Type /Catalog /Pages 7 0 R >>
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+10 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+11 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+12 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+13 0 obj
+<< /Type /Pages /Kids [8 0 R 9 0 R 10 0 R 11 0 R 12 0 R] /Count 5 >>
+endobj
+14 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
 endobj
 xref
-0 9
+0 15
 0000000000 65535 f 
 0000000009 00000 n 
 0000000079 00000 n 
 0000000154 00000 n 
-0000000879 00000 n 
-0000003133 00000 n 
-0000003269 00000 n 
-0000003405 00000 n 
-0000003468 00000 n 
+0000001194 00000 n 
+0000002497 00000 n 
+0000003814 00000 n 
+0000005173 00000 n 
+0000006450 00000 n 
+0000006587 00000 n 
+0000006724 00000 n 
+0000006862 00000 n 
+0000007000 00000 n 
+0000007138 00000 n 
+0000007223 00000 n 
 trailer
-<< /Size 9 /Root 8 0 R >>
+<< /Size 15 /Root 14 0 R >>
 startxref
-3517
+7274
 %%EOF
