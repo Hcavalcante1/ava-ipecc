@@ -1020,6 +1020,18 @@ async function inscreverSe(cursoId) {
 }
 
 // ── Sala de aula ──────────────────────────────────────────────────
+function renderAula2Interactive(contentEl, ambienteProfessor) {
+  contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0"><div class="eyebrow">${ambienteProfessor?'AULA INTERATIVA · ESTAÇÃO DE TRABALHO':'ATIVIDADE COMPLEMENTAR INTERATIVA · ESTAÇÃO DE TRABALHO'}</div><h3 style="margin:6px 0 8px">Monte e opere uma estação segura</h3><p class="muted">${ambienteProfessor?'Conduza a identificação dos componentes, a escolha dos periféricos e a rotina básica do sistema operacional.':'Identifique componentes, escolha periféricos e pratique decisões básicas de uso do computador.'}</p><div class="progress-bar" style="margin:12px 0"><i id="aula2-progress" style="width:0%"></i></div></div><div id="aula2-interativa"></div><section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)"><div class="eyebrow">DESAFIO FINAL</div><h3 style="margin:6px 0 8px">Checklist da estação de trabalho</h3><div id="aula2-final"></div></section>`;
+  const cases = [['Componentes','Qual peça executa os cálculos e coordena as operações?',['Monitor','Processador','Teclado'],1],['Periféricos','Qual conjunto é adequado para uma videochamada?',['Monitor, webcam e microfone','Apenas impressora','Pendrive e mouse'],0],['Teclado','Qual atalho copia um item selecionado?',['Ctrl + C','Ctrl + P','Alt + F4'],0],['Sistema operacional','Qual é uma função do sistema operacional?',['Gerenciar arquivos, programas e dispositivos','Aumentar fisicamente a memória RAM','Substituir o monitor'],0],['Organização','Onde guardar um documento para encontrá-lo depois?',['Em uma pasta com nome e data claros','Na área de trabalho sem nome','Em qualquer pasta aleatória'],0],['Segurança','Como reduzir o risco de perda ao remover um pendrive?',['Ejetar com segurança','Puxar imediatamente','Desligar o monitor'],0]];
+  const host = $('#aula2-interativa');
+  if (host) host.innerHTML = `<div class="panel" style="background:var(--surface);border:1px solid var(--line);margin-bottom:12px"><div class="eyebrow">SIMULAÇÃO</div><div style="padding:14px;background:var(--bg);border-radius:8px"><strong>Missão:</strong> preparar um computador para estudo, trabalho e atendimento digital.</div></div>` + cases.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">TELA ${i+1} · ${c[0]}</div><h3 style="margin:6px 0 12px">${c[1]}</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary aula2-choice" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="aula2-feedback" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+  const final = $('#aula2-final');
+  if (final) final.innerHTML = ['Identifique o componente principal','Escolha o periférico necessário','Use um atalho de teclado','Organize e proteja o arquivo'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi aula2-final-input" data-step="${i}" placeholder="Digite sua decisão" style="width:100%;margin-top:5px"></label>`).join('')+'<button type="button" class="btn-primary" id="aula2-finalizar" style="margin-top:8px">Finalizar estação</button><div id="aula2-final-feedback" style="display:none;margin-top:10px;padding:10px"></div>';
+  if (ambienteProfessor) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h3 style="margin:6px 0 10px">Condução da aula · 5 horas</h3><div id="aula2-roteiro-professor"></div></section>`);
+  const roteiro = $('#aula2-roteiro-professor');
+  if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Componentes e funções','55 min'],['Periféricos e acessibilidade','45 min'],['Teclado e atalhos','50 min'],['Sistema operacional e arquivos','60 min'],['Oficina de organização','55 min'],['Prática de segurança','30 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+}
+
 async function renderCurso(cursoId, aulaId) {
   if (!cursoId) { location.hash='#cursos'; return; }
   // A sala de aprendizagem aberta por #atividades é sempre a visão do aluno,
@@ -1192,6 +1204,8 @@ async function renderCurso(cursoId, aulaId) {
         if (ambienteProfessor) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h3 style="margin:6px 0 10px">Condução da aula · 5 horas</h3><div id="aula1-roteiro-professor"></div><p class="muted" style="margin-top:12px">Marque cada etapa durante a regência. O roteiro separa diagnóstico, desenvolvimento, prática, caso real, produto e avaliação.</p></section>`);
         const roteiro = $('#aula1-roteiro-professor');
         if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Cidadania, ética e fundamentos','45 min'],['Dados pessoais e LGPD','50 min'],['Senhas, 2FA e dispositivos','55 min'],['Phishing e casos reais','60 min'],['Oficina em grupos','50 min'],['Plano pessoal de proteção','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox" class="aula1-roteiro-check"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+      } else if ((aula.titulo||'').toLowerCase().includes('computador, periféricos')) {
+        renderAula2Interactive(contentEl, ambienteProfessor);
       }
     }
   }
@@ -1207,6 +1221,25 @@ async function renderCurso(cursoId, aulaId) {
       const values = [...document.querySelectorAll('.aula1-final-input')].map(x=>x.value.trim());
       const f = document.querySelector('#aula1-final-feedback');
       if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Protocolo completo. Você criou uma sequência de resposta segura.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    if (e.target.closest('#aula2-finalizar')) {
+      const values = [...document.querySelectorAll('.aula2-final-input')].map(x=>x.value.trim());
+      const f = document.querySelector('#aula2-final-feedback');
+      if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Estação configurada. Você registrou uma rotina básica de uso seguro.' : 'Complete os quatro passos para finalizar.'; }
+      return;
+    }
+    const choice2 = e.target.closest('.aula2-choice');
+    if (choice2) {
+      const group = [...document.querySelectorAll(`.aula2-choice[data-case="${choice2.dataset.case}"]`)];
+      group.forEach(b => { b.disabled = true; });
+      const correct = choice2.dataset.choice === '0' || (choice2.dataset.case === '0' && choice2.dataset.choice === '1');
+      choice2.style.background = correct ? '#e4f6e9' : '#fff0ed';
+      const feedback = document.querySelector(`.aula2-feedback[data-feedback="${choice2.dataset.case}"]`);
+      if (feedback) { feedback.style.display='block'; feedback.innerHTML = correct ? '<strong>Decisão correta.</strong> Você aplicou o conceito da tela.' : '<strong>Revise a decisão.</strong> Observe a função do componente e escolha a alternativa que atende à missão.'; }
+      const done = document.querySelectorAll('.aula2-choice[disabled][data-choice="0"], .aula2-choice[disabled][data-case="0"][data-choice="1"]').length;
+      const progress = document.querySelector('#aula2-progress');
+      if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
       return;
     }
     const choice = e.target.closest('.aula1-choice');
