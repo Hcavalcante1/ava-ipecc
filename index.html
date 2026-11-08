@@ -1068,6 +1068,20 @@ function renderAulaBlocoInteractive(contentEl, ambienteProfessor, cfg) {
   if (roteiro && ambienteProfessor) roteiro.innerHTML = cfg.roteiro.map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
 }
 
+function renderAulaCompletaInteractive(contentEl, ambienteProfessor, aula) {
+  const key = `aula-${String(aula.ordem||0).replace(/[^0-9]/g,'')}-completa`;
+  const titulo = aula.titulo || 'Aula do curso';
+  const casos = [['Objetivo','Qual deve ser o primeiro passo nesta aula?',['Identificar objetivo, público e resultado esperado','Começar sem ler a proposta','Copiar uma resposta pronta'],0],['Prática','Qual atitude demonstra domínio do conteúdo?',['Aplicar o conceito em uma situação de trabalho','Memorizar sem praticar','Pular a conferência'],0],['Qualidade','Como conferir uma entrega?',['Revisar conteúdo, formato e finalidade','Confiar apenas na aparência','Enviar sem abrir'],0],['Segurança','Qual cuidado deve acompanhar a atividade?',['Proteger dados, acessos e arquivos','Compartilhar tudo publicamente','Usar qualquer senha'],0],['Decisão','Quando houver dúvida, o que fazer?',['Parar, verificar e buscar a fonte adequada','Escolher a alternativa mais rápida','Ignorar o problema'],0],['Entrega','Como concluir a atividade?',['Registrar a decisão e enviar o resultado correto','Enviar vazio','Apagar o trabalho'],0]];
+  contentEl.innerHTML = `<div class="panel" style="margin-top:8px;background:var(--bg);border:0"><div class="eyebrow">${ambienteProfessor?'AULA INTERATIVA · PRÁTICA PROFISSIONAL':'ATIVIDADE COMPLEMENTAR INTERATIVA · PRÁTICA PROFISSIONAL'}</div><h3 style="margin:6px 0 8px">${esc(titulo)}</h3><p class="muted">${ambienteProfessor?'Conduza a aula com demonstração, prática guiada, aplicação e avaliação.':'Aplique o tema da aula em decisões práticas e registre seu resultado.'}</p><div class="progress-bar" style="margin:12px 0"><i id="${key}-progress" style="width:0%"></i></div></div><div id="${key}-interativa"></div><section class="panel" style="margin-top:20px;border:1px solid var(--line);background:var(--bg)"><div class="eyebrow">DESAFIO FINAL</div><h3 style="margin:6px 0 8px">Entregue o produto da aula</h3><div id="${key}-final"></div></section>`;
+  const host = $(`#${key}-interativa`);
+  if (host) host.innerHTML = `<div class="panel" style="background:var(--surface);border:1px solid var(--line);margin-bottom:12px"><div class="eyebrow">SIMULAÇÃO DA AULA</div><div style="padding:14px;background:var(--bg);border-radius:8px"><strong>Missão:</strong> transformar o conteúdo de “${esc(titulo)}” em uma entrega útil, segura e verificável.</div></div>` + casos.map((c,i)=>`<article style="padding:18px 0;border-top:1px solid var(--line)"><div class="eyebrow">TELA ${i+1} · ${c[0]}</div><h3 style="margin:6px 0 12px">${c[1]}</h3>${c[2].map((x,j)=>`<button type="button" class="btn-secondary completa-choice" data-block="${key}" data-case="${i}" data-choice="${j}" style="display:block;width:100%;text-align:left;margin:8px 0">${x}</button>`).join('')}<div class="completa-feedback" data-block="${key}" data-feedback="${i}" style="display:none;margin-top:10px;padding:10px;border-radius:7px;background:var(--surface)"></div></article>`).join('');
+  const final = $(`#${key}-final`);
+  if (final) final.innerHTML = ['Defina o resultado','Aplique o conteúdo','Revise a entrega','Registre o próximo passo'].map((x,i)=>`<label style="display:block;margin:10px 0"><span class="muted">${i+1}. ${x}</span><input class="fi completa-final-input" data-block="${key}" data-step="${i}" placeholder="Digite sua decisão" style="width:100%;margin-top:5px"></label>`).join('')+`<button type="button" class="btn-primary completa-finalizar" data-block="${key}" style="margin-top:8px">Finalizar atividade</button><div id="${key}-final-feedback" style="display:none;margin-top:10px;padding:10px"></div>`;
+  if (ambienteProfessor) contentEl.insertAdjacentHTML('beforeend', `<section class="panel" style="margin-top:20px;background:var(--bg);border:1px solid var(--line)"><div class="eyebrow">ROTEIRO PEDAGÓGICO · PROFESSOR</div><h3 style="margin:6px 0 10px">Condução da aula · 5 horas</h3><div id="${key}-roteiro"></div></section>`);
+  const roteiro = $(`#${key}-roteiro`);
+  if (roteiro && ambienteProfessor) roteiro.innerHTML = [['Acolhida e diagnóstico','30 min'],['Apresentação do conceito','50 min'],['Demonstração guiada','55 min'],['Prática individual ou em grupo','75 min'],['Aplicação em situação real','55 min'],['Revisão e feedback','45 min'],['Produto da aula','35 min'],['Avaliação e fechamento','15 min']].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><input type="checkbox"><span><b>${i+1}. ${x[0]}</b><br><small class="muted">${x[1]}</small></span></label>`).join('');
+}
+
 const AULA_BLOCO_5_9 = [
   {key:'aula5',match:'e-mail profissional e envio de documentos',area:'COMUNICAÇÃO PROFISSIONAL',titulo:'Escreva e envie documentos com clareza',professor:'Conduza a criação de um e-mail profissional, a escolha de anexos e a conferência antes do envio.',aluno:'Pratique assunto, destinatário, anexo e revisão antes de enviar uma mensagem de trabalho.',desafio:'Prepare um envio profissional',missao:'enviar um documento correto, para a pessoa correta, com uma mensagem clara.',cases:[['Assunto','Qual assunto ajuda o destinatário?',['Currículo - Helena Souza - vaga de auxiliar','Oi','URGENTE!!!'],0],['Destinatário','Antes de enviar, qual conferência é essencial?',['Verificar endereço e destinatários','Adicionar todos os contatos','Enviar para si mesmo sem revisar'],0],['Anexo','Como evitar esquecer o arquivo?',['Anexar, abrir e conferir o documento antes de enviar','Escrever “anexo” e não anexar','Mandar o arquivo depois sem contexto'],0],['Mensagem','Qual abertura é adequada?',['Prezada equipe, encaminho o documento solicitado.','E aí, olha isso','Segue aí'],0],['Formato','Qual formato facilita leitura e compartilhamento?',['PDF quando a formatação precisa ser preservada','Foto borrada da tela','Arquivo sem extensão'],0],['Revisão','O que fazer antes de clicar em enviar?',['Revisar texto, anexo e destinatário','Aumentar o número de destinatários','Apagar o assunto'],0]],final:['Defina o assunto','Confirme o destinatário','Anexe e abra o arquivo','Revise e envie'],roteiro:[['Acolhida e diagnóstico','30 min'],['Anatomia do e-mail profissional','45 min'],['Assunto, saudação e clareza','50 min'],['Anexos e formatos','50 min'],['Revisão e segurança','45 min'],['Oficina de envio','75 min'],['Resposta e acompanhamento','30 min'],['Avaliação e fechamento','15 min']]},
   {key:'aula6',match:'digitalização, pdf e organização documental',area:'DOCUMENTOS DIGITAIS',titulo:'Digitalize, converta e organize documentos',professor:'Conduza a digitalização, a conferência de legibilidade, a conversão para PDF e a nomeação dos arquivos.',aluno:'Pratique como transformar um documento físico em arquivo digital organizado e pronto para uso.',desafio:'Monte um documento digitalizável',missao:'criar um PDF legível, nomeado e armazenado no local correto.',cases:[['Captura','O que melhora uma digitalização?',['Documento alinhado, inteiro e bem iluminado','Foto inclinada e escura','Cortar a assinatura'],0],['Legibilidade','Como conferir o resultado?',['Abrir o PDF e verificar todas as páginas','Confiar apenas na miniatura','Enviar sem abrir'],0],['Nome','Qual nome facilita localizar o arquivo?',['2026-11-08_declaracao_assinada.pdf','scan1.pdf','documento novo final final'],0],['Formato','Quando o PDF é útil?',['Quando se quer preservar a aparência do documento','Somente para apagar texto','Para substituir qualquer arquivo editável'],0],['Pasta','Onde guardar?',['Pasta do projeto com nome e data','Área de trabalho sem organização','Pasta de downloads para sempre'],0],['Compartilhamento','Qual cuidado evita exposição?',['Compartilhar apenas com quem precisa e revisar permissões','Liberar edição pública','Enviar em grupo aberto'],0]],final:['Confira a imagem','Gere o PDF','Nomeie com data e assunto','Guarde e compartilhe com cuidado'],roteiro:[['Acolhida e diagnóstico','30 min'],['Digitalização e qualidade','50 min'],['PDF e preservação de layout','45 min'],['Nomes e versões','45 min'],['Pastas e organização','55 min'],['Oficina de digitalização','80 min'],['Compartilhamento seguro','20 min'],['Avaliação e fechamento','15 min']]},
@@ -1265,6 +1279,7 @@ async function renderCurso(cursoId, aulaId) {
       } else {
         const blocoCfg = AULA_BLOCO_5_9.concat(AULA_BLOCO_10_14).find(cfg => (aula.titulo||'').toLowerCase().includes(cfg.match));
         if (blocoCfg) renderAulaBlocoInteractive(contentEl, ambienteProfessor, blocoCfg);
+        else if (aulaIndex >= 14) renderAulaCompletaInteractive(contentEl, ambienteProfessor, aula);
       }
     }
   }
@@ -1330,6 +1345,28 @@ async function renderCurso(cursoId, aulaId) {
       const feedback = document.querySelector(`.bloco-feedback[data-block="${key}"][data-feedback="${blocoChoice.dataset.case}"]`);
       if (feedback) { feedback.style.display='block'; feedback.innerHTML = correct ? '<strong>Boa decisão.</strong> Você aplicou o critério profissional da tela.' : '<strong>Revise a decisão.</strong> Escolha a alternativa que protege a qualidade e a finalidade da entrega.'; }
       const done = document.querySelectorAll(`.bloco-choice[data-block="${key}"][disabled][data-choice="0"]`).length;
+      const progress = document.querySelector(`#${key}-progress`);
+      if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
+      return;
+    }
+    const completaFinal = e.target.closest('.completa-finalizar');
+    if (completaFinal) {
+      const key = completaFinal.dataset.block;
+      const values = [...document.querySelectorAll(`.completa-final-input[data-block="${key}"]`)].map(x=>x.value.trim());
+      const f = document.querySelector(`#${key}-final-feedback`);
+      if (f) { f.style.display='block'; f.style.background = values.every(Boolean) ? '#e4f6e9' : '#fff0ed'; f.textContent = values.every(Boolean) ? 'Atividade concluída. Você registrou a aplicação prática da aula.' : 'Complete todos os passos para finalizar.'; }
+      return;
+    }
+    const completaChoice = e.target.closest('.completa-choice');
+    if (completaChoice) {
+      const key = completaChoice.dataset.block;
+      const group = [...document.querySelectorAll(`.completa-choice[data-block="${key}"][data-case="${completaChoice.dataset.case}"]`)];
+      group.forEach(b => { b.disabled = true; });
+      const correct = completaChoice.dataset.choice === '0';
+      completaChoice.style.background = correct ? '#e4f6e9' : '#fff0ed';
+      const feedback = document.querySelector(`.completa-feedback[data-block="${key}"][data-feedback="${completaChoice.dataset.case}"]`);
+      if (feedback) { feedback.style.display='block'; feedback.innerHTML = correct ? '<strong>Boa decisão.</strong> Você aplicou uma prática profissional.' : '<strong>Revise a decisão.</strong> Pense em objetivo, qualidade, segurança e verificação.'; }
+      const done = document.querySelectorAll(`.completa-choice[data-block="${key}"][disabled][data-choice="0"]`).length;
       const progress = document.querySelector(`#${key}-progress`);
       if (progress) progress.style.width = `${Math.round(done/6*100)}%`;
       return;
