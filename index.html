@@ -936,7 +936,11 @@ async function renderDashboard() {
 // ── Cursos ────────────────────────────────────────────────────────
 async function renderCursos(filtroTema='') {
   const {data: cursos, error} = await supa.from('ava_cursos').select(`id,titulo,descricao,carga_horas,tema,ava_modulos(id)`).eq('ativo',true);
-  if (error) {\n    $('#main').innerHTML = `<div class="panel"><h2>Não foi possível carregar os cursos</h2><p class="muted">${esc(error.message||'Erro de conexão com o ambiente de aprendizagem.')}</p><button class="btn-primary" type="button" id="btn-recarregar-cursos" style="margin-top:14px">Tentar novamente</button></div>`;\n    $('#btn-recarregar-cursos')?.addEventListener('click', () => renderCursos(filtroTema));\n    return;\n  }
+  if (error) {
+    $('#main').innerHTML = `<div class="panel"><h2>Não foi possível carregar os cursos</h2><p class="muted">${esc(error.message||'Erro de conexão com o ambiente de aprendizagem.')}</p><button class="btn-primary" type="button" id="btn-recarregar-cursos" style="margin-top:14px">Tentar novamente</button></div>`;
+    $('#btn-recarregar-cursos')?.addEventListener('click', () => renderCursos(filtroTema));
+    return;
+  }
 
   let matriculaMap = {};
   let pctPorCurso = {};
