@@ -88,7 +88,7 @@ Deno.serve(async (req: Request) => {
       } catch {
         // usa o destino seguro abaixo
       }
-      return "https://ava.ipecc.org.br/#nova-senha";
+      return "https://ava.ipecc.org.br/";
     })();
 
     // cliente com service role — so usado aqui, no servidor, nunca enviado ao navegador
