@@ -3323,6 +3323,12 @@ function renderNovaSenha() {
 (async () => {
   const {data:{session}} = await supa.auth.getSession();
   if (!session?.user) {
+    const authError = new URLSearchParams(location.hash.replace(/^#/, '')).get('error_code');
+    if (authError === 'otp_expired') {
+      history.replaceState(null, '', location.pathname);
+      renderLogin('O link expirou ou já foi utilizado. Digite seu e-mail e clique em “Recuperar por e-mail” para receber um novo link.');
+      return;
+    }
     if (isRotaPublica()) { await render(); return; }
     renderLogin();
     return;
