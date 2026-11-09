@@ -1269,8 +1269,8 @@ async function renderCurso(cursoId, aulaId) {
           ${(m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).sort((a,b)=>a.ordem-b.ordem).map(a=>{
             const okIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--green);flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
             const pendIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>`;
-            const lista = (m.ava_aulas||[]).filter(x=>x.publicada||isAdmin()).sort((x,y)=>x.ordem-y.ordem);
-            const prev = lista[lista.findIndex(x=>x.id===a.id)-1];
+            const globalIndex = todasAulas.findIndex(x=>x.id===a.id);
+            const prev = globalIndex > 0 ? todasAulas[globalIndex-1] : null;
             const locked = !ambienteProfessor && !!prev && !progSet.has(prev.id);
             return `<button class="lesson-nav-btn${a.id===aula?.id?' sel':''}" data-lesson="${locked?'':esc(a.id)}" data-curso="${esc(cursoId)}" ${locked?'disabled':''} title="${locked?'Conclua a atividade anterior para liberar':''}" style="display:flex;align-items:center;gap:8px;${locked?'opacity:.55;cursor:not-allowed':''}">${progSet.has(a.id)?okIcon:pendIcon}<span>${esc(a.titulo)}${locked?' · bloqueada':''}</span></button>`;
           }).join('')}`).join('')}
