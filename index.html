@@ -405,6 +405,13 @@ function isJwtError(err) {
   const m = (err?.message||'')+'';
   return /JWT expired|invalid JWT|PGRST301|JWSError/i.test(m);
 }
+function clearExpiredSession() {
+  _session = null;
+  currentUser = null;
+  userPerfil = null;
+  try { localStorage.removeItem('ava_session'); } catch{}
+  setTimeout(() => renderLogin('Sua sessão expirou. Entre novamente para continuar.'), 0);
+}
 
 const supa = {
   _headers(extra={}) {
@@ -569,6 +576,7 @@ class SupaQuery {
       if (isJwtError(d0) && await refreshSessionToken()) r = await doFetch();
       else {
         let count0 = null; const cr0=r.headers.get('content-range'); if(cr0){const t=cr0.split('/')[1]; if(t&&t!=='*') count0=parseInt(t,10);}
+        if (isJwtError(d0)) clearExpiredSession();
         return {data:null,error:{message:(d0?.message||d0?.hint||text0||r.statusText)},count:count0};
       }
     }
@@ -578,7 +586,10 @@ class SupaQuery {
     if (cr) { const total = cr.split('/')[1]; if (total && total!=='*') count = parseInt(total,10); }
     const text = this._head ? '' : await r.text();
     let d; try{d = text ? JSON.parse(text) : [];}catch{d=text;}
-    if (!r.ok) return {data:null,error:{message:(d?.message||d?.hint||text||r.statusText)},count};
+    if (!r.ok) {
+      if (isJwtError(d)) clearExpiredSession();
+      return {data:null,error:{message:(d?.message||d?.hint||text||r.statusText)},count};
+    }
     const arr = Array.isArray(d)?d:(d?[d]:[]);
     if(this._single) return {data:arr[0]||null,error:null,count};
     return {data:arr,error:null,count};
