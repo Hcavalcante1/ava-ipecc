@@ -3,8 +3,9 @@
 ## Automatizado
 
 - Workflow: `AVA quality gate`
-- Migração de sequência endurecida no commit: `ca6f5e6ae632797da64f91b3d546dba981cb6a51`
-- Resultado: smoke test aprovado anteriormente para HTML publicado, convite, recuperação e sintaxe JavaScript
+- Migração RLS de sequência aplicada em produção: `enforce_student_activity_sequence_rls`
+- Correção de ACL aplicada: `revoke_sequence_guard_anon_execute`
+- Smoke test aprovado para HTML publicado, convite, recuperação e sintaxe JavaScript
 - Limite: ainda não existe E2E autenticado no CI porque não há credenciais de teste configuradas
 
 ## Banco
@@ -13,9 +14,11 @@
 - 160 atividades publicadas
 - 40 aulas com exatamente 4 atividades
 - 0 violações históricas de sequência encontradas
-- `ava_pode_acessar_aula` ainda não existe em produção; a migração está versionada, mas não aplicada
+- `ava_pode_acessar_aula` instalada em produção
+- Cinco políticas de gravação de `ava_entregas`/`ava_progresso` usam o guard e destinam-se a `authenticated`
+- `anon` sem EXECUTE na função; `authenticated` com EXECUTE
 - Perfis atuais: 1 administrador e 1 aluno; nenhum professor cadastrado
-- Migrações aplicadas incluem `add_account_recovery_codes`
+- Migrações aplicadas incluem `add_account_recovery_codes` e `enforce_student_activity_sequence_rls`
 
 ## Chrome real
 
@@ -34,7 +37,7 @@
 
 ## Pendências explícitas
 
-- Aplicar a migração `enforce_student_activity_sequence_rls` em produção, após autorização explícita.
 - Criar um professor de teste usando e-mail autorizado.
-- Executar sessão independente de aluno para o fluxo completo.
+- Executar sessão independente de aluno para o fluxo completo pós-RLS.
 - Verificar rollback em ambiente separado; não executar rollback destrutivo na produção principal.
+- Configurar E2E autenticado no CI, após disponibilizar credenciais de teste seguras.
