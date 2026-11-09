@@ -83,7 +83,8 @@ Deno.serve(async (req: Request) => {
       try {
         const url = new URL(candidato);
         if (url.origin === "https://ava.ipecc.org.br" && url.pathname === "/") {
-          return candidato;
+          // O Supabase adiciona o fragmento de token; nunca preserve um hash enviado pela tela.
+          return "https://ava.ipecc.org.br/";
         }
       } catch {
         // usa o destino seguro abaixo
