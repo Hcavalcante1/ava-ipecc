@@ -451,12 +451,13 @@ const supa = {
       return {data:d, error:null};
     },
     async signOut() {
-      try {
-        await fetch(SUPA_URL+'/auth/v1/logout',{method:'POST',headers:supa._headers()});
-      } catch{}
+      const sessionHeaders = supa._headers();
       _session = null;
       try { localStorage.removeItem('ava_session'); } catch{}
       this._cbs.forEach(cb => cb('SIGNED_OUT', null));
+      try {
+        await fetch(SUPA_URL+'/auth/v1/logout',{method:'POST',headers:sessionHeaders});
+      } catch{}
     },
     onAuthStateChange(cb) { this._cbs.push(cb); return {data:{subscription:{unsubscribe:()=>{}}}}; },
     async resetPasswordForEmail(email, {redirectTo}={}) {
