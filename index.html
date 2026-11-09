@@ -918,7 +918,7 @@ async function renderDashboard() {
 // ── Cursos ────────────────────────────────────────────────────────
 async function renderCursos(filtroTema='') {
   const {data: cursos, error} = await supa.from('ava_cursos').select(`id,titulo,descricao,carga_horas,tema,ava_modulos(id)`).eq('ativo',true);
-  if (error) throw error;
+  if (error) {\n    $('#main').innerHTML = `<div class="panel"><h2>Não foi possível carregar os cursos</h2><p class="muted">${esc(error.message||'Erro de conexão com o ambiente de aprendizagem.')}</p><button class="btn-primary" type="button" id="btn-recarregar-cursos" style="margin-top:14px">Tentar novamente</button></div>`;\n    $('#btn-recarregar-cursos')?.addEventListener('click', () => renderCursos(filtroTema));\n    return;\n  }
 
   let matriculaMap = {};
   let pctPorCurso = {};
@@ -1117,11 +1117,17 @@ async function renderCurso(cursoId, aulaId) {
   // A regência do professor fica separada em #aula-professor.
   const ambienteProfessor = false;
 
-  const [{data:curso},{data:modulos}] = await Promise.all([
+  const [{data:curso,error:cursoError},{data:modulos,error:modulosError}] = await Promise.all([
     supa.from('ava_cursos').select('id,titulo,descricao,carga_horas').eq('id',cursoId).single(),
     supa.from('ava_modulos').select('id,titulo,ordem,ava_aulas(id,titulo,conteudo,video_url,prompt,ordem,publicada)').eq('curso_id',cursoId).order('ordem')
   ]);
-  if (!curso) { $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel">Curso não encontrado.</div>`; return; }
+  if (cursoError || modulosError) {
+    const msg = cursoError?.message || modulosError?.message || 'Erro de conexão com o ambiente de aprendizagem.';
+    $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel"><h2>Não foi possível abrir o curso</h2><p class="muted">${esc(msg)}</p><button class="btn-primary" type="button" id="btn-reabrir-curso" style="margin-top:14px">Tentar novamente</button></div>`;
+    $('#btn-reabrir-curso')?.addEventListener('click', () => renderCurso(cursoId,aulaId));
+    return;
+  }
+  if (!curso) { $('#main').innerHTML=`<a class="back-link" href="#cursos">← Voltar</a><div class="panel"><h2>Curso não encontrado</h2><p class="muted">O curso não retornou dados para este ambiente. Volte ao catálogo e tente abrir novamente.</p><a class="btn-primary" style="margin-top:14px" href="#cursos">Voltar aos cursos</a></div>`; return; }
 
   // aplainar aulas
   const todasAulas = (modulos||[]).flatMap(m => (m.ava_aulas||[]).filter(a=>a.publicada||isAdmin()).map(a=>({...a,modulo:m})))
@@ -1169,9 +1175,12 @@ async function renderCurso(cursoId, aulaId) {
 
   // materiais de apoio
   let materiais = [];
+  let atividadesAula = [];
   if (aula) {
     const {data:mats} = await supa.from('ava_materiais').select('id,titulo,url,tipo').eq('aula_id', aula.id);
     materiais = mats || [];
+    const {data:atividades} = await supa.from('ava_atividades').select('id,ordem,tipo,titulo,instrucoes,pergunta,duracao_min,publicada').eq('aula_id',aula.id).eq('publicada',true).order('ordem');
+    atividadesAula = atividades || [];
   }
 
   const pct = todasAulas.length ? Math.round(progSet.size/todasAulas.length*100) : 0;
@@ -1202,6 +1211,7 @@ async function renderCurso(cursoId, aulaId) {
             ${isStaff() ? `<button type="button" class="material-delete-btn" data-material-id="${esc(mat.id)}" title="Remover" style="flex-shrink:0;background:none;border:0;color:#b33;cursor:pointer;padding:2px 6px;font-size:13px">✕</button>` : ''}
           </div>`).join('')}
         </div>` : ''}
+        ${aula && atividadesAula.length ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES VINCULADAS</div><p class="muted" style="margin:5px 0 10px">${atividadesAula.length} atividades complementares desta aula.</p><div style="display:grid;gap:8px">${atividadesAula.map((atividade,i)=>`<article style="padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface)"><strong style="font-size:13px">${i+1}. ${esc(atividade.titulo||'Atividade complementar')}</strong><p class="muted" style="margin-top:3px">${esc(atividade.tipo||'Atividade')} · ${atividade.duracao_min||''}${atividade.duracao_min?' min':''}</p><p class="muted" style="margin-top:6px">${esc((atividade.pergunta||atividade.instrucoes||'Atividade complementar vinculada à aula.').replace(/<[^>]*>/g,''))}</p></article>`).join('')}</div></div>` : ''}
         ${aula ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES DA AULA</div><p class="muted" style="margin:5px 0 10px">Abra ou baixe as quatro atividades complementares vinculadas a esta aula.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" target="_blank" rel="noopener">Abrir atividades da aula →</a><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" rel="noopener" download="aula-${aula.ordem||1}-atividades.pdf">Baixar PDF</a></div></div>` : ''}
         ${aula && isStaff() ? `<details style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--green);text-transform:uppercase">+ Adicionar material de apoio</summary>
           <form class="material-form" data-aula="${esc(aula.id)}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;max-width:460px">
