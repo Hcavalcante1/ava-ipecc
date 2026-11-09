@@ -677,7 +677,7 @@ function renderLogin(msg, ok=false) {
     e.preventDefault();
     const email = document.querySelector('#login-form [name="email"]')?.value?.trim();
     if (!email) { toast('Preencha o e-mail primeiro.', false); return; }
-    supa.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname + '#nova-senha'})
+    supa.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname})
       .then(({error}) => {
         if (error) toast('Erro: ' + error.message, false);
         else toast('Link de recuperação enviado para ' + email + '. Verifique sua caixa de entrada.');
@@ -2538,7 +2538,7 @@ João Pereira, joao@exemplo.com</pre>
         headers: supa._headers(),
         body: JSON.stringify({
           usuarios,
-          redirectTo: location.origin + location.pathname + '#nova-senha'
+          redirectTo: location.origin + location.pathname
         })
       });
       const d = await r.json().catch(() => ({}));
@@ -2711,7 +2711,7 @@ $('#usuario-form')?.addEventListener('submit', async e => {
         email: f.get('email')?.trim(),
         telefone: f.get('telefone')?.trim() || null,
         papel: f.get('papel'),
-        redirectTo: location.origin + location.pathname + '#nova-senha'
+        redirectTo: location.origin + location.pathname
       })
     });
     const d = await r.json().catch(() => ({}));
