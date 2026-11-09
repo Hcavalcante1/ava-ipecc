@@ -1530,11 +1530,15 @@ async function renderAtividades() {
 
   // aulas por curso
   const cursoIds = [...new Set(mats.map(m=>m.ava_turmas?.ava_cursos?.id).filter(Boolean))];
-  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,modulo_id,ordem,ava_modulos(curso_id,ordem)').eq('publicada',true);
+  const {data: atividadeRows} = await supa.rpc('ava_listar_atividades_aluno');
   const aulasPorCurso = {};
-  (aulas||[]).forEach(a => {
-    const cid = a.ava_modulos?.curso_id;
-    if (cid) (aulasPorCurso[cid]||=(aulasPorCurso[cid]=[])).push(a);
+  (atividadeRows||[]).forEach(r => {
+    const cid = r.curso_id;
+    if (!cid) return;
+    const lista = (aulasPorCurso[cid]||=(aulasPorCurso[cid]=[]));
+    if (!lista.some(a => a.id === r.aula_id)) {
+      lista.push({id:r.aula_id,titulo:r.aula_titulo,ordem:r.aula_ordem,ava_modulos:{ordem:r.modulo_ordem}});
+    }
   });
 
   $('#main').innerHTML = `
@@ -1574,9 +1578,16 @@ async function renderPdfAtividades() {
   const {data: mats} = await supa.from('ava_matriculas').select('id,ava_turmas(nome,ava_cursos(id,titulo))').eq('aluno_id',currentUser.id).eq('status','ativa');
   if (!mats?.length) { $('#main').innerHTML=`<div class="panel"><p class="muted">Você não tem matrículas ativas.</p></div>`; return; }
   const cursoIds = [...new Set(mats.map(m=>m.ava_turmas?.ava_cursos?.id).filter(Boolean))];
-  const {data: aulas} = await supa.from('ava_aulas').select('id,titulo,ordem,ava_modulos!inner(curso_id,ordem)').in('ava_modulos.curso_id',cursoIds).eq('publicada',true);
+  const {data: atividadeRows} = await supa.rpc('ava_listar_atividades_aluno');
   const porCurso = {};
-  (aulas||[]).forEach(a => { const cid=a.ava_modulos?.curso_id; if(cid) (porCurso[cid]||=(porCurso[cid]=[])).push(a); });
+  (atividadeRows||[]).forEach(r => {
+    const cid = r.curso_id;
+    if (!cid) return;
+    const lista = (porCurso[cid]||=(porCurso[cid]=[]));
+    if (!lista.some(a => a.id === r.aula_id)) {
+      lista.push({id:r.aula_id,titulo:r.aula_titulo,ordem:r.aula_ordem,ava_modulos:{ordem:r.modulo_ordem}});
+    }
+  });
   const pdfHref = a => a.id==='94624342-b9d5-4e76-9345-cd1433fe3699' ? '/materiais/aula-1-atividades.pdf' : `/materiais/atividades/${encodeURIComponent(a.id)}.pdf`;
   const pdfDownloadName = a => `aula-${a.id}-atividades.pdf`;
   $('#main').innerHTML = `
