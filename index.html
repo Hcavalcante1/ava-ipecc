@@ -2717,7 +2717,7 @@ $('#usuario-form')?.addEventListener('submit', async e => {
     const d = await r.json().catch(() => ({}));
     if (!r.ok || d.error) { toast('Erro: ' + (d.error || 'falha ao criar usuário'), false); return; }
     $('#dlg-usuario').close(); e.target.reset();
-    toast(d.reenviado ? 'Usuário já existia — perfil sincronizado.' : 'Usuário criado. Convite enviado por e-mail.');
+    toast(d.reenviado ? 'Link para criar ou recuperar a senha enviado por e-mail.' : 'Usuário criado. Convite enviado por e-mail.');
     render();
   } catch (err) {
     toast('Erro: ' + err.message, false);
