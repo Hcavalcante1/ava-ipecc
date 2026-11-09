@@ -30,6 +30,7 @@ type ItemResultado = {
   success: boolean;
   id?: string;
   reenviado?: boolean;
+  tipo?: "convite" | "recuperacao";
   error?: string;
 };
 
@@ -97,7 +98,7 @@ Deno.serve(async (req: Request) => {
 
     // professores/monitores so podem convidar alunos — o papel enviado pelo
     // cliente e ignorado nesse caso, nunca confiamos nisso vindo do navegador
-    let listaExistentesCache: { id: string; email?: string }[] | null = null;
+    let listaExistentesCache: { id: string; email?: string; email_confirmed_at?: string | null }[] | null = null;
     async function buscarUsuarioExistentePorEmail(email: string) {
       if (!listaExistentesCache) {
         const { data: list, error: listErr } = await adminClient.auth.admin.listUsers({
@@ -154,7 +155,14 @@ Deno.serve(async (req: Request) => {
             continue;
           }
           userId = existing.id;
-          reenviado = true;
+          if (existing.email_confirmed_at) {
+            const { error: recoveryErr } = await adminClient.auth.resetPasswordForEmail(email, { redirectTo });
+            if (recoveryErr) {
+              resultados.push({ email, success: false, error: recoveryErr.message });
+              continue;
+            }
+            reenviado = true;
+          }
         }
 
         if (!userId) {
@@ -188,7 +196,7 @@ Deno.serve(async (req: Request) => {
     if (!Array.isArray(body.usuarios)) {
       const r = resultados[0];
       if (!r.success) return json({ error: r.error }, 400);
-      return json({ success: true, id: r.id, reenviado: r.reenviado });
+      return json({ success: true, id: r.id, reenviado: r.reenviado, tipo: r.tipo });
     }
 
     const okCount = resultados.filter((r) => r.success).length;
