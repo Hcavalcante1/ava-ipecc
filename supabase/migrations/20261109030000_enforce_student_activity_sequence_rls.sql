@@ -15,6 +15,7 @@ as $$
     select s.id, s.curso_id, s.posicao
     from sequencia s
     join ava_matriculas mat on mat.id = p_matricula_id
+      and mat.aluno_id = (select auth.uid())
     join ava_turmas t on t.id = mat.turma_id and t.curso_id = s.curso_id
     where s.id = p_aula_id
   )
@@ -33,33 +34,34 @@ as $$
   );
 $$;
 
-grant execute on function public.ava_pode_acessar_aula(uuid, uuid) to anon, authenticated;
+revoke all on function public.ava_pode_acessar_aula(uuid, uuid) from public;
+grant execute on function public.ava_pode_acessar_aula(uuid, uuid) to authenticated;
 
 drop policy if exists aluno_envia_entrega on public.ava_entregas;
-create policy aluno_envia_entrega on public.ava_entregas for insert to public
+create policy aluno_envia_entrega on public.ava_entregas for insert to authenticated
 with check (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and public.ava_pode_acessar_aula(matricula_id, aula_id));
 
 drop policy if exists aluno_update_entrega on public.ava_entregas;
-create policy aluno_update_entrega on public.ava_entregas for update to public
+create policy aluno_update_entrega on public.ava_entregas for update to authenticated
 using (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and status = 'pendente'::ava_status_entrega)
 with check (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and public.ava_pode_acessar_aula(matricula_id, aula_id));
 
 drop policy if exists aluno_upsert_entrega on public.ava_entregas;
-create policy aluno_upsert_entrega on public.ava_entregas for all to public
+create policy aluno_upsert_entrega on public.ava_entregas for all to authenticated
 using (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid())))
 with check (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and public.ava_pode_acessar_aula(matricula_id, aula_id));
 
 drop policy if exists aluno_atualiza_progresso on public.ava_progresso;
-create policy aluno_atualiza_progresso on public.ava_progresso for insert to public
+create policy aluno_atualiza_progresso on public.ava_progresso for insert to authenticated
 with check (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and public.ava_pode_acessar_aula(matricula_id, aula_id));
 
 drop policy if exists aluno_update_progresso on public.ava_progresso;
-create policy aluno_update_progresso on public.ava_progresso for update to public
+create policy aluno_update_progresso on public.ava_progresso for update to authenticated
 using (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid())))
 with check (matricula_id in (select id from public.ava_matriculas where aluno_id = (select auth.uid()))
   and public.ava_pode_acessar_aula(matricula_id, aula_id));
