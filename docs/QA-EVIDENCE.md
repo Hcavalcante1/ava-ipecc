@@ -17,7 +17,8 @@
 - `ava_pode_acessar_aula` instalada em produção
 - Cinco políticas de gravação de `ava_entregas`/`ava_progresso` usam o guard e destinam-se a `authenticated`
 - `anon` sem EXECUTE na função; `authenticated` com EXECUTE
-- Perfis atuais: 1 administrador e 1 aluno; nenhum professor cadastrado
+- Perfis atuais: 1 administrador, 1 aluno e 1 professor de teste
+- O usuário de professor foi criado e `confirmation_sent_at` foi registrado pelo Supabase; ainda não houve confirmação nem login
 - Migrações aplicadas incluem `add_account_recovery_codes` e `enforce_student_activity_sequence_rls`
 
 ## Chrome real
@@ -27,6 +28,7 @@
 - Rota de recuperação exibiu e-mail, código e nova senha
 - Ambiente do professor exibiu as 40 aulas
 - Aula do professor exibiu conteúdo interativo, roteiro de 5 horas e controles Abrir/Baixar dos PDFs
+- Cadastro administrativo exibiu o professor de teste como ativo
 - Console sem erros ou avisos observados
 
 ## Observabilidade
@@ -37,7 +39,7 @@
 
 ## Pendências explícitas
 
-- Criar um professor de teste usando e-mail autorizado.
+- Concluir confirmação/login do professor de teste após recebimento do convite.
 - Executar sessão independente de aluno para o fluxo completo pós-RLS.
 - Verificar rollback em ambiente separado; não executar rollback destrutivo na produção principal.
 - Configurar E2E autenticado no CI, após disponibilizar credenciais de teste seguras.
