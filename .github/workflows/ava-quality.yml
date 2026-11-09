@@ -1,0 +1,24 @@
+name: AVA quality gate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  static-and-production-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate source markers
+        run: |
+          test -s index.html
+          test -s supabase/functions/ava-criar-usuario/index.ts
+          test -s supabase/functions/ava-recuperar-conta/index.ts
+          grep -q "PAPEIS_STAFF" supabase/functions/ava-criar-usuario/index.ts
+          grep -q "codigo_hash" supabase/functions/ava-recuperar-conta/index.ts
+      - name: Production smoke and JavaScript syntax
+        run: node tests/production-smoke.mjs
