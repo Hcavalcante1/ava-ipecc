@@ -419,10 +419,16 @@ const supa = {
         const raw = localStorage.getItem('ava_session');
         if (raw) {
           _session = JSON.parse(raw);
-          if (sessionExpiringSoon()) await refreshSessionToken();
+          if (sessionExpiringSoon() && !await refreshSessionToken()) {
+            _session = null;
+            localStorage.removeItem('ava_session');
+            return {data:{session:null}};
+          }
           return {data:{session:_session}};
         }
       } catch{}
+      _session = null;
+      try { localStorage.removeItem('ava_session'); } catch{}
       return {data:{session:null}};
     },
     async signInWithPassword({email,password}) {
