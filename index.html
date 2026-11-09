@@ -661,7 +661,9 @@ function renderLogin(msg, ok=false) {
             <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="login-btn">Entrar →</button>
           </form>
           <p class="muted" style="margin-top:16px;font-size:12px;text-align:center">
-            <a href="#" id="link-recuperar" style="color:var(--green)">Esqueceu a senha? Fale com o IPECC ou clique aqui.</a>
+            <a href="#" id="link-recuperar" style="color:var(--green)">Recuperar por e-mail</a>
+            <span class="muted">ou</span>
+            <a href="#recuperar-codigo" style="color:var(--green)">Usar código de recuperação</a>
           </p>
         </div>
         <p class="muted" style="margin-top:18px;font-size:12px;text-align:center;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
@@ -743,11 +745,11 @@ function isRotaPublica() {
   // caem na mesma tela de "definir senha"
   if (location.hash.includes('access_token=') && (location.hash.includes('type=recovery') || location.hash.includes('type=invite'))) return true;
   const view = location.hash.slice(1).split('/')[0];
-  return view === 'stats' || view === 'validar' || view === 'nova-senha' || view === 'catalogo';
+  return view === 'stats' || view === 'validar' || view === 'nova-senha' || view === 'recuperar-codigo' || view === 'catalogo';
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha',catalogo:'Catálogo de Cursos'};
+const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha','recuperar-codigo':'Recuperar conta',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -793,6 +795,13 @@ async function render() {
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     $('#main').innerHTML = loading();
     try { await renderCatalogo(); } catch(err) { $('#main').innerHTML=`<p>${esc(err.message)}</p>`; }
+    return;
+  }
+  if (view === 'recuperar-codigo') {
+    prepararChromePublico();
+    $('#crumb').textContent = 'Recuperar conta';
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    renderRecuperarCodigo();
     return;
   }
   if (view === 'nova-senha') {
@@ -2884,6 +2893,12 @@ async function renderPerfil() {
             <button type="submit" class="btn-secondary">Alterar</button>
           </form>
         </div>
+        <div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
+          <p class="muted" style="font-size:12px;margin-bottom:8px">Código de recuperação</p>
+          <p class="muted" style="font-size:12px;margin-bottom:8px">Gere um código, guarde-o fora do AVA e use-o se perder o acesso ao e-mail. O código será mostrado uma única vez.</p>
+          <button type="button" class="btn-secondary" id="gerar-codigo-recuperacao">Gerar novo código</button>
+          <div id="codigo-recuperacao-resultado" style="margin-top:10px"></div>
+        </div>
       </div>
 
       <div class="panel">
@@ -2999,6 +3014,21 @@ async function renderPerfil() {
     if (error) { toast('Erro: '+error.message, false); return; }
     toast('Senha alterada com sucesso');
     e.target.reset();
+  });
+
+  document.getElementById('gerar-codigo-recuperacao')?.addEventListener('click', async e => {
+    const btn = e.currentTarget;
+    btn.disabled = true; btn.textContent = 'Gerando…';
+    try {
+      const r = await fetch(SUPA_URL + '/functions/v1/ava-recuperar-conta', {
+        method: 'POST', headers: supa._headers(),
+        body: JSON.stringify({mode:'generate'})
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.error) { toast(d.error || 'Não foi possível gerar o código.', false); return; }
+      $('#codigo-recuperacao-resultado').innerHTML = '<div class="panel" style="background:var(--green-light);border:1px solid var(--accent)"><strong style="font-size:20px;letter-spacing:3px">'+esc(d.codigo)+'</strong><p class="muted" style="font-size:11px;margin-top:6px">Anote este código. Por segurança, ele não será exibido novamente.</p></div>';
+      toast('Código gerado. Guarde-o em local seguro.');
+    } finally { btn.disabled = false; btn.textContent = 'Gerar novo código'; }
   });
 
   // ── Pad de assinatura (professor/admin) ───────────────────────────
@@ -3205,6 +3235,47 @@ async function renderStats() {
         <a class="btn-primary" href="${location.pathname}">Acessar plataforma →</a>
       </div>
     </div>`}`;
+}
+
+function renderRecuperarCodigo() {
+  $('#main').innerHTML = `
+    <div style="max-width:430px;margin:60px auto">
+      <div class="brand" style="margin-bottom:28px;justify-content:center">
+        <div class="brand-mark">i</div>
+        <div class="brand-text">IPECC <small>Ambiente de Aprendizagem</small></div>
+      </div>
+      <div class="panel">
+        <h2 style="margin-bottom:4px">Recuperar conta</h2>
+        <p class="muted" style="margin-bottom:20px">Use o código de recuperação que você guardou no seu perfil. Ele só pode ser usado uma vez.</p>
+        <form id="recuperar-codigo-form" style="display:flex;flex-direction:column;gap:12px">
+          <label class="field"><span>E-mail cadastrado</span><input class="fi" type="email" name="email" required autocomplete="username"></label>
+          <label class="field"><span>Código de recuperação</span><input class="fi" name="codigo" required minlength="8" maxlength="24" autocomplete="one-time-code" style="text-transform:uppercase;letter-spacing:2px"></label>
+          <label class="field"><span>Nova senha</span><input class="fi" type="password" name="senha" required minlength="6" autocomplete="new-password"></label>
+          <label class="field"><span>Confirmar senha</span><input class="fi" type="password" name="confirma" required minlength="6" autocomplete="new-password"></label>
+          <button class="btn-primary" type="submit">Redefinir senha →</button>
+        </form>
+        <p class="muted" style="font-size:12px;margin-top:16px;text-align:center"><a href="${location.pathname}" style="color:var(--green)">Voltar para entrar</a></p>
+      </div>
+    </div>`;
+  $('#recuperar-codigo-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    if (f.get('senha') !== f.get('confirma')) { toast('As senhas não conferem.', false); return; }
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Validando…';
+    try {
+      const r = await fetch(SUPA_URL + '/functions/v1/ava-recuperar-conta', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+        body: JSON.stringify({mode:'recover',email:f.get('email'),codigo:f.get('codigo'),senha:f.get('senha')})
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.error) { toast(d.error || 'Não foi possível recuperar a conta.', false); return; }
+      renderLogin('Senha redefinida. Faça login com a nova senha.', true);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Redefinir senha →';
+    }
+  });
 }
 
 // ── Nova senha (redirect pós-email, recuperação ou convite) ──────
