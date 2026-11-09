@@ -76,7 +76,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Envie no maximo 200 usuarios por vez" }, 400);
     }
 
-    const redirectTo = typeof body.redirectTo === "string" ? body.redirectTo : undefined;
+    // Nunca permita que um convite redirecione para outro site. O AVA e o destino canonico.\n    const redirectTo = (() => {\n      const candidato = typeof body.redirectTo === "string" ? body.redirectTo : "";\n      try {\n        const url = new URL(candidato);\n        if (url.origin === "https://ava.ipecc.org.br" && url.pathname === "/") {\n          return candidato;\n        }\n      } catch {\n        // usa o destino seguro abaixo\n      }\n      return "https://ava.ipecc.org.br/#nova-senha";\n    })();
 
     // cliente com service role — so usado aqui, no servidor, nunca enviado ao navegador
     const adminClient = createClient(supabaseUrl, serviceKey, {
