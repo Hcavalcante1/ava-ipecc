@@ -216,6 +216,65 @@ textarea.fi{min-height:85px;resize:vertical}
   .hero{padding:26px}
   .hero h2{font-size:24px}
 }
+/* Modelo institucional final fornecido pelo IPECC (duas páginas). O PNG
+      preserva a diagramação do Canva; somente os campos variáveis ficam em
+      camadas por cima para que nome, curso, QR e assinaturas sejam reais. */
+   .cert-model-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+   .cert-model-layer{position:absolute;inset:0;font-family:'Inter','Segoe UI',Arial,sans-serif;color:#063f31}
+   .cert-p1-textbox{position:absolute;left:24%;top:39%;width:52%;height:35%;background:#fff;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:1% 2%;box-sizing:border-box}
+   .cert-p1-clean{position:absolute;left:8%;right:8%;top:30%;height:54%;background:#fff}
+   .cert-p1-title-cover{position:absolute;left:28%;top:13%;width:44%;height:15%;background:#fff;text-align:center;display:flex;align-items:center;justify-content:center}
+   .cert-p1-title{font-family:Georgia,'Times New Roman',serif;font-size:52px;letter-spacing:1px;font-weight:700;color:#063f31}
+   .cert-p1-intro{font-size:17px;line-height:1.2}
+   .cert-p1-name{font-size:25px;font-weight:700;line-height:1.18;max-width:95%}
+   .cert-p1-course{font-size:17px;line-height:1.35;max-width:95%}
+   .cert-p1-date{font-size:16px;line-height:1.2;margin-top:8px}
+   .cert-p1-signatures{position:absolute;left:17%;right:17%;bottom:4.2%;display:flex;justify-content:space-between;gap:18%;text-align:center}
+   .cert-p1-signature{width:34%;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+   .cert-p1-signature img{height:36px;max-width:150px;object-fit:contain;margin-bottom:2px}
+   .cert-p1-signature .name{font-size:12px;font-weight:700;line-height:1.15;max-width:95%;background:#fff;padding:0 4px}
+   .cert-p2-value{position:absolute;background:#fff;font-size:15px;line-height:1.25;color:#202725;padding:1px 3px;box-sizing:border-box}
+   .cert-p2-name{left:29%;top:32.1%;width:27%;height:3.5%}
+   .cert-p2-course{left:29%;top:40.3%;width:27%;height:3.5%}
+   .cert-p2-hours{left:29%;top:48.4%;width:27%;height:3.5%}
+   .cert-p2-summary{left:29%;top:55.8%;width:27%;height:17.5%;font-size:13px;line-height:1.35;overflow:hidden}
+   .cert-p2-code{left:29%;top:80.3%;width:27%;height:3.5%;font-family:monospace;font-size:10px}
+   .cert-p2-qr{position:absolute;right:17.8%;top:44%;width:24%;height:28%;background:#fff;display:flex;align-items:center;justify-content:center}
+   .cert-p2-qr canvas,.cert-p2-qr img{width:145px!important;height:145px!important;max-width:90%;max-height:90%}
+   .cert-p2-url{position:absolute;right:17.5%;top:78.2%;width:25%;background:#fff;text-align:center;font-size:10px;line-height:1.25;padding:2px;box-sizing:border-box;word-break:break-word}
+}
+
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-center{display:flex;justify-content:center;padding:48px;color:var(--muted)}
+
+@media(max-width:900px){
+  aside{width:200px;padding:24px 14px}
+  .shell{margin-left:200px}
+  footer{margin-left:200px}
+  .hero{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .lesson-layout{grid-template-columns:1fr}
+  header,main,.notice{padding-left:26px;padding-right:26px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:640px){
+  aside{position:relative;width:100%;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:14px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line)}
+  .brand{margin-bottom:0}
+  .nav-label,.aside-footer{display:none}
+  nav{display:flex;flex-direction:row;gap:4px;overflow-x:auto;padding:8px 0 0;width:100%}
+  nav a span{display:none}
+  nav a{padding:10px}
+  .shell{margin-left:0}
+  footer{margin-left:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  header{padding:0 max(16px,env(safe-area-inset-left,0px))}
+  .notice{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  main{padding:24px max(16px,env(safe-area-inset-left,0px)) 48px}
+  .courses,.stats{grid-template-columns:1fr}
+  .hero{padding:26px}
+  .hero h2{font-size:24px}
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -1851,70 +1910,40 @@ async function baixarCertificado(codigo) {
       <div class="cert-conteudo-titulo">Conteúdo:</div>
       <ul class="cert-conteudo-list">${modulos.map(m=>`<li>${esc(m.titulo)}</li>`).join('')}</ul>` : '';
 
+  const resumoModelo = (modulos||[]).map(m=>m.titulo).filter(Boolean).join('; ') || curso?.descricao || 'Formação concluída conforme os critérios institucionais do IPECC.';
   wrap.innerHTML = `<div class="cert-page"><div class="cert-frame">
-    <div class="cert-corner tl"></div>
-    <div class="cert-corner tr"></div>
-    <div class="cert-corner bl"></div>
-    <div class="cert-corner br"></div>
-    <div class="cert-watermark" style="background-image:url('${watermarkFoto}')"></div>
-    <div class="cert-content">
-      <div class="cert-header-row">
-        <div class="cert-header">
-          <img class="cert-logo-img" src="${LOGO_DATA_URI}" alt="IPECC">
-          <div class="cert-header-text">
-            <div class="cert-inst">Instituto Paulista de Esporte, Cultura e Cidadania</div>
-            <div class="cert-inst-sub">IPECC</div>
-          </div>
-        </div>
-        <div class="cert-wordmark">Certificado</div>
+    <img class="cert-model-bg" src="/media/certificados/modelo-final-certificado.png" alt="Modelo institucional de certificado">
+    <div class="cert-model-layer">
+      <div class="cert-p1-clean"></div>
+      <div class="cert-p1-title-cover"><div class="cert-p1-title">CERTIFICADO</div></div>
+      <div class="cert-p1-textbox">
+        <div class="cert-p1-intro">Certificamos que</div>
+        <div class="cert-p1-name">${esc(nome)}</div>
+        <div class="cert-p1-course">concluiu o curso de <strong>${esc(cursotitulo)}</strong>,<br>com carga horária de <strong>${carga} horas</strong>.</div>
+        <div class="cert-p1-date">Suzano-SP, ${dt}.</div>
       </div>
-      <div class="cert-corpo">
-        O Instituto Paulista de Esporte, Cultura e Cidadania certifica que
-        <span class="aluno-nome">${esc(nome)}</span>
-        concluiu o curso <strong>${esc(cursotitulo)}</strong>, com carga horária de <strong>${carga} horas</strong>.
-      </div>
-      <div class="cert-data-local">Suzano-SP, ${dt}.</div>
-      ${parceirosHtml}
-      <div class="cert-assinaturas">
-        <div class="cert-assinatura">
-          ${professorNome?`${professorAssinatura?`<div class="sig-mark"><img src="${professorAssinatura}" alt=""></div>`:''}<div class="sig-nome">${esc(professorNome)}</div>`:''}
-          <div class="sig-linha"><span class="sig-cargo">${professorNome?'Professor(a) responsável':'Professor(a) — a definir'}</span><br>IPECC</div>
+      <div class="cert-p1-signatures">
+        <div class="cert-p1-signature">
+          ${professorAssinatura?`<img src="${professorAssinatura}" alt="Assinatura do professor">`:''}
+          <div class="name">${professorNome?esc(professorNome):'Professor(a) responsável'}</div>
         </div>
-        <div class="cert-assinatura">
-          ${presidenteAssinatura?`<div class="sig-mark"><img src="${presidenteAssinatura}" alt=""></div>`:''}
-          <div class="sig-nome">${esc(presidenteNome)}</div>
-          <div class="sig-linha"><span class="sig-cargo">Presidente</span><br>IPECC</div>
+        <div class="cert-p1-signature">
+          ${presidenteAssinatura?`<img src="${presidenteAssinatura}" alt="Assinatura do presidente">`:''}
+          <div class="name">${esc(presidenteNome)}</div>
         </div>
       </div>
     </div>
   </div></div>
   <div class="cert-page"><div class="cert-frame">
-    <div class="cert-corner tl"></div>
-    <div class="cert-corner tr"></div>
-    <div class="cert-corner bl"></div>
-    <div class="cert-corner br"></div>
-    <div class="cert-watermark" style="background-image:url('${watermarkFoto}')"></div>
-    <div class="cert-content">
-      <div class="cert-header-row">
-        <div class="cert-header">
-          <img class="cert-logo-img" src="${LOGO_DATA_URI}" alt="IPECC">
-          <div class="cert-header-text">
-            <div class="cert-inst">Instituto Paulista de Esporte, Cultura e Cidadania</div>
-            <div class="cert-inst-sub">IPECC</div>
-          </div>
-        </div>
-      </div>
-      <div class="cert-historico-titulo">Histórico</div>
-      <div class="cert-historico-grid">
-        <div class="cert-historico-item"><div class="label">Nome</div><div class="value">${esc(nome)}</div></div>
-        <div class="cert-historico-item"><div class="label">Curso</div><div class="value">${esc(cursotitulo)}</div></div>
-        <div class="cert-historico-item"><div class="label">Carga horária</div><div class="value">${carga} horas</div></div>
-      </div>
-      ${conteudoHtml}
-      <div class="cert-footer-row">
-        <div class="cert-qr" id="cert-qr-box"></div>
-        <div class="cert-disclaimer">Certificado emitido pelo AVA IPECC sob o código ${esc(cert.codigo)}. A validade deste documento pode ser comprovada acessando o QR Code ao lado, ou informando o código acima em: ${validUrl}</div>
-      </div>
+    <img class="cert-model-bg" src="/media/certificados/modelo-final-historico.png" alt="Modelo institucional de histórico">
+    <div class="cert-model-layer">
+      <div class="cert-p2-value cert-p2-name">${esc(nome)}</div>
+      <div class="cert-p2-value cert-p2-course">${esc(cursotitulo)}</div>
+      <div class="cert-p2-value cert-p2-hours">${carga} horas</div>
+      <div class="cert-p2-value cert-p2-summary">${esc(resumoModelo)}</div>
+      <div class="cert-p2-value cert-p2-code">${esc(cert.codigo)}</div>
+      <div class="cert-p2-qr" id="cert-qr-box"></div>
+      <div class="cert-p2-url">${esc(validUrl)}</div>
     </div>
   </div></div>`;
 
@@ -1932,6 +1961,7 @@ async function baixarCertificado(codigo) {
     setTimeout(() => { document.title = tituloOriginal; }, 500);
   }, 300);
 }
+
 
 // ── Validar (pública) ─────────────────────────────────────────────
 async function renderValidar(codigo) {
