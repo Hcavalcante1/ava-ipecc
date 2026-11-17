@@ -2453,6 +2453,7 @@ async function renderRelatorios() {
   const {data:planosComerciais} = isAdmin() ? await supa.from('ava_planos_comerciais').select('codigo,nome,descricao,preco_mensal,limite_usuarios,limite_cursos,limite_armazenamento_mb,recursos').eq('ativo',true).order('ordem') : {data:[]};
   const {data:auditoria} = isAdmin() ? await supa.from('ava_auditoria').select('id,ator_id,acao,tabela,registro_id,criado_em').order('criado_em',{ascending:false}).limit(12) : {data:[]};
   const {data:diagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_perfis') : {data:[]};
+  const {data:conteudoDiagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_conteudo') : {data:[]};
 
   const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
   const progMap = {};
@@ -2514,6 +2515,11 @@ async function renderRelatorios() {
   if (auditoria?.length) {
     const logs = auditoria.map(l => '<tr><td>'+new Date(l.criado_em).toLocaleString('pt-BR')+'</td><td>'+esc(l.acao)+'</td><td>'+esc(l.tabela)+'</td><td style="font-family:monospace;font-size:11px">'+esc(l.registro_id||'')+'</td></tr>').join('');
     $('#main').insertAdjacentHTML('afterbegin','<section class="panel" style="margin-bottom:20px"><div class="section-header"><h2>Auditoria recente</h2><span class="muted">Últimas 12 alterações</span></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Ação</th><th>Tabela</th><th>Registro</th></tr></thead><tbody>'+logs+'</tbody></table></div></section>');
+  }
+
+  if (isAdmin() && conteudoDiagnostico) {
+    const c = Array.isArray(conteudoDiagnostico) ? conteudoDiagnostico[0] : conteudoDiagnostico;
+    if (c) $('#main').insertAdjacentHTML('beforeend', '<section class="panel" style="margin-top:20px"><div class="section-header"><h2>Integridade do conteúdo Canvas</h2><span class="muted">Cobertura pedagógica</span></div><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:0"><div class="stat"><div class="eyebrow">Aulas com conteúdo</div><span class="stat-num">'+Number(c.cobertura_aulas||0).toLocaleString('pt-BR')+'%</span><small class="muted">'+Number(c.aulas_com_conteudo||0)+' / '+Number(c.aulas_publicadas||0)+'</small></div><div class="stat"><div class="eyebrow">Atividades Canvas</div><span class="stat-num">'+Number(c.cobertura_atividades||0).toLocaleString('pt-BR')+'%</span><small class="muted">'+Number(c.atividades_canvas||0)+' / '+Number(c.atividades_publicadas||0)+'</small></div><div class="stat"><div class="eyebrow">Materiais Canvas</div><span class="stat-num">'+Number(c.materiais_canvas||0)+'</span><small class="muted">materiais internos</small></div></div></section>');
   }
 
   if (isAdmin() && diagnostico) {
