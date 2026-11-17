@@ -306,6 +306,14 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Atividades</span>
     </a>
+    <a href="#forum" id="nav-link-forum">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5h16v11H7l-3 3z"/><path d="M8 9h8M8 12h5"/></svg>
+      <span>Fórum</span>
+    </a>
+    <a href="#gamificacao" id="nav-link-gamificacao">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+      <span>Conquistas</span>
+    </a>
     <div class="nav-label">Materiais do aluno</div>
     <a href="#pdf-atividades" id="nav-link-pdf-atividades">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v4h4M9 12h6M9 16h6"/></svg>
@@ -819,7 +827,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha','recuperar-codigo':'Recuperar conta',catalogo:'Catálogo de Cursos'};
+const LABELS = {forum:'Fórum',gamificacao:'Conquistas',inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha','recuperar-codigo':'Recuperar conta',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -931,6 +939,8 @@ async function render() {
     if (view === 'curso')       await renderCurso(parts[1], parts[2]);
     else if (view === 'cursos') await renderCursos();
     else if (view === 'atividades') await renderAtividades();
+    else if (view === 'forum') await renderForum();
+    else if (view === 'gamificacao') await renderGamificacao();
     else if (view === 'pdf-atividades') await renderPdfAtividades();
     else if (view === 'certificados') await renderCertificados();
     else if (view === 'solicitacoes') await renderSolicitacoes();
@@ -3265,7 +3275,7 @@ async function renderStats() {
   const totalCursos   = cursos?.length || 0;
   const totalMats     = statsRow?.total_matriculas_ativas || 0;
   const totalCerts    = statsRow?.total_certificados || 0;
-  const totalAulas    = aulas?.length || 0;
+  const totalAulas    = Number(statsRow?.total_aulas_publicadas ?? aulas?.length ?? 0);
   const totalHoras    = (cursos||[]).reduce((s,c)=>s+(c.carga_horas||0),0);
 
   $('#main').innerHTML = `
@@ -3331,6 +3341,29 @@ function renderRecuperarCodigo() {
   });
 }
 
+// ── Fórum e gamificação ───────────────────────────────────────────
+async function renderForum() {
+  const [{data: posts, error: postsError}, {data: cursos}] = await Promise.all([
+    supa.from('ava_forum_posts').select('id,autor_id,curso_id,titulo,conteudo,fixado,encerrado,created_at').order('fixado',{ascending:false}).order('created_at',{ascending:false}),
+    supa.from('ava_cursos').select('id,titulo').eq('ativo',true).order('titulo')
+  ]);
+  if (postsError) throw postsError;
+  const autorIds = [...new Set((posts||[]).map(p=>p.autor_id).filter(Boolean))];
+  const {data: perfis} = autorIds.length ? await supa.from('ava_perfis').select('id,nome_completo,nome').in('id',autorIds) : {data:[]};
+  const nomes = Object.fromEntries((perfis||[]).map(p=>[p.id,p.nome_completo||p.nome||'Participante']));
+  const cursoNome = Object.fromEntries((cursos||[]).map(c=>[c.id,c.titulo]));
+  const cards = (posts||[]).map(p=>'<article class="panel" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><h3 style="font-size:17px;margin-bottom:5px">'+esc(p.titulo)+'</h3><p class="muted" style="font-size:12px">'+esc(nomes[p.autor_id]||'Participante')+' · '+new Date(p.created_at).toLocaleDateString('pt-BR')+(cursoNome[p.curso_id]?' · '+esc(cursoNome[p.curso_id]):'')+'</p></div>'+(p.encerrado?'<span class="tag warn">Encerrado</span>':'')+'</div><p style="margin-top:14px;white-space:pre-wrap;line-height:1.6">'+esc(p.conteudo)+'</p></article>').join('');
+  $('#main').innerHTML = '<div class="topline"><div><div class="eyebrow">IPECC · COMUNIDADE</div><h1 class="page-title">Fórum de aprendizagem</h1><p class="muted">Tire dúvidas, compartilhe experiências e acompanhe os temas do curso.</p></div></div><div class="panel"><h2>Nova discussão</h2><form id="forum-form" style="display:grid;gap:12px"><label class="field"><span>Título</span><input class="fi" name="titulo" required maxlength="160"></label><label class="field"><span>Mensagem</span><textarea class="fi" name="conteudo" required maxlength="10000" style="min-height:120px"></textarea></label><label class="field"><span>Curso (opcional)</span><select class="fi" name="curso_id"><option value="">Todos os cursos</option>'+(cursos||[]).map(c=>'<option value="'+esc(c.id)+'">'+esc(c.titulo)+'</option>').join('')+'</select></label><button class="btn-primary" type="submit">Publicar discussão →</button></form></div><section><div class="section-header"><h2>Discussões recentes</h2><span class="muted">'+(posts||[]).length+' publicação(ões)</span></div>'+(cards||'<div class="panel"><p class="muted">Ainda não há discussões. Seja o primeiro a publicar.</p></div>')+'</section>';
+  $('#forum-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const {error}=await supa.from('ava_forum_posts').insert({autor_id:currentUser.id,titulo:String(f.get('titulo')||'').trim(),conteudo:String(f.get('conteudo')||'').trim(),curso_id:f.get('curso_id')||null});if(error){toast('Não foi possível publicar: '+error.message,false);return;}toast('Discussão publicada.');await renderForum();});
+}
+async function renderGamificacao() {
+  const [{data: pontos},{data: conquistas}] = await Promise.all([
+    supa.from('ava_pontos').select('pontos,nivel,atualizado_em').eq('usuario_id',currentUser.id).maybeSingle(),
+    supa.from('ava_conquistas').select('codigo,titulo,descricao,conquistada_em').eq('usuario_id',currentUser.id).order('conquistada_em',{ascending:false})
+  ]);
+  const total=Number(pontos?.pontos||0), nivel=Number(pontos?.nivel||1), prox=nivel*100, pct=Math.min(100,Math.round((total%100)));
+  $('#main').innerHTML='<div class="topline"><div><div class="eyebrow">IPECC · PROGRESSO</div><h1 class="page-title">Conquistas</h1><p class="muted">Acompanhe seus pontos, níveis e marcos de aprendizagem.</p></div></div><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"><div class="stat"><div class="eyebrow">Pontos</div><span class="stat-num">'+total+'</span></div><div class="stat"><div class="eyebrow">Nível</div><span class="stat-num">'+nivel+'</span></div><div class="stat"><div class="eyebrow">Conquistas</div><span class="stat-num">'+(conquistas||[]).length+'</span></div></div><div class="panel"><div class="section-header"><h2>Próximo nível</h2><span class="muted">'+Math.max(0,prox-total)+' pontos restantes</span></div><div class="progress-bar"><i style="width:'+pct+'%"></i></div><p class="muted" style="margin-top:10px">Cada atividade concluída vale 10 pontos.</p></div><div class="section-header"><h2>Minhas conquistas</h2></div>'+((conquistas||[]).length?(conquistas||[]).map(c=>'<div class="panel" style="display:flex;gap:14px;align-items:center"><div class="stat-icon">★</div><div><h3 style="font-size:15px">'+esc(c.titulo)+'</h3><p class="muted">'+esc(c.descricao||'Marco de aprendizagem')+'</p></div></div>').join(''):'<div class="panel"><p class="muted">Conclua uma atividade para desbloquear sua primeira conquista.</p></div>');
+}
 // ── Nova senha (redirect pós-email, recuperação ou convite) ──────
 function renderNovaSenha() {
   // o Supabase redireciona com o token no hash (#access_token=...&type=recovery|invite)
