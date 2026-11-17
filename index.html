@@ -1043,6 +1043,16 @@ async function renderDashboard() {
     </div>
     <div class="section-header"><h2>${matriculas?.length ? 'Minha jornada' : 'Cursos disponíveis'}</h2><a href="#cursos">Ver todos →</a></div>
     <div class="courses">${cursosCards || '<p class="muted">Nenhum curso disponível ainda.</p>'}</div>`;
+  if (matriculas?.length) {
+    const fluxo = (await Promise.all(matriculas.map(async m => {
+      const r = await supa.rpc('ava_progresso_matricula', {p_matricula_id:m.id});
+      return r.data ? (Array.isArray(r.data) ? r.data[0] : r.data) : null;
+    }))).filter(Boolean);
+    if (fluxo.length) {
+      const linhas = fluxo.map(f => '<tr><td>'+Number(f.percentual||0).toLocaleString('pt-BR')+'%</td><td>'+Number(f.aulas_concluidas||0)+' / '+Number(f.aulas_total||0)+'</td><td>'+Number(f.atividades_enviadas||0)+' / '+Number(f.atividades_total||0)+'</td><td><span class="tag">'+(f.elegivel_certificado?'Elegível para certificado':'Em andamento')+'</span></td></tr>').join('');
+      $('#main').insertAdjacentHTML('beforeend','<section class="panel" style="margin-top:20px"><div class="section-header"><h2>Status pedagógico</h2><span class="muted">Acompanhamento da matrícula</span></div><div class="table-wrap"><table><thead><tr><th>Progresso</th><th>Aulas</th><th>Atividades</th><th>Situação</th></tr></thead><tbody>'+linhas+'</tbody></table></div></section>');
+    }
+  }
 }
 
 // ── Cursos ────────────────────────────────────────────────────────
