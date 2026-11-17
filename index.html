@@ -1310,11 +1310,17 @@ async function renderCurso(cursoId, aulaId) {
   // materiais de apoio
   let materiais = [];
   let atividadesAula = [];
+  let entregasAtividades = {};
   if (aula) {
     const {data:mats} = await supa.from('ava_materiais').select('id,titulo,url,tipo,conteudo').eq('aula_id', aula.id);
     materiais = mats || [];
     const {data:atividades} = await supa.from('ava_atividades').select('id,ordem,tipo,titulo,instrucoes,pergunta,duracao_min,publicada').eq('aula_id',aula.id).eq('publicada',true).order('ordem');
     atividadesAula = atividades || [];
+    if (!ambienteProfessor && matriculaId && atividadesAula.length) {
+      const idsAtividades = atividadesAula.map(x => x.id);
+      const {data: entregasAtividade} = await supa.from('ava_atividade_entregas').select('atividade_id,resposta,status,feedback').eq('matricula_id',matriculaId).in('atividade_id',idsAtividades);
+      entregasAtividades = Object.fromEntries((entregasAtividade||[]).map(x => [x.atividade_id, x]));
+    }
   }
 
   const pct = todasAulas.length ? Math.round(progSet.size/todasAulas.length*100) : 0;
@@ -1345,7 +1351,7 @@ async function renderCurso(cursoId, aulaId) {
             ${isStaff() ? `<button type="button" class="material-delete-btn" data-material-id="${esc(mat.id)}" title="Remover" style="flex-shrink:0;background:none;border:0;color:#b33;cursor:pointer;padding:2px 6px;font-size:13px">✕</button>` : ''}
           </div>`).join('')}
         </div>` : ''}
-        ${aula && atividadesAula.length ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES VINCULADAS</div><p class="muted" style="margin:5px 0 10px">${atividadesAula.length} atividades complementares desta aula.</p><div style="display:grid;gap:8px">${atividadesAula.map((atividade,i)=>`<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--surface)"><summary style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--green)"><span style="font-size:16px">▸</span><span style="flex:1">${i+1}. ${esc(atividade.titulo||'Atividade complementar')}</span><span class="tag">CANVAS</span></summary><div style="padding:12px 14px 14px;border-top:1px solid var(--line)"><p class="muted">${esc(atividade.tipo||'Atividade')} · ${atividade.duracao_min||''}${atividade.duracao_min?' min':''}</p><div style="margin-top:10px;line-height:1.8">${atividade.instrucoes||'<p>Atividade complementar vinculada à aula.</p>'}</div><div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:7px"><strong>Registro da atividade</strong><p class="muted" style="margin-top:4px">${esc(atividade.pergunta||'Registre sua aprendizagem e a entrega final.')}</p></div></div></details>`).join('')}</div></div>` : ''}
+        ${aula && atividadesAula.length ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES VINCULADAS</div><p class="muted" style="margin:5px 0 10px">${atividadesAula.length} atividades complementares desta aula.</p><div style="display:grid;gap:8px">${atividadesAula.map((atividade,i)=>`<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--surface)"><summary style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--green)"><span style="font-size:16px">▸</span><span style="flex:1">${i+1}. ${esc(atividade.titulo||'Atividade complementar')}</span><span class="tag">CANVAS</span></summary><div style="padding:12px 14px 14px;border-top:1px solid var(--line)"><p class="muted">${esc(atividade.tipo||'Atividade')} · ${atividade.duracao_min||''}${atividade.duracao_min?' min':''}</p><div style="margin-top:10px;line-height:1.8">${atividade.instrucoes||'<p>Atividade complementar vinculada à aula.</p>'}</div><div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:7px"><strong>Registro da atividade</strong><p class="muted" style="margin-top:4px">${esc(atividade.pergunta||'Registre sua aprendizagem e a entrega final.')}</p></div></div>${!ambienteProfessor && matriculaId ? `<form class="atividade-entrega-form" data-atividade="${esc(atividade.id)}" data-matricula="${esc(matriculaId)}" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><label class="muted">Sua entrega</label><textarea class="fi" name="resposta" required minlength="10" style="min-height:90px;margin-top:5px">${esc(entregasAtividades[atividade.id]?.resposta||'')}"</textarea><div style="display:flex;align-items:center;gap:10px;margin-top:8px"><button class="btn-secondary" type="submit">${entregasAtividades[atividade.id]?.status==='enviada'?'Atualizar entrega':'Enviar entrega'}"</button>${entregasAtividades[atividade.id]?.status==='avaliada'?'<span class="tag">Avaliada</span>':''}</div>` : ''}</details>`).join('')}</div></div>` : ''}
         ${aula ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES DA AULA</div><p class="muted" style="margin:5px 0 10px">Abra ou baixe as quatro atividades complementares vinculadas a esta aula.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" target="_blank" rel="noopener">Abrir atividades da aula →</a><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" rel="noopener" download="aula-${aula.ordem||1}-atividades.pdf">Baixar PDF</a></div></div>` : ''}
         ${aula && isStaff() ? `<details style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--green);text-transform:uppercase">+ Adicionar material de apoio</summary>
           <form class="material-form" data-aula="${esc(aula.id)}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;max-width:460px">
@@ -2812,6 +2818,24 @@ $('#usuario-form')?.addEventListener('submit', async e => {
 });
 
 document.addEventListener('submit', async e => {
+  if (e.target.matches('.atividade-entrega-form')) {
+    e.preventDefault();
+    const formEl = e.target;
+    const f = new FormData(formEl);
+    const resposta = String(f.get('resposta') || '').trim();
+    const {error} = await supa.from('ava_atividade_entregas').upsert({
+      atividade_id: formEl.dataset.atividade,
+      matricula_id: formEl.dataset.matricula,
+      resposta,
+      status: 'enviada',
+      enviada_em: new Date().toISOString(),
+      atualizada_em: new Date().toISOString()
+    }, {onConflict:'atividade_id,matricula_id'});
+    if (error) { toast('Não foi possível enviar a atividade: '+error.message, false); return; }
+    toast('Entrega enviada.'); 
+    await render();
+    return;
+  }
   if (e.target.matches('.solic-resposta-form')) {
     e.preventDefault();
     const formEl = e.target;
