@@ -21,4 +21,12 @@ jobs:
           grep -q "PAPEIS_STAFF" supabase/functions/ava-criar-usuario/index.ts
           grep -q "codigo_hash" supabase/functions/ava-recuperar-conta/index.ts
       - name: Production smoke and JavaScript syntax
-        run: node tests/production-smoke.mjs
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if node tests/production-smoke.mjs; then
+              exit 0
+            fi
+            echo "Production deployment still propagating; retrying in 10 seconds (attempt $attempt/6)"
+            sleep 10
+          done
+          exit 1
