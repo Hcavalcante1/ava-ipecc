@@ -314,6 +314,14 @@ textarea.fi{min-height:85px;resize:vertical}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
       <span>Conquistas</span>
     </a>
+    <a href="#ranking" id="nav-link-ranking">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V7M16 16v-9"/></svg>
+      <span>Ranking</span>
+    </a>
+    <a href="#configuracao" id="nav-link-configuracao" style="display:none">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.5V20a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1A1.7 1.7 0 0 0 8 15a1.7 1.7 0 0 0-1.6-1H6v-2.5h.4A1.7 1.7 0 0 0 8 10a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2.5V5a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1A1.7 1.7 0 0 0 19.4 10c.2.6.8 1 1.5 1h.2v2.5h-.2c-.7 0-1.3.4-1.5 1z"/></svg>
+      <span>Configuração</span>
+    </a>
     <div class="nav-label">Materiais do aluno</div>
     <a href="#pdf-atividades" id="nav-link-pdf-atividades">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v4h4M9 12h6M9 16h6"/></svg>
@@ -837,7 +845,7 @@ function isRotaPublica() {
 }
 
 // ── Routing ───────────────────────────────────────────────────────
-const LABELS = {forum:'Fórum',gamificacao:'Conquistas',inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha','recuperar-codigo':'Recuperar conta',catalogo:'Catálogo de Cursos'};
+const LABELS = {ranking:'Ranking',configuracao:'Configuração',forum:'Fórum',gamificacao:'Conquistas',inicio:'Visão geral',cursos:'Meus cursos',atividades:'Atividades','pdf-atividades':'PDFs das atividades',trilhas:'Trilhas de aprendizagem',certificados:'Certificados',solicitacoes:'Solicitações',perfil:'Meu perfil',gestao:'Cursos e turmas','sala-professor':'Ambiente do professor','material-pedagogico':'Material pedagógico do curso','aula-professor':'Aula do professor',relatorios:'Relatórios',correcoes:'Correções',usuarios:'Usuários',curso:'Sala de aprendizagem',validar:'Validar Certificado',stats:'Estatísticas','nova-senha':'Nova senha','recuperar-codigo':'Recuperar conta',catalogo:'Catálogo de Cursos'};
 
 // para visitante anônimo em rota pública: simplifica a navegação lateral (links internos não funcionam sem login)
 function prepararChromePublico() {
@@ -951,6 +959,8 @@ async function render() {
     else if (view === 'atividades') await renderAtividades();
     else if (view === 'forum') await renderForum();
     else if (view === 'gamificacao') await renderGamificacao();
+    else if (view === 'ranking') await renderRanking();
+    else if (view === 'configuracao') await renderConfiguracao();
     else if (view === 'pdf-atividades') await renderPdfAtividades();
     else if (view === 'certificados') await renderCertificados();
     else if (view === 'solicitacoes') await renderSolicitacoes();
@@ -3373,6 +3383,19 @@ async function renderGamificacao() {
   ]);
   const total=Number(pontos?.pontos||0), nivel=Number(pontos?.nivel||1), prox=nivel*100, pct=Math.min(100,Math.round((total%100)));
   $('#main').innerHTML='<div class="topline"><div><div class="eyebrow">IPECC · PROGRESSO</div><h1 class="page-title">Conquistas</h1><p class="muted">Acompanhe seus pontos, níveis e marcos de aprendizagem.</p></div></div><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"><div class="stat"><div class="eyebrow">Pontos</div><span class="stat-num">'+total+'</span></div><div class="stat"><div class="eyebrow">Nível</div><span class="stat-num">'+nivel+'</span></div><div class="stat"><div class="eyebrow">Conquistas</div><span class="stat-num">'+(conquistas||[]).length+'</span></div></div><div class="panel"><div class="section-header"><h2>Próximo nível</h2><span class="muted">'+Math.max(0,prox-total)+' pontos restantes</span></div><div class="progress-bar"><i style="width:'+pct+'%"></i></div><p class="muted" style="margin-top:10px">Cada atividade concluída vale 10 pontos.</p></div><div class="section-header"><h2>Minhas conquistas</h2></div>'+((conquistas||[]).length?(conquistas||[]).map(c=>'<div class="panel" style="display:flex;gap:14px;align-items:center"><div class="stat-icon">★</div><div><h3 style="font-size:15px">'+esc(c.titulo)+'</h3><p class="muted">'+esc(c.descricao||'Marco de aprendizagem')+'</p></div></div>').join(''):'<div class="panel"><p class="muted">Conclua uma atividade para desbloquear sua primeira conquista.</p></div>');
+}
+async function renderRanking() {
+  const {data, error} = await supa.rpc('ava_ranking_publico');
+  if (error) throw error;
+  const rows=(data||[]).map((r,i)=>'<tr><td style="font-weight:700">'+(i+1)+'</td><td>'+esc(r.nome||'Participante')+'</td><td>'+Number(r.pontos||0)+'</td><td>Nível '+Number(r.nivel||1)+'</td></tr>').join('');
+  $('#main').innerHTML='<div class="topline"><div><div class="eyebrow">IPECC · COMUNIDADE</div><h1 class="page-title">Ranking de aprendizagem</h1><p class="muted">Pontuação acumulada pelos participantes.</p></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>#</th><th>Participante</th><th>Pontos</th><th>Nível</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="muted">Ainda não há pontuação registrada.</td></tr>')+'</tbody></table></div></div>';
+}
+async function renderConfiguracao() {
+  if (!isAdmin()) { toast('Apenas administradores podem acessar a configuração.',false); location.hash='inicio'; return; }
+  const {data, error}=await supa.from('ava_configuracoes').select('nome,subtitulo,cor_primaria,cor_fundo,logo_url').eq('id',true).single();
+  if(error) throw error;
+  $('#main').innerHTML='<div class="topline"><div><div class="eyebrow">IPECC · ADMINISTRAÇÃO</div><h1 class="page-title">Configuração da plataforma</h1><p class="muted">Personalize a identidade visual do ambiente.</p></div></div><div class="panel"><form id="config-form" style="display:grid;gap:14px;max-width:620px"><label class="field"><span>Nome da plataforma</span><input class="fi" name="nome" required maxlength="80" value="'+esc(data?.nome||'')+'"></label><label class="field"><span>Subtítulo</span><input class="fi" name="subtitulo" required maxlength="120" value="'+esc(data?.subtitulo||'')+'"></label><div class="form-grid"><label class="field"><span>Cor principal</span><input class="fi" name="cor_primaria" type="color" value="'+esc(data?.cor_primaria||'#17634d')+'"></label><label class="field"><span>Cor de fundo</span><input class="fi" name="cor_fundo" type="color" value="'+esc(data?.cor_fundo||'#f6f8f5')+'"></label></div><label class="field"><span>URL do logotipo (opcional)</span><input class="fi" name="logo_url" type="url" value="'+esc(data?.logo_url||'')+'"></label><button class="btn-primary" type="submit">Salvar identidade →</button></form></div>';
+  $('#config-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);const {error}=await supa.from('ava_configuracoes').update({nome:String(f.get('nome')||'').trim(),subtitulo:String(f.get('subtitulo')||'').trim(),cor_primaria:f.get('cor_primaria'),cor_fundo:f.get('cor_fundo'),logo_url:String(f.get('logo_url')||'').trim()||null,updated_at:new Date().toISOString()}).eq('id',true);if(error){toast('Erro ao salvar: '+error.message,false);return;}await loadPlatformConfig();toast('Configuração salva.');});
 }
 // ── Nova senha (redirect pós-email, recuperação ou convite) ──────
 function renderNovaSenha() {
