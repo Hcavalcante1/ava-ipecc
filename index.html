@@ -899,7 +899,7 @@ async function render() {
     try { await renderValidar(parts[1]); } catch(err) { $('#main').innerHTML=`<p>${esc(err.message)}</p>`; }
     return;
   }
-  if (!currentUser) return;
+  if (!currentUser) { renderLogin(); return; }
   // nav de Gestão (Cursos e turmas / Relatórios) só aparece para quem tem
   // acesso de fato — para um aluno comum esses itens eram sempre visíveis,
   // mesmo sem nenhuma ação disponível ao entrar neles
