@@ -2713,7 +2713,7 @@ async function renderCorrecoes() {
     const curso = a.ava_aulas?.ava_modulos?.ava_cursos?.titulo || '';
     const aulaTitulo = a.ava_aulas?.titulo || '';
     const pendente = e.status === 'enviada';
-    return '<div class="panel" data-atividade-entrega="'+esc(e.id)+'" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="tag'+(pendente?' warn':'')+'">'+(pendente?'Pendente':'Avaliada')+'</span><p style="margin-top:8px;font-weight:600;font-size:14px">'+esc(nomeAluno)+'</p><p class="muted" style="font-size:12px">'+esc(curso)+(curso&&aulaTitulo?' · ':'')+esc(aulaTitulo)+' · '+esc(a.titulo||'Atividade Canvas')+'</p></div></div><div class="panel" style="background:var(--bg);border:0;margin-top:12px;white-space:pre-wrap;font-size:13px;line-height:1.7">'+esc(e.resposta||'(sem entrega escrita)')+'</div>'+(e.arquivo_link?'<a class="btn-secondary" href="'+esc(e.arquivo_link)+'" target="_blank" rel="noopener" style="margin-top:8px">Abrir arquivo anexado →</a>':'')+'<label class="field" style="margin-top:12px"><span>Feedback ao aluno</span><textarea class="fi atividade-feedback" maxlength="2000" style="min-height:70px">'+esc(e.feedback||'')+'</textarea></label><div style="display:flex;gap:10px;margin-top:10px"><button class="btn-primary atividade-aprovar" data-id="'+esc(e.id)+'">'+(pendente?'Aprovar':'Atualizar feedback')+'</button></div></div>';
+    return '<div class="panel" data-atividade-entrega="'+esc(e.id)+'" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="tag'+(pendente?' warn':'')+'">'+(pendente?'Pendente':'Avaliada')+'</span><p style="margin-top:8px;font-weight:600;font-size:14px">'+esc(nomeAluno)+'</p><p class="muted" style="font-size:12px">'+esc(curso)+(curso&&aulaTitulo?' · ':'')+esc(aulaTitulo)+' · '+esc(a.titulo||'Atividade Canvas')+'</p></div></div><div class="panel" style="background:var(--bg);border:0;margin-top:12px;white-space:pre-wrap;font-size:13px;line-height:1.7">'+esc(e.resposta||'(sem entrega escrita)')+'</div>'+(e.arquivo_link?'<a class="btn-secondary" href="'+esc(e.arquivo_link)+'" target="_blank" rel="noopener" style="margin-top:8px">Abrir arquivo anexado →</a>':'')+'<label class="field" style="margin-top:12px"><span>Feedback ao aluno</span><textarea class="fi atividade-feedback" maxlength="2000" style="min-height:70px">'+esc(e.feedback||'')+'</textarea></label><div style="display:flex;gap:10px;margin-top:10px"><button class="btn-primary atividade-aprovar" data-id="'+esc(e.id)+'">'+(pendente?'Aprovar':'Atualizar feedback')+'</button>'+(pendente?'<button class="btn-secondary atividade-revisar" data-id="'+esc(e.id)+'">Pedir revisão</button>':'')+'</div></div>';
   };
   const pendentes = (entregas||[]).filter(e=>e.status==='enviada');
   const avaliadas = (entregas||[]).filter(e=>e.status==='avaliada');
@@ -2745,16 +2745,16 @@ async function renderCorrecoes() {
       toast(revisar ? 'Devolvido ao aluno para revisão.' : 'Correção salva.');
       await renderCorrecoes();
     });
-  $('#main').querySelectorAll('.atividade-aprovar').forEach(btn => {
+  $('#main').querySelectorAll('.atividade-aprovar, .atividade-revisar').forEach(btn => {
     btn.addEventListener('click', async () => {
       const card = btn.closest('[data-atividade-entrega]');
       const feedback = card.querySelector('.atividade-feedback')?.value?.trim() || null;
       btn.disabled = true;
       const {error} = await supa.from('ava_atividade_entregas').update({
-        status:'avaliada', feedback, avaliada_por:currentUser.id, avaliada_em:new Date().toISOString(), atualizada_em:new Date().toISOString()
+        status:btn.classList.contains('atividade-revisar')?'rascunho':'avaliada', feedback, avaliada_por:currentUser.id, avaliada_em:new Date().toISOString(), atualizada_em:new Date().toISOString()
       }).eq('id',btn.dataset.id);
       if (error) { toast('Erro: '+error.message,false); btn.disabled=false; return; }
-      toast('Entrega Canvas avaliada.');
+      toast(btn.classList.contains('atividade-revisar')?'Entrega devolvida para revisão.':'Entrega Canvas avaliada.');
       await renderCorrecoes();
     });
   });
