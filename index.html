@@ -2716,7 +2716,7 @@ async function renderCorrecoes() {
     <div class="topline"><div>
       <div class="eyebrow">IPECC · GESTÃO</div>
       <h1 class="page-title">Correções</h1>
-      <p class="sub">${pendentes.length} atividade${pendentes.length===1?'':'s'} aguardando correção</p>
+      <p class="sub">${pendentes.length + (entregasAtividades||[]).filter(e=>e.status==='enviada').length} atividade${(pendentes.length + (entregasAtividades||[]).filter(e=>e.status==='enviada').length)===1?'':'s'} aguardando correção</p>
     </div></div>
     ${pendentes.length ? pendentes.map(linha).join('') : '<div class="panel"><p class="muted">Nenhuma atividade pendente de correção.</p></div>'}
     ${avaliadas.length ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)">Já avaliadas (${avaliadas.length})</summary><div style="margin-top:14px">${avaliadas.map(linha).join('')}</div></details>` : ''}
