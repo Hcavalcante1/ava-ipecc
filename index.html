@@ -1729,6 +1729,7 @@ async function renderCertificados() {
     : {data:[]};
 
   const certByMat = Object.fromEntries((certs||[]).map(c=>[c.matricula_id, c]));
+  const fechamentoByMat = Object.fromEntries((await Promise.all(mids.map(async mid => { const r = await supa.rpc('ava_fechamento_matricula',{p_matricula_id:mid}); return r.data ? (Array.isArray(r.data)?r.data[0]:r.data) : null; }))).filter(Boolean).map(f=>[f.matricula_id,f]));
 
   // verifica progresso para cada matrícula
   const progRows = mids.length ? (await supa.from('ava_progresso').select('matricula_id,concluida').in('matricula_id',mids)).data||[] : [];
@@ -1754,7 +1755,8 @@ async function renderCertificados() {
     const total = aulasTotais[curso.id]||1;
     const pct = Math.round(concl/total*100);
     const minimo = curso.pct_minimo||70;
-    const elegivel = pct >= minimo;
+    const fechamento = fechamentoByMat[m.id];
+    const elegivel = fechamento ? !!fechamento.elegivel : pct >= minimo;
 
     const medalIcon = `<div style="width:48px;height:48px;border-radius:50%;background:var(--green-light);color:var(--green);display:grid;place-items:center;flex-shrink:0">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
@@ -1786,7 +1788,7 @@ async function renderCertificados() {
           <p class="muted" style="margin-top:4px;font-size:13px">Progresso: ${pct}% (mínimo ${minimo}%)</p>
         </div>
       </div>
-      ${elegivel ? `<button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px" onclick="emitirCertificado('${m.id}','${curso.id}',${curso.carga_horas||0})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Emitir certificado</button>` : `<span class="tag warn">Conclua ${minimo}% das aulas</span>`}
+      ${elegivel ? `<button class="btn-primary" style="display:inline-flex;align-items:center;gap:6px" onclick="emitirCertificado('${m.id}','${curso.id}',${curso.carga_horas||0})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Emitir certificado</button>` : `<span class="tag warn">${fechamento?.atividades_pendentes ? 'Finalize as atividades pendentes' : Number(fechamento?.frequencia_percentual||0)<70 ? 'Regularize a frequência' : 'Conclua '+minimo+'% das aulas'}</span>`}
     </div>`;
   }).join('');
 
