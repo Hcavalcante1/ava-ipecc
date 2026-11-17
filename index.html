@@ -1311,7 +1311,7 @@ async function renderCurso(cursoId, aulaId) {
   let materiais = [];
   let atividadesAula = [];
   if (aula) {
-    const {data:mats} = await supa.from('ava_materiais').select('id,titulo,url,tipo').eq('aula_id', aula.id);
+    const {data:mats} = await supa.from('ava_materiais').select('id,titulo,url,tipo,conteudo').eq('aula_id', aula.id);
     materiais = mats || [];
     const {data:atividades} = await supa.from('ava_atividades').select('id,ordem,tipo,titulo,instrucoes,pergunta,duracao_min,publicada').eq('aula_id',aula.id).eq('publicada',true).order('ordem');
     atividadesAula = atividades || [];
@@ -1338,7 +1338,7 @@ async function renderCurso(cursoId, aulaId) {
         <div id="lesson-content" style="font-size:14px;line-height:1.8;color:var(--muted);margin-top:8px"></div>
         ${materiais.length ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
           <p style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Materiais de apoio</p>
-          ${materiais.map(mat=>`<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px">
+          ${materiais.map(mat=>mat.tipo==='canvas' && mat.conteudo ? `<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--surface)"><summary style="cursor:pointer;padding:12px 14px;font-weight:600;color:var(--green)">▸ ${esc(mat.titulo)} <span class="tag">CANVAS</span></summary><div style="padding:0 14px 14px;border-top:1px solid var(--line)">${mat.conteudo}</div></details>` : `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;margin-bottom:6px">
             <span style="flex:1;min-width:0;font-size:13px;color:var(--green);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(mat.titulo)}</span>
             <a class="btn-secondary" href="${esc(mat.url)}" target="_blank" rel="noopener" style="white-space:nowrap">Abrir</a>
             <a class="btn-secondary" href="${esc(mat.url)}" rel="noopener" download="material-aula-${aula?.ordem||1}.pdf" style="white-space:nowrap">Baixar</a>
