@@ -2488,6 +2488,7 @@ async function renderRelatorios() {
 
   const totalMats = mats?.length||0;
   const totalAtivas = (mats||[]).filter(m=>m.status==='ativa').length;
+  const fechamentos = (mats||[]).length ? (await Promise.all((mats||[]).map(async m => { const r = await supa.rpc('ava_fechamento_matricula',{p_matricula_id:m.id}); return r.data ? (Array.isArray(r.data)?r.data[0]:r.data) : null; }))).filter(Boolean) : [];
 
   $('#main').innerHTML = `
     <div class="topline"><div>
@@ -2541,6 +2542,11 @@ async function renderRelatorios() {
   if (isAdmin() && diagnostico) {
     const perfilRows = diagnostico.map(p => `<tr><td><strong>${esc(p.nome||'—')}</strong><div class="muted" style="font-size:11px">${esc(p.email||'')}</div></td><td>${esc(p.papel||'')}</td><td>${p.ativo?'Ativo':'Inativo'}</td><td>${Number(p.matriculas||0)}</td><td>${Number(p.turmas_professor||0)}</td><td>${Number(p.entregas||0)}</td><td>${Number(p.progresso||0)}</td><td>${Number(p.certificados||0)}</td></tr>`).join('');
     $('#main').insertAdjacentHTML('beforeend', '<section class="panel" style="margin-top:20px"><div class="section-header"><h2>Validação dos perfis</h2><span class="muted">Matriz de operação por usuário</span></div><div class="table-wrap"><table><thead><tr><th>Perfil</th><th>Papel</th><th>Status</th><th>Matrículas</th><th>Turmas</th><th>Entregas</th><th>Progresso</th><th>Certificados</th></tr></thead><tbody>'+perfilRows+'</tbody></table></div><p class="muted" style="font-size:12px;margin-top:10px">Use esta matriz para validar cada perfil antes da homologação: aluno, professor, monitor e administrador.</p></section>');
+  }
+
+  if (fechamentos.length) {
+    const linhasFechamento = fechamentos.map(f => '<tr><td><strong>'+esc(f.aluno_nome||'')+'</strong></td><td>'+esc(f.curso_titulo||'')+'</td><td>'+Number(f.frequencia_percentual||0).toLocaleString('pt-BR')+'%</td><td>'+Number(f.aulas_percentual||0).toLocaleString('pt-BR')+'%</td><td>'+Number(f.atividades_pendentes||0)+'</td><td><span class="tag'+(f.elegivel?'':' warn')+'">'+(f.elegivel?'Apto':'Pendente')+'</span></td></tr>').join('');
+    $('#main').insertAdjacentHTML('beforeend','<section class="panel" style="margin-top:20px"><div class="section-header"><h2>Fechamento pedagógico</h2><span class="muted">Frequência · progresso · pendências</span></div><div class="table-wrap"><table><thead><tr><th>Aluno</th><th>Curso</th><th>Frequência</th><th>Progresso</th><th>Atividades pendentes</th><th>Resultado</th></tr></thead><tbody>'+linhasFechamento+'</tbody></table></div></section>');
   }
 
   $('#export-csv')?.addEventListener('click', () => {
