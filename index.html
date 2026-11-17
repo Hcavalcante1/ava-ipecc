@@ -2450,6 +2450,7 @@ async function renderRelatorios() {
   ]);
 
   const {data:comercial} = isAdmin() ? await supa.rpc('ava_comercial_uso') : {data:null};
+  const {data:planosComerciais} = isAdmin() ? await supa.from('ava_planos_comerciais').select('codigo,nome,descricao,preco_mensal,limite_usuarios,limite_cursos,limite_armazenamento_mb,recursos').eq('ativo',true).order('ordem') : {data:[]};
 
   const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
   const progMap = {};
@@ -2504,6 +2505,9 @@ async function renderRelatorios() {
     const fmt = v => Number(v||0).toLocaleString('pt-BR');
     $('#main').insertAdjacentHTML('afterbegin','<div class="panel" style="border:1px solid var(--green);background:var(--green-light);margin-bottom:20px"><div class="eyebrow">ENTERPRISE · CAPACIDADE DA INSTÂNCIA</div><h2 style="margin:6px 0 12px">Operação comercial</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><div><span class="muted">Usuários ativos</span><strong style="display:block;font-size:22px">'+fmt(comercial.usuarios)+'</strong></div><div><span class="muted">Cursos</span><strong style="display:block;font-size:22px">'+fmt(comercial.cursos)+'</strong></div><div><span class="muted">Entregas Canvas</span><strong style="display:block;font-size:22px">'+fmt(comercial.entregas_canvas)+'</strong></div><div><span class="muted">Fórum</span><strong style="display:block;font-size:22px">'+fmt(comercial.forum_posts)+'</strong></div></div></div>');
   }
+
+    const cardsPlanos = (planosComerciais||[]).map(p => '<article class="panel" style="margin:0"><span class="tag">'+esc(p.nome)+'</span><h3 style="margin:8px 0 4px">'+(Number(p.preco_mensal)?'R$ '+Number(p.preco_mensal).toLocaleString('pt-BR',{minimumFractionDigits:2}):'Sob consulta')+'</h3><p class="muted" style="min-height:36px">'+esc(p.descricao||'')+'</p><p style="font-size:12px;margin-top:10px">Até '+Number(p.limite_usuarios).toLocaleString('pt-BR')+' usuários · '+Number(p.limite_cursos).toLocaleString('pt-BR')+' cursos</p></article>').join('');
+    $('#main').insertAdjacentHTML('afterbegin','<section style="margin-bottom:20px"><div class="section-header"><h2>Planos comerciais</h2><span class="muted">Catálogo Enterprise</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">'+cardsPlanos+'</div></section>');
 
   $('#export-csv')?.addEventListener('click', () => {
     const cell = v => '"'+String(v).replace(/^[=+@\-]/,"'$&").replace(/"/g,'""')+'"';
