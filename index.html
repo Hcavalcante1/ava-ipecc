@@ -935,6 +935,8 @@ async function render() {
   // professor/monitor também vê este item, mas só para convidar alunos —
   // a gestão completa de usuários (mudar papel, ativar/desativar) é só do admin
   $('#nav-link-usuarios').style.display = navGestaoVisivel ? 'flex' : 'none';
+  $('#nav-link-ranking').style.display = 'flex';
+  $('#nav-link-configuracao').style.display = isAdmin() ? 'flex' : 'none';
   const navUsuariosLabel = $('#nav-link-usuarios-label');
   if (navUsuariosLabel) navUsuariosLabel.textContent = isAdmin() ? 'Usuários' : 'Convidar alunos';
   if ((view === 'gestao' || view === 'sala-professor' || view === 'material-pedagogico' || view === 'aula-professor' || view === 'relatorios' || view === 'correcoes') && !navGestaoVisivel) {
