@@ -2719,8 +2719,8 @@ async function renderCorrecoes() {
       <p class="sub">${pendentes.length} atividade${pendentes.length===1?'':'s'} aguardando correção</p>
     </div></div>
     ${pendentes.length ? pendentes.map(linha).join('') : '<div class="panel"><p class="muted">Nenhuma atividade pendente de correção.</p></div>'}
-    ${avaliadas.length ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)">Já avaliadas (${avaliadas.length})</summary><div style="margin-top:14px">${avaliadas.map(linha).join('')}</div></details>`
-    ${entregasAtividades.length ? `<details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--green)">Entregas Canvas (${entregasAtividades.length})</summary><div style="margin-top:14px">${entregasAtividades.map(linhaAtividade).join('')}</div></details>` : ''} : ''}`;
+    ${avaliadas.length ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)">Já avaliadas (${avaliadas.length})</summary><div style="margin-top:14px">${avaliadas.map(linha).join('')}</div></details>` : ''}
+    ${entregasAtividades.length ? `<details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--green)">Entregas Canvas (${entregasAtividades.length})</summary><div style="margin-top:14px">${entregasAtividades.map(linhaAtividade).join('')}</div></details>` : ''}`;
 
   $('#main').querySelectorAll('.correcao-aprovar, .correcao-revisar').forEach(btn => {
     btn.addEventListener('click', async () => {
