@@ -1351,7 +1351,7 @@ async function renderCurso(cursoId, aulaId) {
             ${isStaff() ? `<button type="button" class="material-delete-btn" data-material-id="${esc(mat.id)}" title="Remover" style="flex-shrink:0;background:none;border:0;color:#b33;cursor:pointer;padding:2px 6px;font-size:13px">✕</button>` : ''}
           </div>`).join('')}
         </div>` : ''}
-        ${aula && atividadesAula.length ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES VINCULADAS</div><p class="muted" style="margin:5px 0 10px">${atividadesAula.length} atividades complementares desta aula.</p><div style="display:grid;gap:8px">${atividadesAula.map((atividade,i)=>`<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--surface)"><summary style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--green)"><span style="font-size:16px">▸</span><span style="flex:1">${i+1}. ${esc(atividade.titulo||'Atividade complementar')}</span><span class="tag">CANVAS</span></summary><div style="padding:12px 14px 14px;border-top:1px solid var(--line)"><p class="muted">${esc(atividade.tipo||'Atividade')} · ${atividade.duracao_min||''}${atividade.duracao_min?' min':''}</p><div style="margin-top:10px;line-height:1.8">${atividade.instrucoes||'<p>Atividade complementar vinculada à aula.</p>'}</div><div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:7px"><strong>Registro da atividade</strong><p class="muted" style="margin-top:4px">${esc(atividade.pergunta||'Registre sua aprendizagem e a entrega final.')}</p></div></div>${!ambienteProfessor && matriculaId ? `<form class="atividade-entrega-form" data-atividade="${esc(atividade.id)}" data-matricula="${esc(matriculaId)}" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><label class="muted">Sua entrega</label><textarea class="fi" name="resposta" required minlength="10" style="min-height:90px;margin-top:5px">${esc(entregasAtividades[atividade.id]?.resposta||'')}"</textarea><div style="display:flex;align-items:center;gap:10px;margin-top:8px"><button class="btn-secondary" type="submit">${entregasAtividades[atividade.id]?.status==='enviada'?'Atualizar entrega':'Enviar entrega'}"</button>${entregasAtividades[atividade.id]?.status==='avaliada'?'<span class="tag">Avaliada</span>':''}</div>` : ''}</details>`).join('')}</div></div>` : ''}
+        ${aula && atividadesAula.length ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES VINCULADAS</div><p class="muted" style="margin:5px 0 10px">${atividadesAula.length} atividades complementares desta aula.</p><div style="display:grid;gap:8px">${atividadesAula.map((atividade,i)=>`<details style="border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:var(--surface)"><summary style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--green)"><span style="font-size:16px">▸</span><span style="flex:1">${i+1}. ${esc(atividade.titulo||'Atividade complementar')}</span><span class="tag">CANVAS</span></summary><div style="padding:12px 14px 14px;border-top:1px solid var(--line)"><p class="muted">${esc(atividade.tipo||'Atividade')} · ${atividade.duracao_min||''}${atividade.duracao_min?' min':''}</p><div style="margin-top:10px;line-height:1.8">${atividade.instrucoes||'<p>Atividade complementar vinculada à aula.</p>'}</div><div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:7px"><strong>Registro da atividade</strong><p class="muted" style="margin-top:4px">${esc(atividade.pergunta||'Registre sua aprendizagem e a entrega final.')}</p></div></div>${!ambienteProfessor && matriculaId ? `<form class="atividade-entrega-form" data-atividade="${esc(atividade.id)}" data-matricula="${esc(matriculaId)}" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><label class="muted">Sua entrega</label><textarea class="fi" name="resposta" required minlength="10" style="min-height:90px;margin-top:5px">${esc(entregasAtividades[atividade.id]?.resposta||'')}</textarea><label class="muted" style="display:block;margin-top:8px">Arquivo (opcional)<input class="fi" type="file" name="arquivo" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg" style="margin-top:5px"></label><div style="display:flex;align-items:center;gap:10px;margin-top:8px"><button class="btn-secondary" type="submit">${entregasAtividades[atividade.id]?.status==='enviada'?'Atualizar entrega':'Enviar entrega'}</button>${entregasAtividades[atividade.id]?.status==='avaliada'?'<span class="tag">Avaliada</span>':''}</div>` : ''}</details>`).join('')}</div></div>` : ''}
         ${aula ? `<div style="margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)"><div class="eyebrow">ATIVIDADES DA AULA</div><p class="muted" style="margin:5px 0 10px">Abra ou baixe as quatro atividades complementares vinculadas a esta aula.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" target="_blank" rel="noopener">Abrir atividades da aula →</a><a class="btn-secondary" href="${aula.id==='94624342-b9d5-4e76-9345-cd1433fe3699'?'/materiais/aula-1-atividades.pdf':'/materiais/atividades/'+encodeURIComponent(aula.id)+'.pdf'}" rel="noopener" download="aula-${aula.ordem||1}-atividades.pdf">Baixar PDF</a></div></div>` : ''}
         ${aula && isStaff() ? `<details style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--green);text-transform:uppercase">+ Adicionar material de apoio</summary>
           <form class="material-form" data-aula="${esc(aula.id)}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;max-width:460px">
@@ -2660,9 +2660,15 @@ async function renderCorrecoes() {
     .in('status', ['enviada','avaliada'])
     .order('enviada_em', {ascending: false});
   const {data: entregasAtividades} = await supa.from('ava_atividade_entregas')
-    .select('id,resposta,status,feedback,enviada_em,matricula_id,atividade_id,ava_atividades(titulo,aula_id,ava_aulas(titulo,ava_modulos(titulo,ava_cursos(titulo))))')
+    .select('id,resposta,arquivo_url,status,feedback,enviada_em,matricula_id,atividade_id,ava_atividades(titulo,aula_id,ava_aulas(titulo,ava_modulos(titulo,ava_cursos(titulo))))')
     .in('status', ['enviada','avaliada'])
     .order('enviada_em', {ascending: false});
+  for (const entrega of (entregasAtividades||[])) {
+    if (entrega.arquivo_url) {
+      const signed = await supa.storage.from('ava-entregas').createSignedUrl(entrega.arquivo_url, 3600);
+      entrega.arquivo_link = signed.data?.signedUrl || null;
+    }
+  }
 
   const matIds = [...new Set([...(entregas||[]), ...(entregasAtividades||[])].map(e=>e.matricula_id))];
   const {data: mats} = matIds.length
@@ -2707,7 +2713,7 @@ async function renderCorrecoes() {
     const curso = a.ava_aulas?.ava_modulos?.ava_cursos?.titulo || '';
     const aulaTitulo = a.ava_aulas?.titulo || '';
     const pendente = e.status === 'enviada';
-    return '<div class="panel" data-atividade-entrega="'+esc(e.id)+'" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="tag'+(pendente?' warn':'')+'">'+(pendente?'Pendente':'Avaliada')+'</span><p style="margin-top:8px;font-weight:600;font-size:14px">'+esc(nomeAluno)+'</p><p class="muted" style="font-size:12px">'+esc(curso)+(curso&&aulaTitulo?' · ':'')+esc(aulaTitulo)+' · '+esc(a.titulo||'Atividade Canvas')+'</p></div></div><div class="panel" style="background:var(--bg);border:0;margin-top:12px;white-space:pre-wrap;font-size:13px;line-height:1.7">'+esc(e.resposta||'(sem entrega escrita)')+'</div><label class="field" style="margin-top:12px"><span>Feedback ao aluno</span><textarea class="fi atividade-feedback" maxlength="2000" style="min-height:70px">'+esc(e.feedback||'')+'</textarea></label><div style="display:flex;gap:10px;margin-top:10px"><button class="btn-primary atividade-aprovar" data-id="'+esc(e.id)+'">'+(pendente?'Aprovar':'Atualizar feedback')+'</button></div></div>';
+    return '<div class="panel" data-atividade-entrega="'+esc(e.id)+'" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><span class="tag'+(pendente?' warn':'')+'">'+(pendente?'Pendente':'Avaliada')+'</span><p style="margin-top:8px;font-weight:600;font-size:14px">'+esc(nomeAluno)+'</p><p class="muted" style="font-size:12px">'+esc(curso)+(curso&&aulaTitulo?' · ':'')+esc(aulaTitulo)+' · '+esc(a.titulo||'Atividade Canvas')+'</p></div></div><div class="panel" style="background:var(--bg);border:0;margin-top:12px;white-space:pre-wrap;font-size:13px;line-height:1.7">'+esc(e.resposta||'(sem entrega escrita)')+'</div>'+(e.arquivo_link?'<a class="btn-secondary" href="'+esc(e.arquivo_link)+'" target="_blank" rel="noopener" style="margin-top:8px">Abrir arquivo anexado →</a>':'')+'<label class="field" style="margin-top:12px"><span>Feedback ao aluno</span><textarea class="fi atividade-feedback" maxlength="2000" style="min-height:70px">'+esc(e.feedback||'')+'</textarea></label><div style="display:flex;gap:10px;margin-top:10px"><button class="btn-primary atividade-aprovar" data-id="'+esc(e.id)+'">'+(pendente?'Aprovar':'Atualizar feedback')+'</button></div></div>';
   };
   const pendentes = (entregas||[]).filter(e=>e.status==='enviada');
   const avaliadas = (entregas||[]).filter(e=>e.status==='avaliada');
@@ -2850,14 +2856,17 @@ document.addEventListener('submit', async e => {
     const formEl = e.target;
     const f = new FormData(formEl);
     const resposta = String(f.get('resposta') || '').trim();
-    const {error} = await supa.from('ava_atividade_entregas').upsert({
-      atividade_id: formEl.dataset.atividade,
-      matricula_id: formEl.dataset.matricula,
-      resposta,
-      status: 'enviada',
-      enviada_em: new Date().toISOString(),
-      atualizada_em: new Date().toISOString()
-    }, {onConflict:'atividade_id,matricula_id'});
+    const arquivo = f.get('arquivo');
+    const payload = {atividade_id: formEl.dataset.atividade, matricula_id: formEl.dataset.matricula, resposta, status:'enviada', enviada_em:new Date().toISOString(), atualizada_em:new Date().toISOString()};
+    if (arquivo?.size) {
+      if (arquivo.size > 20 * 1024 * 1024) { toast('Arquivo muito grande (máx. 20MB).', false); return; }
+      const ext = (arquivo.name.split('.').pop() || 'bin').toLowerCase();
+      const path = formEl.dataset.matricula+'/'+formEl.dataset.atividade+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+      const {error: uploadError} = await supa.storage.from('ava-entregas').upload(path, arquivo, {contentType: arquivo.type || undefined, upsert:false});
+      if (uploadError) { toast('Não foi possível enviar o arquivo: '+uploadError.message, false); return; }
+      payload.arquivo_url = path;
+    }
+    const {error} = await supa.from('ava_atividade_entregas').upsert(payload, {onConflict:'atividade_id,matricula_id'});
     if (error) { toast('Não foi possível enviar a atividade: '+error.message, false); return; }
     toast('Entrega enviada.'); 
     await render();
