@@ -2451,6 +2451,7 @@ async function renderRelatorios() {
 
   const {data:comercial} = isAdmin() ? await supa.rpc('ava_comercial_uso') : {data:null};
   const {data:planosComerciais} = isAdmin() ? await supa.from('ava_planos_comerciais').select('codigo,nome,descricao,preco_mensal,limite_usuarios,limite_cursos,limite_armazenamento_mb,recursos').eq('ativo',true).order('ordem') : {data:[]};
+  const {data:auditoria} = isAdmin() ? await supa.from('ava_auditoria').select('id,ator_id,acao,tabela,registro_id,criado_em').order('criado_em',{ascending:false}).limit(12) : {data:[]};
 
   const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
   const progMap = {};
@@ -2508,6 +2509,11 @@ async function renderRelatorios() {
 
     const cardsPlanos = (planosComerciais||[]).map(p => '<article class="panel" style="margin:0"><span class="tag">'+esc(p.nome)+'</span><h3 style="margin:8px 0 4px">'+(Number(p.preco_mensal)?'R$ '+Number(p.preco_mensal).toLocaleString('pt-BR',{minimumFractionDigits:2}):'Sob consulta')+'</h3><p class="muted" style="min-height:36px">'+esc(p.descricao||'')+'</p><p style="font-size:12px;margin-top:10px">Até '+Number(p.limite_usuarios).toLocaleString('pt-BR')+' usuários · '+Number(p.limite_cursos).toLocaleString('pt-BR')+' cursos</p></article>').join('');
     $('#main').insertAdjacentHTML('afterbegin','<section style="margin-bottom:20px"><div class="section-header"><h2>Planos comerciais</h2><span class="muted">Catálogo Enterprise</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">'+cardsPlanos+'</div></section>');
+
+  if (auditoria?.length) {
+    const logs = auditoria.map(l => '<tr><td>'+new Date(l.criado_em).toLocaleString('pt-BR')+'</td><td>'+esc(l.acao)+'</td><td>'+esc(l.tabela)+'</td><td style="font-family:monospace;font-size:11px">'+esc(l.registro_id||'')+'</td></tr>').join('');
+    $('#main').insertAdjacentHTML('afterbegin','<section class="panel" style="margin-bottom:20px"><div class="section-header"><h2>Auditoria recente</h2><span class="muted">Últimas 12 alterações</span></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Ação</th><th>Tabela</th><th>Registro</th></tr></thead><tbody>'+logs+'</tbody></table></div></section>');
+  }
 
   $('#export-csv')?.addEventListener('click', () => {
     const cell = v => '"'+String(v).replace(/^[=+@\-]/,"'$&").replace(/"/g,'""')+'"';
