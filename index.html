@@ -2490,6 +2490,7 @@ async function renderRelatorios() {
   const {data:diagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_perfis') : {data:[]};
   const {data:conteudoDiagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_conteudo') : {data:[]};
   const {data:fechamentoDiagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_fechamento') : {data:[]};
+  const {data:statusComercial} = isAdmin() ? await supa.rpc('ava_status_comercial') : {data:[]};
 
   const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
   const progMap = {};
@@ -2544,6 +2545,11 @@ async function renderRelatorios() {
   if (isAdmin() && fechamentoDiagnostico) {
     const f = Array.isArray(fechamentoDiagnostico) ? fechamentoDiagnostico[0] : fechamentoDiagnostico;
     if (f) $('#main').insertAdjacentHTML('afterbegin','<section class="panel" style="border:1px solid var(--green);background:var(--green-light);margin-bottom:20px"><div class="section-header"><h2>Fechamento administrativo</h2><span class="muted">Visão consolidada</span></div><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));margin:0"><div class="stat"><div class="eyebrow">Matrículas ativas</div><span class="stat-num">'+Number(f.matriculas_ativas||0)+'</span></div><div class="stat"><div class="eyebrow">Aptas</div><span class="stat-num">'+Number(f.aptas_certificado||0)+'</span></div><div class="stat"><div class="eyebrow">Pendência de frequência</div><span class="stat-num">'+Number(f.pendentes_frequencia||0)+'</span></div><div class="stat"><div class="eyebrow">Atividades pendentes</div><span class="stat-num">'+Number(f.pendentes_atividades||0)+'</span></div><div class="stat"><div class="eyebrow">Certificados</div><span class="stat-num">'+Number(f.certificados_emitidos||0)+'</span></div><div class="stat"><div class="eyebrow">Média das notas</div><span class="stat-num">'+(f.media_geral==null?'—':Number(f.media_geral).toLocaleString('pt-BR'))+'</span></div></div></section>');
+  }
+
+  if (isAdmin() && statusComercial) {
+    const sc = Array.isArray(statusComercial) ? statusComercial[0] : statusComercial;
+    if (sc) $('#main').insertAdjacentHTML('afterbegin','<section class="panel" style="margin-bottom:20px"><div class="section-header"><h2>Plano ativo da instância</h2><span class="tag">'+esc(sc.plano_nome||sc.plano_codigo||'')+'</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px"><div><span class="muted">Usuários</span><strong style="display:block;font-size:20px">'+Number(sc.usuarios_uso||0)+' / '+Number(sc.usuarios_limite||0)+'</strong></div><div><span class="muted">Cursos</span><strong style="display:block;font-size:20px">'+Number(sc.cursos_uso||0)+' / '+Number(sc.cursos_limite||0)+'</strong></div><div><span class="muted">Armazenamento</span><strong style="display:block;font-size:20px">'+Number(sc.armazenamento_uso_mb||0).toLocaleString('pt-BR')+' / '+Number(sc.armazenamento_limite_mb||0).toLocaleString('pt-BR')+' MB</strong></div></div><p class="muted" style="margin-top:10px">Status de capacidade: '+(sc.dentro_limites?'dentro dos limites':'limite excedido')+'</p></section>');
   }
 
   if (comercial) {
