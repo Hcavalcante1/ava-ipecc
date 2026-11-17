@@ -2489,6 +2489,7 @@ async function renderRelatorios() {
   const {data:auditoria} = isAdmin() ? await supa.from('ava_auditoria').select('id,ator_id,acao,tabela,registro_id,criado_em').order('criado_em',{ascending:false}).limit(12) : {data:[]};
   const {data:diagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_perfis') : {data:[]};
   const {data:conteudoDiagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_conteudo') : {data:[]};
+  const {data:fechamentoDiagnostico} = isAdmin() ? await supa.rpc('ava_diagnostico_fechamento') : {data:[]};
 
   const {data:prog} = await supa.from('ava_progresso').select('matricula_id,concluida');
   const progMap = {};
@@ -2539,6 +2540,11 @@ async function renderRelatorios() {
         </tbody>
       </table></div>
     </div>`;
+
+  if (isAdmin() && fechamentoDiagnostico) {
+    const f = Array.isArray(fechamentoDiagnostico) ? fechamentoDiagnostico[0] : fechamentoDiagnostico;
+    if (f) $('#main').insertAdjacentHTML('afterbegin','<section class="panel" style="border:1px solid var(--green);background:var(--green-light);margin-bottom:20px"><div class="section-header"><h2>Fechamento administrativo</h2><span class="muted">Visão consolidada</span></div><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));margin:0"><div class="stat"><div class="eyebrow">Matrículas ativas</div><span class="stat-num">'+Number(f.matriculas_ativas||0)+'</span></div><div class="stat"><div class="eyebrow">Aptas</div><span class="stat-num">'+Number(f.aptas_certificado||0)+'</span></div><div class="stat"><div class="eyebrow">Pendência de frequência</div><span class="stat-num">'+Number(f.pendentes_frequencia||0)+'</span></div><div class="stat"><div class="eyebrow">Atividades pendentes</div><span class="stat-num">'+Number(f.pendentes_atividades||0)+'</span></div><div class="stat"><div class="eyebrow">Certificados</div><span class="stat-num">'+Number(f.certificados_emitidos||0)+'</span></div><div class="stat"><div class="eyebrow">Média das notas</div><span class="stat-num">'+(f.media_geral==null?'—':Number(f.media_geral).toLocaleString('pt-BR'))+'</span></div></div></section>');
+  }
 
   if (comercial) {
     const fmt = v => Number(v||0).toLocaleString('pt-BR');
